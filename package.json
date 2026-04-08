@@ -1,0 +1,17 @@
+{
+  "name": "family-food-shopping-planner",
+  "private": true,
+  "scripts": {
+    "backend": "cd planner_backend && ./mvnw spring-boot:run",
+    "backend:local": "cd planner_backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local",
+    "backend:build": "cd planner_backend && ./mvnw clean package",
+    "frontend": "cd planner_ui && npm run dev",
+    "frontend:build": "cd planner_ui && npm run build",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "dev:local": "concurrently \"npm run backend:local\" \"npm run frontend\"",
+    "build": "concurrently \"npm run backend:build\" \"npm run frontend:build\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

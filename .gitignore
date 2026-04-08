@@ -1,0 +1,17 @@
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
