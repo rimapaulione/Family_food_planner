@@ -18,6 +18,6 @@ public class TagController {
 
     @GetMapping
     public ResponseEntity<List<TagResponseDto>> getAll() {
-        return ResponseEntity.ok(tagService.getAll());
+        return ResponseEntity.ok(tagService.getTags());
     }
 }

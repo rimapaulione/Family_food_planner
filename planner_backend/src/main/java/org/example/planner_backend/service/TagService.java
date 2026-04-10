@@ -14,7 +14,7 @@ public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
-    public List<TagResponseDto> getAll() {
+    public List<TagResponseDto> getTags() {
         return tagRepository.findAll().stream().map(tagMapper::toResponse).toList();
     }
 }
