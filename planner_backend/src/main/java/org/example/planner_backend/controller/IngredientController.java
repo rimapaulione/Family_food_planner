@@ -29,10 +29,10 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.getAll(search));
     }
 
-    @GetMapping("/with-recipes")
+    @GetMapping("/with-recipes-count")
     public ResponseEntity<List<IngredientDetailResponseDto>> getIngredientsWithDetails(
             @Size(min = 2, max = 50)
             @RequestParam(required = false) String search) {
-        return ResponseEntity.ok(ingredientService.getAllWithRecipeCount(search));
+        return ResponseEntity.ok(ingredientService.getAllWithRecipesCount(search));
     }
 }

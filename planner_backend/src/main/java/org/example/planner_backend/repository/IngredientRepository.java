@@ -19,7 +19,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
         )
         FROM Ingredient i
         LEFT JOIN RecipeIngredient ri ON ri.ingredient = i
-        WHERE (:search IS NULL OR LOWER(i.nameLt) LIKE LOWER(CONCAT('%', :search, '%')))
+        WHERE (:search IS NULL OR LOWER(i.nameLt) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
         GROUP BY i.id, i.nameLt, i.unit
         ORDER BY i.nameLt
         """)

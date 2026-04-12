@@ -22,7 +22,7 @@ public class IngredientService {
                 .toList();
     }
 
-    public List<IngredientDetailResponseDto> getAllWithRecipeCount(final String search) {
+    public List<IngredientDetailResponseDto> getAllWithRecipesCount(final String search) {
         String trimmedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
         return ingredientRepository.findAllWithRecipeCount(trimmedSearch);
     }
