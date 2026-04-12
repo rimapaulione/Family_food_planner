@@ -24,13 +24,15 @@ public class IngredientController {
 
     @GetMapping
     public ResponseEntity<List<IngredientResponseDto>> getIngredients(
-            @Size(min = 2, max = 50) @RequestParam(required = false) String search) {
+            @Size(min = 2, max = 50)
+            @RequestParam(required = false) String search) {
         return ResponseEntity.ok(ingredientService.getAll(search));
     }
 
     @GetMapping("/with-recipes")
     public ResponseEntity<List<IngredientDetailResponseDto>> getIngredientsWithDetails(
-            @Size(min = 2, max = 50) @RequestParam(required = false) String search) {
+            @Size(min = 2, max = 50)
+            @RequestParam(required = false) String search) {
         return ResponseEntity.ok(ingredientService.getAllWithRecipeCount(search));
     }
 }

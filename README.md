@@ -1,6 +1,15 @@
 # Family Food Shopping Planner
 
-A full-stack application for planning family meals and shopping lists.
+A collaborative family meal planning app where family members plan weekly meals together, manage recipes, and generate shopping lists automatically.
+
+**Key features:**
+- Recipe management with ingredients, categories, tags, and leftover chaining
+- 2-week meal planning with drag-and-drop grid
+- Auto-generated shopping lists from planned meals
+- Family collaboration with invites and roles
+- Smart recipe suggestions (seasonal, cook time, duplicates)
+
+**Tech stack:** Spring Boot 3 (Java 21) + React 19 (TypeScript) + PostgreSQL + JWT Auth + Google OAuth2 (Spring Security)
 
 ## Prerequisites
 

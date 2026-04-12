@@ -16,18 +16,18 @@ public class IngredientService {
     private final IngredientRepository ingredientRepository;
     private final IngredientMapper ingredientMapper;
 
-    public List<IngredientResponseDto> getAll(String search) {
+    public List<IngredientResponseDto> getAll(final String search) {
         return findIngredients(search).stream()
                 .map(ingredientMapper::toResponse)
                 .toList();
     }
 
-    public List<IngredientDetailResponseDto> getAllWithRecipeCount(String search) {
+    public List<IngredientDetailResponseDto> getAllWithRecipeCount(final String search) {
         String trimmedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
         return ingredientRepository.findAllWithRecipeCount(trimmedSearch);
     }
 
-    private List<org.example.planner_backend.model.entity.Ingredient> findIngredients(String search) {
+    private List<org.example.planner_backend.model.entity.Ingredient> findIngredients(final String search) {
         if (search != null && !search.isBlank()) {
             return ingredientRepository.findByNameLtContainingIgnoreCase(search.trim());
         }
