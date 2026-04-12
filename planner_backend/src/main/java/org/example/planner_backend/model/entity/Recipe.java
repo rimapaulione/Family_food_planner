@@ -46,8 +46,6 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID family_id;
-
     @Column(nullable = false)
     private String name;
 

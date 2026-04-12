@@ -15,14 +15,12 @@ CREATE TABLE ingredient
     id         UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     name_lt    VARCHAR(100) NOT NULL UNIQUE,
     unit       VARCHAR(20)  NOT NULL CHECK (unit IN ('VNT', 'G', 'ML')),
-    family_id  UUID,
     created_at TIMESTAMP    NOT NULL DEFAULT now()
 );
 
 CREATE TABLE recipe
 (
     id                   UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
-    family_id  UUID,
     name                 VARCHAR(100) NOT NULL UNIQUE,
     category_id          BIGINT       NOT NULL REFERENCES category (id),
     default_serving      SMALLINT     NOT NULL DEFAULT 4 CHECK

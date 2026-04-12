@@ -38,8 +38,6 @@ public class Ingredient {
     @Size(max = 100)
     private String nameLt;
 
-    private UUID family_id;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Unit unit;
