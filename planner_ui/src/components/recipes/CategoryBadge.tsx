@@ -7,7 +7,7 @@ interface CategoryBadgeProps {
 
 export function CategoryBadge({category}: CategoryBadgeProps) {
     return (
-        <span className="rounded-full bg-[hsl(var(--secondary))] px-2 py-0.5 text-xs text-[hsl(var(--secondary-foreground))]">
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
             {CATEGORY_LABELS[category.name] || category.name}
         </span>
     );

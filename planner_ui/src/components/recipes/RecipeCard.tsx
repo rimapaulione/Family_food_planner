@@ -21,7 +21,7 @@ export function RecipeCard({recipe}: RecipeCardProps) {
 
             <div className="mt-1 flex items-center justify-between">
                 <CategoryBadge category={recipe.category}/>
-                <div className="flex items-center gap-3 text-xs text-[hsl(var(--muted-foreground))]">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>{recipe.ingredientCount} ingr.</span>
                     <IconStat icon={Users}>{recipe.defaultServing}</IconStat>
                     {recipe.cookingTimeMinutes && (
@@ -29,7 +29,7 @@ export function RecipeCard({recipe}: RecipeCardProps) {
                     )}
                     <button
                         onClick={() => setConfirmOpen(true)}
-                        className="rounded p-1 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--destructive))] hover:text-[hsl(var(--destructive-foreground))]"
+                        className="rounded p-1 text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
                     >
                         <Trash2 className="h-3 w-3"/>
                     </button>

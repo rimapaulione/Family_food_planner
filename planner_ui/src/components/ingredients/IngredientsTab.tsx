@@ -1,26 +1,100 @@
-import {useIngredients} from '@/hooks/useIngredients';
+import {useState} from 'react';
+import {
+    useCreateIngredient,
+    useDeleteIngredient,
+    useIngredientsWithRecipeCount,
+    useUpdateIngredient,
+} from '@/hooks/useIngredients';
+import type {IngredientDetail} from '@/types/ingredient';
 import {Spinner} from '@/components/ui/Spinner';
+import {PageHeader} from '@/components/ui/PageHeader';
+import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
+import {IngredientCard} from '@/components/ingredients/IngredientCard';
+import {IngredientForm} from '@/components/ingredients/IngredientForm';
 
 export function IngredientsTab() {
-    const {data: ingredients, isLoading} = useIngredients();
+    const [search, setSearch] = useState('');
+    const {data: ingredients, isLoading} = useIngredientsWithRecipeCount(search);
 
-    if (isLoading) return <Spinner/>
+    const createMutation = useCreateIngredient();
+    const updateMutation = useUpdateIngredient();
+    const deleteMutation = useDeleteIngredient();
 
-    if (!ingredients || ingredients.length === 0) {
-        return <p className="text-muted-foreground">No ingredients found.</p>;
-    }
+    const [addIngredient, setAddIngredient] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [toDelete, setToDelete] = useState<IngredientDetail | null>(null);
+
+    const sorted = (ingredients ?? [])
+        .slice()
+        .sort((a, b) => a.nameLt.localeCompare(b.nameLt, 'lt'));
+
+    const handleCreate = async (data: {nameLt: string; unit: string}) => {
+        await createMutation.mutateAsync(data);
+        setAddIngredient(false);
+    };
+
+    const handleUpdate = async (id: string, data: {nameLt: string; unit: string}) => {
+        await updateMutation.mutateAsync({id, data});
+        setEditingId(null);
+    };
 
     return (
-        <div className="grid gap-2">
-            {ingredients.map((ingredient) => (
-                <div
-                    key={ingredient.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
-                >
-                    <span className="text-foreground">{ingredient.nameLt}</span>
-                    <span className="text-sm text-muted-foreground">{ingredient.unit}</span>
+        <div className="flex flex-col gap-4">
+            <PageHeader
+                title="Ingredients"
+                addLabel="Add Ingredient"
+                onAddClick={() => setAddIngredient(true)}
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search ingredients..."
+            />
+
+            {addIngredient && (
+                <IngredientForm
+                    onSave={handleCreate}
+                    onCancel={() => setAddIngredient(false)}
+                />
+            )}
+
+            {isLoading ? (
+                <Spinner/>
+            ) : sorted.length === 0 ? (
+                <p className="text-muted-foreground">No ingredients found.</p>
+            ) : (
+                <div className="space-y-1">
+                    {sorted.map((ing) =>
+                        editingId === ing.id ? (
+                            <IngredientForm
+                                key={ing.id}
+                                initialName={ing.nameLt}
+                                initialUnit={ing.unit}
+                                onSave={(data) => handleUpdate(ing.id, data)}
+                                onCancel={() => setEditingId(null)}
+                            />
+                        ) : (
+                            <IngredientCard
+                                key={ing.id}
+                                ingredient={ing}
+                                onEdit={() => setEditingId(ing.id)}
+                                onDelete={() => setToDelete(ing)}
+                            />
+                        ),
+                    )}
                 </div>
-            ))}
+            )}
+
+            <ConfirmDialog
+                open={toDelete !== null}
+                onOpenChange={(open) => { if (!open) setToDelete(null); }}
+                title="Delete ingredient?"
+                description={toDelete ? `"${toDelete.nameLt}" will be permanently deleted.` : ''}
+                confirmText="Delete"
+                destructive
+                onConfirm={() => {
+                    if (toDelete) deleteMutation.mutate(toDelete.id);
+                    setToDelete(null);
+                }}
+            />
         </div>
     );
 }
