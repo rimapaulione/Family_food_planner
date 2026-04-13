@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useRecipes} from '@/hooks/useRecipes';
-import {useIngredients} from '@/hooks/useIngredients';
+import {useIngredientsWithRecipeCount} from '@/hooks/useIngredients';
 import {RecipesTab} from '@/components/recipes/RecipesTab';
 import {IngredientsTab} from '@/components/ingredients/IngredientsTab';
 import {TabButton} from '@/components/recipes/TabButton';
@@ -8,7 +8,7 @@ import {TabButton} from '@/components/recipes/TabButton';
 export function RecipesPage() {
     const [tab, setTab] = useState<'recipes' | 'ingredients'>('recipes');
     const {data: recipes} = useRecipes();
-    const {data: ingredients} = useIngredients();
+    const {data: ingredients} = useIngredientsWithRecipeCount();
 
     return (
         <div className="space-y-4">

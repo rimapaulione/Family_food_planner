@@ -6,7 +6,11 @@ import {RecipeCard} from '@/components/recipes/RecipeCard';
 
 export function RecipesTab() {
     const [search, setSearch] = useState('');
-    const {data: recipes, isLoading} = useRecipes(search);
+    const {data: recipes, isLoading, isError, error} = useRecipes();
+
+    const filtered = (recipes ?? []).filter(
+        (r) => !search || r.name.toLowerCase().includes(search.toLowerCase()),
+    );
 
     return (
         <div className="flex flex-col gap-4">
@@ -21,11 +25,17 @@ export function RecipesTab() {
 
             {isLoading ? (
                 <Spinner/>
+            ) : isError ? (
+                <p className="text-destructive">
+                    Failed to load recipes. {error instanceof Error ? error.message : ''}
+                </p>
             ) : !recipes || recipes.length === 0 ? (
                 <p className="text-muted-foreground">No recipes yet. Create your first recipe!</p>
+            ) : filtered.length === 0 ? (
+                <p className="text-muted-foreground">No recipes match your search.</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {recipes.map((recipe) => (
+                    {filtered.map((recipe) => (
                         <RecipeCard key={recipe.id} recipe={recipe}/>
                     ))}
                 </div>

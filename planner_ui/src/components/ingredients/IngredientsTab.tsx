@@ -14,7 +14,7 @@ import {IngredientForm} from '@/components/ingredients/IngredientForm';
 
 export function IngredientsTab() {
     const [search, setSearch] = useState('');
-    const {data: ingredients, isLoading} = useIngredientsWithRecipeCount(search);
+    const {data: ingredients, isLoading, isError, error} = useIngredientsWithRecipeCount();
 
     const createMutation = useCreateIngredient();
     const updateMutation = useUpdateIngredient();
@@ -24,8 +24,8 @@ export function IngredientsTab() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [toDelete, setToDelete] = useState<IngredientDetail | null>(null);
 
-    const sorted = (ingredients ?? [])
-        .slice()
+    const filtered = (ingredients ?? [])
+        .filter((i) => !search || i.nameLt.toLowerCase().includes(search.toLowerCase()))
         .sort((a, b) => a.nameLt.localeCompare(b.nameLt, 'lt'));
 
     const handleCreate = async (data: {nameLt: string; unit: string}) => {
@@ -58,11 +58,17 @@ export function IngredientsTab() {
 
             {isLoading ? (
                 <Spinner/>
-            ) : sorted.length === 0 ? (
-                <p className="text-muted-foreground">No ingredients found.</p>
+            ) : isError ? (
+                <p className="text-destructive">
+                    Failed to load ingredients. {error instanceof Error ? error.message : ''}
+                </p>
+            ) : !ingredients || ingredients.length === 0 ? (
+                <p className="text-muted-foreground">No ingredients yet.</p>
+            ) : filtered.length === 0 ? (
+                <p className="text-muted-foreground">No ingredients match your search.</p>
             ) : (
                 <div className="space-y-1">
-                    {sorted.map((ing) =>
+                    {filtered.map((ing) =>
                         editingId === ing.id ? (
                             <IngredientForm
                                 key={ing.id}
