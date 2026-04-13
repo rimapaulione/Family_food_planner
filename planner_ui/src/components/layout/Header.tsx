@@ -1,6 +1,6 @@
 import {Link} from 'react-router-dom';
 import {ChefHat, UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket} from 'lucide-react';
-import {NavLink} from '@/components/ui/NavLink';
+import {NavLink} from '@/components/layout/NavLink';
 
 export function Header() {
     return (

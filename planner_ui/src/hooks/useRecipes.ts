@@ -14,7 +14,7 @@ export function useRecipes(search?: string) {
     });
 }
 
-export function useRecipe(id: string) {
+export function useRecipesById(id: string) {
     return useQuery({
         queryKey: ['recipes', id],
         queryFn: async () => {
@@ -59,6 +59,8 @@ export function useDeleteRecipe() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['recipes']});
+            toast.success('Recipe deleted');
         },
+        onError: () => toast.error('Failed to delete recipe'),
     });
 }
