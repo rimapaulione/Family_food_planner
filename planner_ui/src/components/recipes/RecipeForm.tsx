@@ -9,9 +9,11 @@ import {useRecipes} from '@/hooks/useRecipes';
 import type {RecipeRequest, RecipeResponse} from '@/types/recipe';
 import {recipeSchema, type RecipeFormData} from '@/schemas/recipe';
 import {Button} from '@/components/ui/Button';
+import {FormField} from '@/components/ui/FormField';
 import {RecipeTagPicker} from '@/components/recipes/RecipeTagPicker';
 import {RecipeIngredientPicker} from '@/components/recipes/RecipeIngredientPicker';
 import {CATEGORY_LABELS} from '@/constants/categories';
+import {inputClass} from '@/utils/inputClass';
 
 interface RecipeFormProps {
     initialData?: RecipeResponse;
@@ -21,9 +23,6 @@ interface RecipeFormProps {
     submitLabel: string;
     excludeRecipeId?: string;
 }
-
-const inputClass = (hasError: boolean) =>
-    `w-full rounded-md border ${hasError ? 'border-destructive' : 'border-input'} bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring`;
 
 export function RecipeForm({
     initialData,
@@ -115,8 +114,7 @@ export function RecipeForm({
 
     return (
         <form onSubmit={handleFormSubmit} className="space-y-4">
-            <div>
-                <label className="mb-1 block text-sm font-medium">Recipe Name</label>
+            <FormField label="Recipe Name" error={errors.name?.message}>
                 <Controller
                     control={control}
                     name="name"
@@ -133,12 +131,10 @@ export function RecipeForm({
                         />
                     )}
                 />
-                <p className="mt-1 min-h-4 text-xs text-destructive">{errors.name?.message}</p>
-            </div>
+            </FormField>
 
             <div className="grid grid-cols-3 gap-4">
-                <div>
-                    <label className="mb-1 block text-sm font-medium">Category</label>
+                <FormField label="Category" error={errors.categoryId?.message}>
                     <Controller
                         control={control}
                         name="categoryId"
@@ -156,10 +152,9 @@ export function RecipeForm({
                             </select>
                         )}
                     />
-                    <p className="mt-1 min-h-4 text-xs text-destructive">{errors.categoryId?.message}</p>
-                </div>
-                <div>
-                    <label className="mb-1 block text-sm font-medium">Servings</label>
+                </FormField>
+
+                <FormField label="Servings" error={errors.defaultServing?.message}>
                     <input
                         type="number"
                         min={1}
@@ -167,10 +162,9 @@ export function RecipeForm({
                         {...register('defaultServing', {valueAsNumber: true})}
                         className={inputClass(!!errors.defaultServing)}
                     />
-                    <p className="mt-1 min-h-4 text-xs text-destructive">{errors.defaultServing?.message}</p>
-                </div>
-                <div>
-                    <label className="mb-1 block text-sm font-medium">Cooking time (min)</label>
+                </FormField>
+
+                <FormField label="Cooking time (min)" error={errors.cookingTimeMinutes?.message}>
                     <Controller
                         control={control}
                         name="cookingTimeMinutes"
@@ -188,8 +182,7 @@ export function RecipeForm({
                             />
                         )}
                     />
-                    <p className="mt-1 min-h-4 text-xs text-destructive">{errors.cookingTimeMinutes?.message}</p>
-                </div>
+                </FormField>
             </div>
 
             <div>
@@ -207,8 +200,7 @@ export function RecipeForm({
                 />
             </div>
 
-            <div>
-                <label className="mb-1 block text-sm font-medium">Uses leftovers from</label>
+            <FormField label="Uses leftovers from">
                 <Controller
                     control={control}
                     name="leftoverRecipeId"
@@ -229,7 +221,7 @@ export function RecipeForm({
                         </select>
                     )}
                 />
-            </div>
+            </FormField>
 
             <label className="flex items-center gap-2 text-sm">
                 <input
@@ -240,16 +232,14 @@ export function RecipeForm({
                 Favorite recipe
             </label>
 
-            <div>
-                <label className="mb-1 block text-sm font-medium">Notes</label>
+            <FormField label="Notes" error={errors.notes?.message}>
                 <textarea
                     {...register('notes')}
                     rows={2}
                     className={inputClass(!!errors.notes)}
                     placeholder="Optional notes..."
                 />
-                <p className="mt-1 min-h-4 text-xs text-destructive">{errors.notes?.message}</p>
-            </div>
+            </FormField>
 
             <Controller
                 control={control}
