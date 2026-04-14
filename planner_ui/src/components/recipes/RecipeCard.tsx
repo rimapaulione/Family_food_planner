@@ -4,8 +4,8 @@ import type {RecipeListResponse} from '@/types/recipe';
 import {useDeleteRecipe} from '@/hooks/useRecipes';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {IconStat} from '@/components/ui/IconStat';
-import {CategoryBadge} from '@/components/recipes/CategoryBadge';
-import {TagList} from '@/components/recipes/TagList';
+import {RecipeCategoryBadge} from '@/components/recipes/RecipeCategoryBadge';
+import {RecipeTagList} from '@/components/recipes/RecipeTagList';
 import {Users, Clock, Trash2} from 'lucide-react';
 
 interface RecipeCardProps {
@@ -23,7 +23,7 @@ export function RecipeCard({recipe}: RecipeCardProps) {
             </Link>
 
             <div className="mt-1 flex items-center justify-between">
-                <CategoryBadge category={recipe.category}/>
+                <RecipeCategoryBadge category={recipe.category}/>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>{recipe.ingredientCount} ingr.</span>
                     <IconStat icon={Users}>{recipe.defaultServing}</IconStat>
@@ -39,7 +39,7 @@ export function RecipeCard({recipe}: RecipeCardProps) {
                 </div>
             </div>
 
-            <TagList tags={recipe.tags}/>
+            <RecipeTagList tags={recipe.tags}/>
 
             <ConfirmDialog
                 open={confirmOpen}

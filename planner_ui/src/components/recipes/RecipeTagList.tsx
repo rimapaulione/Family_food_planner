@@ -4,7 +4,7 @@ interface TagListProps {
     tags: Tag[];
 }
 
-export function TagList({tags}: TagListProps) {
+export function RecipeTagList({tags}: TagListProps) {
     if (tags.length === 0) return null;
     return (
         <div className="flex flex-wrap items-center gap-1">

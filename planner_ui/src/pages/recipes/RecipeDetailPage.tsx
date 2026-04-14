@@ -7,8 +7,8 @@ import {BackLink} from '@/components/ui/BackLink';
 import {IconStat} from '@/components/ui/IconStat';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {Button} from '@/components/ui/Button';
-import {CategoryBadge} from '@/components/recipes/CategoryBadge';
-import {TagList} from '@/components/recipes/TagList';
+import {RecipeCategoryBadge} from '@/components/recipes/RecipeCategoryBadge';
+import {RecipeTagList} from '@/components/recipes/RecipeTagList';
 import {RecipeIngredientList} from '@/components/recipes/RecipeIngredientList';
 import {Clock, Users} from 'lucide-react';
 
@@ -52,7 +52,7 @@ export function RecipeDetailPage() {
                 <div className="flex flex-col gap-2">
                     <h1 className="text-2xl font-bold text-foreground">{recipe.name}</h1>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <CategoryBadge category={recipe.category}/>
+                        <RecipeCategoryBadge category={recipe.category}/>
                         <IconStat icon={Users}>{recipe.defaultServing}</IconStat>
                         {recipe.cookingTimeMinutes && (
                             <IconStat icon={Clock}>{recipe.cookingTimeMinutes}min</IconStat>
@@ -65,7 +65,7 @@ export function RecipeDetailPage() {
                 </div>
             </div>
 
-            <TagList tags={recipe.tags}/>
+            <RecipeTagList tags={recipe.tags}/>
 
             <section className="flex flex-col gap-2">
                 <h2 className="text-lg font-semibold text-foreground">Ingredients</h2>

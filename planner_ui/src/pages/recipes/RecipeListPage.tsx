@@ -3,7 +3,7 @@ import {useRecipes} from '@/hooks/useRecipes';
 import {useIngredientsWithRecipeCount} from '@/hooks/useIngredients';
 import {RecipesTab} from '@/components/recipes/RecipesTab';
 import {IngredientsTab} from '@/components/ingredients/IngredientsTab';
-import {TabButton} from '@/components/recipes/TabButton';
+import {TabButton} from '@/components/ui/TabButton';
 
 export function RecipeListPage() {
     const [tab, setTab] = useState<'recipes' | 'ingredients'>('recipes');
