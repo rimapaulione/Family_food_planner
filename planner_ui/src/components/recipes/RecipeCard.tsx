@@ -7,6 +7,7 @@ import {IconStat} from '@/components/ui/IconStat';
 import {RecipeCategoryBadge} from '@/components/recipes/RecipeCategoryBadge';
 import {RecipeTagList} from '@/components/recipes/RecipeTagList';
 import {Users, Clock, Trash2} from 'lucide-react';
+import {FavoriteStar} from '@/components/recipes/FavoriteStar';
 
 interface RecipeCardProps {
     recipe: RecipeListResponse;
@@ -18,9 +19,12 @@ export function RecipeCard({recipe}: RecipeCardProps) {
 
     return (
         <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-            <Link to={`/recipes/${recipe.id}`} className="font-medium text-foreground hover:underline">
-                {recipe.name}
-            </Link>
+            <div className="flex items-center gap-1.5">
+                <Link to={`/recipes/${recipe.id}`} className="font-medium text-foreground hover:underline">
+                    {recipe.name}
+                </Link>
+                <FavoriteStar isFavorite={recipe.isFavorite}/>
+            </div>
 
             <div className="mt-1 flex items-center justify-between">
                 <RecipeCategoryBadge category={recipe.category}/>

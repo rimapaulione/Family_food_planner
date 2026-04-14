@@ -13,6 +13,8 @@ interface ButtonProps {
     icon?: LucideIcon;
     to?: string;
     onClick?: () => void;
+    type?: 'button' | 'submit';
+    disabled?: boolean;
     children: ReactNode;
     className?: string;
 }
@@ -22,10 +24,12 @@ export function Button({
     icon: Icon,
     to,
     onClick,
+    type = 'button',
+    disabled,
     children,
     className = '',
 }: ButtonProps) {
-    const classes = `flex items-center gap-1 rounded-md px-3 py-1.5 text-sm no-underline ${variants[variant]} ${className}`;
+    const classes = `flex items-center gap-1 rounded-md px-3 py-1.5 text-sm no-underline disabled:opacity-50 ${variants[variant]} ${className}`;
 
     if (to) {
         return (
@@ -37,7 +41,7 @@ export function Button({
     }
 
     return (
-        <button type="button" onClick={onClick} className={classes}>
+        <button type={type} onClick={onClick} disabled={disabled} className={classes}>
             {Icon && <Icon className="h-3 w-3"/>}
             {children}
         </button>

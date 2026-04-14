@@ -78,3 +78,21 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+.themed-scrollbar {
+    scrollbar-color: hsl(var(--border)) hsl(var(--background));
+    scrollbar-width: thin;
+}
+
+.themed-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.themed-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+}

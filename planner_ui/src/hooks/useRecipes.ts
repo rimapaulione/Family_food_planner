@@ -41,20 +41,24 @@ export function useCreateRecipe() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['recipes']});
+            toast.success('Recipe created');
         },
+        onError: () => toast.error('Failed to create recipe'),
     });
 }
 
-export function useUpdateRecipe(id: string) {
+export function useUpdateRecipe() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (recipe: RecipeRequest) => {
-            const {data} = await api.put<RecipeResponse>(`/recipes/${id}`, recipe);
-            return data;
+        mutationFn: async ({id, data}: {id: string; data: RecipeRequest}) => {
+            const {data: updated} = await api.put<RecipeResponse>(`/recipes/${id}`, data);
+            return updated;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['recipes']});
+            toast.success('Recipe updated');
         },
+        onError: () => toast.error('Failed to update recipe'),
     });
 }
 

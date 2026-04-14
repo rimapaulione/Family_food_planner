@@ -4,6 +4,8 @@ import {toast} from 'sonner';
 import {AppLayout} from '@/components/layout/AppLayout';
 import {RecipeListPage} from '@/pages/recipes/RecipeListPage';
 import {RecipeDetailPage} from '@/pages/recipes/RecipeDetailPage';
+import {RecipeNewPage} from '@/pages/recipes/RecipeNewPage';
+import {RecipeEditPage} from '@/pages/recipes/RecipeEditPage';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -24,10 +26,12 @@ function App() {
                 <Routes>
                     <Route element={<AppLayout/>}>
                         <Route path="/" element={<div>Home</div>}/>
-                        <Route path="/recipes" element={<RecipeListPage/>}/>
-                        <Route path="/recipes/new" element={<p>edit recipe </p>} />
-                        <Route path="/recipes/:id" element={<RecipeDetailPage/>}/>
-                        <Route path="/recipes/:id/edit" element={<p>edit recipe </p>}/>
+                        <Route path="/recipes">
+                            <Route index element={<RecipeListPage/>}/>
+                            <Route path="new" element={<RecipeNewPage/>}/>
+                            <Route path=":id" element={<RecipeDetailPage/>}/>
+                            <Route path=":id/edit" element={<RecipeEditPage/>}/>
+                        </Route>
                         <Route path="/planner" element={<div>Planner</div>}/>
                         <Route path="/shopping" element={<div>Shopping</div>}/>
                         <Route path="/basics" element={<div>Always Buy</div>}/>

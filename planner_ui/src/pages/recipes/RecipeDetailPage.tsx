@@ -10,6 +10,7 @@ import {Button} from '@/components/ui/Button';
 import {RecipeCategoryBadge} from '@/components/recipes/RecipeCategoryBadge';
 import {RecipeTagList} from '@/components/recipes/RecipeTagList';
 import {RecipeIngredientList} from '@/components/recipes/RecipeIngredientList';
+import {FavoriteStar} from '@/components/recipes/FavoriteStar';
 import {Clock, Users} from 'lucide-react';
 
 export function RecipeDetailPage() {
@@ -50,7 +51,10 @@ export function RecipeDetailPage() {
 
             <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-2xl font-bold text-foreground">{recipe.name}</h1>
+                    <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
+                        {recipe.name}
+                        <FavoriteStar isFavorite={recipe.isFavorite} className="h-5 w-5"/>
+                    </h1>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <RecipeCategoryBadge category={recipe.category}/>
                         <IconStat icon={Users}>{recipe.defaultServing}</IconStat>
