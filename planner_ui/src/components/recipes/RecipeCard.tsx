@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {Link} from 'react-router-dom';
 import type {RecipeListResponse} from '@/types/recipe';
 import {useDeleteRecipe} from '@/hooks/useRecipes';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
@@ -17,7 +18,9 @@ export function RecipeCard({recipe}: RecipeCardProps) {
 
     return (
         <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-            <h3 className="font-medium text-foreground">{recipe.name}</h3>
+            <Link to={`/recipes/${recipe.id}`} className="font-medium text-foreground hover:underline">
+                {recipe.name}
+            </Link>
 
             <div className="mt-1 flex items-center justify-between">
                 <CategoryBadge category={recipe.category}/>

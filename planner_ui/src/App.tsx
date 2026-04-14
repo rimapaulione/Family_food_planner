@@ -2,7 +2,8 @@ import {QueryCache, QueryClient, QueryClientProvider} from '@tanstack/react-quer
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import {toast} from 'sonner';
 import {AppLayout} from '@/components/layout/AppLayout';
-import {RecipesPage} from '@/pages/RecipesPage';
+import {RecipeListPage} from '@/pages/RecipeListPage';
+import {RecipeDetailPage} from '@/pages/RecipeDetailPage';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -23,7 +24,9 @@ function App() {
                 <Routes>
                     <Route element={<AppLayout/>}>
                         <Route path="/" element={<div>Home</div>}/>
-                        <Route path="/recipes" element={<RecipesPage/>}/>
+                        <Route path="/recipes" element={<RecipeListPage/>}/>
+                        <Route path="/recipes/:id" element={<RecipeDetailPage/>}/>
+                        <Route path="/recipes/:id/edit" element={<p>edit recipe </p>}/>
                         <Route path="/planner" element={<div>Planner</div>}/>
                         <Route path="/shopping" element={<div>Shopping</div>}/>
                         <Route path="/basics" element={<div>Always Buy</div>}/>

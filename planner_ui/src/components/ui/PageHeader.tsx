@@ -1,5 +1,5 @@
-import {Link} from 'react-router-dom';
 import {Plus, Search} from 'lucide-react';
+import {Button} from '@/components/ui/Button';
 
 interface PageHeaderProps {
     title: string;
@@ -11,9 +11,6 @@ interface PageHeaderProps {
     onSearchChange: (value: string) => void;
     searchPlaceholder?: string;
 }
-
-const addButtonClass =
-    'flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground no-underline hover:opacity-90';
 
 export function PageHeader({
     title,
@@ -28,15 +25,9 @@ export function PageHeader({
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-                {addTo ? (
-                    <Link to={addTo} className={addButtonClass}>
-                        <Plus className="h-4 w-4"/> {addLabel}
-                    </Link>
-                ) : (
-                    <button type="button" onClick={onAddClick} className={addButtonClass}>
-                        <Plus className="h-4 w-4"/> {addLabel}
-                    </button>
-                )}
+                <Button variant="primary" icon={Plus} to={addTo} onClick={onAddClick}>
+                    {addLabel}
+                </Button>
             </div>
 
             <div className="relative">

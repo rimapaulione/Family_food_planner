@@ -1,4 +1,5 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {toast} from 'sonner';
 import api from '@/api/axios';
 import type {RecipeListResponse, RecipeResponse, RecipeRequest} from '@/types/recipe';
 
@@ -19,7 +20,13 @@ export function useRecipesById(id: string) {
         queryKey: ['recipes', id],
         queryFn: async () => {
             const {data} = await api.get<RecipeResponse>(`/recipes/${id}`);
-            return data;
+            return {
+                ...data,
+                ingredients: data.ingredients.map((ing) => ({
+                    ...ing,
+                    unit: ing.unit.toLowerCase(),
+                })),
+            };
         },
         enabled: !!id,
     });

@@ -5,7 +5,7 @@ import {RecipesTab} from '@/components/recipes/RecipesTab';
 import {IngredientsTab} from '@/components/ingredients/IngredientsTab';
 import {TabButton} from '@/components/recipes/TabButton';
 
-export function RecipesPage() {
+export function RecipeListPage() {
     const [tab, setTab] = useState<'recipes' | 'ingredients'>('recipes');
     const {data: recipes} = useRecipes();
     const {data: ingredients} = useIngredientsWithRecipeCount();
