@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {normalize} from '@/utils/normalize';
 import {
     useCreateIngredient,
     useDeleteIngredient,
@@ -25,7 +26,7 @@ export function IngredientsTab() {
     const [toDelete, setToDelete] = useState<IngredientDetail | null>(null);
 
     const filtered = (ingredients ?? [])
-        .filter((i) => !search || i.nameLt.toLowerCase().includes(search.toLowerCase()))
+        .filter((i) => !search || normalize(i.nameLt).includes(normalize(search)))
         .sort((a, b) => a.nameLt.localeCompare(b.nameLt, 'lt'));
 
     const handleCreate = async (data: {nameLt: string; unit: string}) => {

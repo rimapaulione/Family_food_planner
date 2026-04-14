@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef} from 'react';
 import {UNITS} from '@/constants/units';
+import {normalize} from '@/utils/normalize';
 
 interface IngredientOption {
     id: string;
@@ -43,13 +44,14 @@ export function IngredientSearch({
     }, []);
 
     const sorted = ingredients.slice().sort((a, b) => a.nameLt.localeCompare(b.nameLt, 'lt'));
-    const filtered = query.trim()
-        ? sorted.filter((i) => i.nameLt.toLowerCase().includes(query.toLowerCase()))
+    const normalizedQuery = normalize(query.trim());
+    const filtered = normalizedQuery
+        ? sorted.filter((i) => normalize(i.nameLt).includes(normalizedQuery))
         : sorted;
     const visible = filtered.slice(0, 20);
 
     const exactMatch = ingredients.find(
-        (i) => i.nameLt.toLowerCase() === query.trim().toLowerCase(),
+        (i) => normalize(i.nameLt) === normalizedQuery,
     );
     const showCreate = query.trim().length > 1 && !exactMatch;
 

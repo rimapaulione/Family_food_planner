@@ -235,7 +235,7 @@ export function RecipeForm({
                 <input
                     type="checkbox"
                     {...register('isFavorite')}
-                    className="rounded"
+                    className="rounded accent-primary"
                 />
                 Favorite recipe
             </label>

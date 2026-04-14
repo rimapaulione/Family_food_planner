@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {useRecipes} from '@/hooks/useRecipes';
+import {normalize} from '@/utils/normalize';
 import {Spinner} from '@/components/ui/Spinner';
 import {PageHeader} from '@/components/ui/PageHeader';
 import {RecipeCard} from '@/components/recipes/RecipeCard';
@@ -9,7 +10,7 @@ export function RecipesTab() {
     const {data: recipes, isLoading, isError, error} = useRecipes();
 
     const filtered = (recipes ?? []).filter(
-        (r) => !search || r.name.toLowerCase().includes(search.toLowerCase()),
+        (r) => !search || normalize(r.name).includes(normalize(search)),
     );
 
     return (
