@@ -2,6 +2,7 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {toast} from 'sonner';
 import api from '@/api/axios';
 import type {Ingredient, IngredientDetail} from '@/types/ingredient';
+import {getErrorMessage} from '@/utils/getErrorMessage';
 
 export interface IngredientRequest {
     nameLt: string;
@@ -53,7 +54,7 @@ export function useCreateIngredient() {
             queryClient.invalidateQueries({queryKey: ['ingredients']});
             toast.success('Ingredient added');
         },
-        onError: () => toast.error('Failed to add ingredient'),
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to add ingredient')),
     });
 }
 
@@ -68,7 +69,7 @@ export function useUpdateIngredient() {
             queryClient.invalidateQueries({queryKey: ['ingredients']});
             toast.success('Ingredient updated');
         },
-        onError: () => toast.error('Failed to update ingredient'),
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to update ingredient')),
     });
 }
 
@@ -82,6 +83,6 @@ export function useDeleteIngredient() {
             queryClient.invalidateQueries({queryKey: ['ingredients']});
             toast.success('Ingredient deleted');
         },
-        onError: () => toast.error('Failed to delete ingredient'),
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to delete ingredient')),
     });
 }

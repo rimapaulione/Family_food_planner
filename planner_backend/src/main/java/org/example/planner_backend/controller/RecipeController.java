@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -33,21 +32,21 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     @GetMapping
-    public ResponseEntity<List<RecipeListResponseDto>> getRecipes(
+    public ResponseEntity<List<RecipeListResponseDto>> getAll(
             @RequestParam(required = false) String search
     ) {
-        return ResponseEntity.ok(recipeService.getAll(search));
+        return ResponseEntity.ok(recipeService.getAllWithIngredients(search));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeResponseDto> getRecipeById(
+    public ResponseEntity<RecipeResponseDto> getById(
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(recipeService.getById(id));
     }
 
     @PostMapping
-    public ResponseEntity<RecipeResponseDto> createRecipe(
+    public ResponseEntity<RecipeResponseDto> create(
             @Valid @RequestBody RecipeRequestDto newRecipe
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(newRecipe));

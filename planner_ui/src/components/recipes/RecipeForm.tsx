@@ -99,7 +99,7 @@ export function RecipeForm({
         } catch (err: unknown) {
             const message =
                 err && typeof err === 'object' && 'response' in err
-                    ? (err as {response?: {data?: {error?: string}}}).response?.data?.error
+                    ? (err as {response?: {data?: {message?: string}}}).response?.data?.message
                     : undefined;
             if (message) {
                 form.setError('root', {message});

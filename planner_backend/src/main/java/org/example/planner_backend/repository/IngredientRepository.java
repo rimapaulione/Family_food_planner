@@ -4,7 +4,6 @@ import org.example.planner_backend.dto.ingredient.IngredientDetailResponseDto;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,5 +22,13 @@ public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
         GROUP BY i.id, i.nameLt, i.unit
         ORDER BY i.nameLt
         """)
-    List<IngredientDetailResponseDto> findAllWithRecipeCount(@Param("search") String search);
+    List<IngredientDetailResponseDto> findAllWithRecipeCount(String search);
+
+    Boolean existsByNameLtIgnoreCase(String nameLT);
+
+    @Query("SELECT COUNT(ri) FROM RecipeIngredient ri WHERE ri.ingredient.id = :ingredientId")
+    int countRecipesByIngredientId(UUID ingredientId);
+
+    List<Ingredient> findByNameLtIgnoreCaseStartingWith(String prefix);
 }
+

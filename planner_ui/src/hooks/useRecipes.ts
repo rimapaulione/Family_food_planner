@@ -2,6 +2,7 @@ import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {toast} from 'sonner';
 import api from '@/api/axios';
 import type {RecipeListResponse, RecipeResponse, RecipeRequest} from '@/types/recipe';
+import {getErrorMessage} from '@/utils/getErrorMessage';
 
 export function useRecipes(search?: string) {
     return useQuery({
@@ -43,7 +44,7 @@ export function useCreateRecipe() {
             queryClient.invalidateQueries({queryKey: ['recipes']});
             toast.success('Recipe created');
         },
-        onError: () => toast.error('Failed to create recipe'),
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to create recipe')),
     });
 }
 
@@ -58,7 +59,7 @@ export function useUpdateRecipe() {
             queryClient.invalidateQueries({queryKey: ['recipes']});
             toast.success('Recipe updated');
         },
-        onError: () => toast.error('Failed to update recipe'),
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to update recipe')),
     });
 }
 
@@ -72,6 +73,6 @@ export function useDeleteRecipe() {
             queryClient.invalidateQueries({queryKey: ['recipes']});
             toast.success('Recipe deleted');
         },
-        onError: () => toast.error('Failed to delete recipe'),
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to delete recipe')),
     });
 }

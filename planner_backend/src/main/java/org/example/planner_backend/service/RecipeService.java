@@ -1,7 +1,6 @@
 package org.example.planner_backend.service;
 
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.planner_backend.dto.recipe.RecipeListResponseDto;
 import org.example.planner_backend.dto.recipe.RecipeRequestDto;
@@ -14,11 +13,13 @@ import org.example.planner_backend.model.entity.Category;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.RecipeIngredient;
+import org.example.planner_backend.model.entity.Tag;
 import org.example.planner_backend.repository.CategoryRepository;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.RecipeRepository;
 import org.example.planner_backend.repository.TagRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -37,11 +38,11 @@ public class RecipeService {
     private final CategoryMapper categoryMapper;
     private final TagMapper tagMapper;
 
-    @Transactional
-    public List<RecipeListResponseDto> getAll(final String search) {
+    @Transactional(readOnly = true)
+    public List<RecipeListResponseDto> getAllWithIngredients(final String search) {
         List<Recipe> recipes = (search != null && !search.isBlank())
-                ? recipeRepository.findAllByNameContainingIgnoreCase(search.trim())
-                : recipeRepository.findAll();
+                ? recipeRepository.findAllWithTagsAndIngredientsBySearch(search.trim())
+                : recipeRepository.findAllWithTagsAndIngredients();
 
         return recipes.stream().map(r -> new RecipeListResponseDto(
                 r.getId(),
@@ -55,7 +56,7 @@ public class RecipeService {
         )).toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public RecipeResponseDto getById(final UUID id) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe not found"));
@@ -106,6 +107,7 @@ public class RecipeService {
         return recipeMapper.toResponse(recipeRepository.save(recipe));
     }
 
+    @Transactional
     public void delete(final UUID id) {
         if (!recipeRepository.existsById(id)) {
             throw new ResourceNotFoundException("Recipe not found");
@@ -115,7 +117,11 @@ public class RecipeService {
 
     private void setTags(final Recipe recipe, final Set<Long> tagIds) {
         if (tagIds != null && !tagIds.isEmpty()) {
-            recipe.setTags(tagRepository.findByIdIn(tagIds));
+            Set<Tag> foundTags = tagRepository.findByIdIn(tagIds);
+            if (foundTags.size() != tagIds.size()) {
+                throw new ResourceNotFoundException("Some tags not found");
+            }
+            recipe.setTags(foundTags);
         } else {
             recipe.getTags().clear();
         }

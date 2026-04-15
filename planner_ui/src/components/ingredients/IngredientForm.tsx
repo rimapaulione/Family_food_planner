@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import {Check, X} from 'lucide-react';
 import {UNITS} from '@/constants/units';
 
@@ -17,10 +17,31 @@ export function IngredientForm({
 }: IngredientFormProps) {
     const [name, setName] = useState(initialName);
     const [unit, setUnit] = useState(initialUnit);
+    const unitRef = useRef<HTMLSelectElement>(null);
 
     const handleSave = () => {
         if (!name.trim()) return;
         onSave({nameLt: name.trim(), unit});
+    };
+
+    const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (name.trim()) unitRef.current?.focus();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            onCancel();
+        }
+    };
+
+    const handleUnitKeyDown = (e: React.KeyboardEvent<HTMLSelectElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSave();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            onCancel();
+        }
     };
 
     return (
@@ -29,13 +50,16 @@ export function IngredientForm({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onKeyDown={handleNameKeyDown}
                 autoFocus
                 placeholder="Ingredient name..."
                 className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
             <select
+                ref={unitRef}
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
+                onKeyDown={handleUnitKeyDown}
                 className="w-16 rounded-md border border-input bg-background px-1 py-1 text-sm"
             >
                 {UNITS.map((u) => (

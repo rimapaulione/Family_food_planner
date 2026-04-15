@@ -1,6 +1,7 @@
 package org.example.planner_backend.dto.recipe;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -42,7 +43,7 @@ public record RecipeRequestDto(
             @NotNull
             UUID ingredientId,
 
-            @NotNull
+            @NotNull @DecimalMin("0.01")
             BigDecimal quantity
     ) {
     }
