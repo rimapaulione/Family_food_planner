@@ -21,6 +21,7 @@ export function RecipeDetailPage() {
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     const handleDelete = async () => {
+        if (!recipe) return;
         deleteMutation.mutate(recipe.id, {
             onSuccess: () => navigate('/recipes'),
         });
