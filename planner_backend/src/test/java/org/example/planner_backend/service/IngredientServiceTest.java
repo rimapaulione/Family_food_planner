@@ -59,6 +59,8 @@ class IngredientServiceTest {
         milkResponse = new IngredientResponseDto(INGREDIENT_ID, INGREDIENT_NAME, Unit.ML);
     }
 
+    // ---------- getAll ----------
+
     @Test
     void test_shouldReturnAllIngredientsWhenSearchIsBlank() {
         when(ingredientRepository.findAll()).thenReturn(List.of(milk));
@@ -84,8 +86,10 @@ class IngredientServiceTest {
         verify(ingredientRepository, never()).findAll();
     }
 
+    // ---------- getAllWithRecipesCount ----------
+
     @Test
-    void test_shouldCallRepositoryWithNullWhenSearchIsBlank() {
+    void test_shouldReturnAllDetailsWhenSearchIsBlank() {
         IngredientDetailResponseDto detail = new IngredientDetailResponseDto(
                 INGREDIENT_ID, INGREDIENT_NAME, Unit.ML, 2);
         when(ingredientRepository.findAllWithRecipeCount(null)).thenReturn(List.of(detail));
@@ -97,7 +101,7 @@ class IngredientServiceTest {
     }
 
     @Test
-    void test_shouldCallRepositoryWithTrimmedSearch() {
+    void test_shouldReturnDetailsUsingTrimmedSearch() {
         IngredientDetailResponseDto detail = new IngredientDetailResponseDto(
                 INGREDIENT_ID, INGREDIENT_NAME, Unit.ML, 2);
         when(ingredientRepository.findAllWithRecipeCount("milk")).thenReturn(List.of(detail));
@@ -107,6 +111,8 @@ class IngredientServiceTest {
         assertThat(result).containsExactly(detail);
         verify(ingredientRepository).findAllWithRecipeCount("milk");
     }
+
+    // ---------- checkName ----------
 
     @Test
     void test_shouldReturnEmptyWhenNameTooShort() {
@@ -154,6 +160,8 @@ class IngredientServiceTest {
         verify(ingredientRepository).findByNameLtIgnoreCaseStartingWith("Pi");
     }
 
+    // ---------- create ----------
+
     @Test
     void test_shouldCreateIngredientWhenNameIsUnique() {
         IngredientRequestDto newIngredient = new IngredientRequestDto(INGREDIENT_NAME, Unit.ML);
@@ -175,7 +183,7 @@ class IngredientServiceTest {
     }
 
     @Test
-    void test_shouldNotCreateIngredientThrowExceptionWhenNameExists() {
+    void test_shouldThrowExceptionWhenCreatingWithExistingName() {
         IngredientRequestDto newIngredient = new IngredientRequestDto(INGREDIENT_NAME, Unit.ML);
 
         when(ingredientRepository.existsByNameLtIgnoreCase(INGREDIENT_NAME)).thenReturn(true);
@@ -186,6 +194,8 @@ class IngredientServiceTest {
 
         verify(ingredientRepository, never()).save(any(Ingredient.class));
     }
+
+    // ---------- update ----------
 
     @Test
     void test_shouldUpdateIngredientWhenIngredientExistsAndIsUnique() {
@@ -222,7 +232,7 @@ class IngredientServiceTest {
     }
 
     @Test
-    void test_shouldNotUpdateIngredientThrowExceptionWhenIngredientNotFound() {
+    void test_shouldThrowExceptionWhenUpdatingNonExistentIngredient() {
         IngredientRequestDto updateIngredient = new IngredientRequestDto(CHANGED_INGREDIENT_NAME, Unit.ML);
 
         when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.empty());
@@ -235,7 +245,7 @@ class IngredientServiceTest {
     }
 
     @Test
-    void test_shouldNotUpdateIngredientThrowExceptionWhenIngredientNameExists() {
+    void test_shouldThrowExceptionWhenUpdatingToExistingName() {
         IngredientRequestDto updateIngredient = new IngredientRequestDto(CHANGED_INGREDIENT_NAME, Unit.ML);
 
         when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(milk));
@@ -248,6 +258,8 @@ class IngredientServiceTest {
         verify(ingredientRepository, never()).save(any(Ingredient.class));
     }
 
+    // ---------- delete ----------
+
     @Test
     void test_shouldDeleteIngredientWhenIngredientExistsAndNotInRecipe() {
         when(ingredientRepository.existsById(INGREDIENT_ID)).thenReturn(true);
@@ -259,7 +271,7 @@ class IngredientServiceTest {
     }
 
     @Test
-    void test_shouldNotDeleteIngredientThrowExceptionWhenIngredientNotFound() {
+    void test_shouldThrowExceptionWhenDeletingNonExistentIngredient() {
         when(ingredientRepository.existsById(INGREDIENT_ID)).thenReturn(false);
 
         assertThatThrownBy(() -> ingredientService.delete(INGREDIENT_ID))
@@ -270,7 +282,7 @@ class IngredientServiceTest {
     }
 
     @Test
-    void test_shouldNotDeleteIngredientThrowExceptionWhenIngredientIsInRecipe() {
+    void test_shouldThrowExceptionWhenDeletingIngredientUsedInRecipe() {
         int numberOfRecipe = 1;
 
         when(ingredientRepository.existsById(INGREDIENT_ID)).thenReturn(true);
