@@ -20,6 +20,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
 
     @Override
@@ -28,9 +31,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader(AUTH_HEADER);
 
-        if (header != null && header.startsWith("Bearer ")) {
+        if (header != null && header.startsWith(BEARER_PREFIX)) {
             String token = header.substring(7);
 
             if (jwtService.isValid(token)) {
