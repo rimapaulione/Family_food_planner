@@ -39,6 +39,16 @@ public class JwtService {
                 .getSubject();
     }
 
+    public Role extractRole(String token) {
+        String roleName = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
+        return Role.valueOf(roleName);
+    }
+
     public String generateToken(String email, Role role) {
         Instant now = Instant.now();
         Instant expiry = now.plus(expiryMinutes, ChronoUnit.MINUTES);
