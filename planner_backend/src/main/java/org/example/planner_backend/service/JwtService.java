@@ -1,12 +1,12 @@
 package org.example.planner_backend.service;
 
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.example.planner_backend.model.enums.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -27,11 +27,16 @@ public class JwtService {
     ) {
         this.secret = secret;
         this.expiryMinutes = expiryMinutes;
-        System.out.println(">>> JwtService loaded. Signing key algorithm: " +
-                getSigningKey().getAlgorithm());
+    }
 
-        String sample = generateToken("test@example.com", Role.USER);
-        System.out.println(">>> Sample token: " + sample);
+
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 
     public String generateToken(String email, Role role) {
@@ -46,6 +51,16 @@ public class JwtService {
                 .signWith(getSigningKey())
                 .compact();
     }
+
+    public boolean isValid(String token) {
+        try {
+            extractEmail(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
