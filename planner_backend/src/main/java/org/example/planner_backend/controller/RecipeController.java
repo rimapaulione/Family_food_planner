@@ -2,6 +2,7 @@ package org.example.planner_backend.controller;
 
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.example.planner_backend.dto.recipe.RecipeListResponseDto;
 import org.example.planner_backend.dto.recipe.RecipeRequestDto;
@@ -33,6 +34,7 @@ public class RecipeController {
 
     @GetMapping
     public ResponseEntity<List<RecipeListResponseDto>> getAll(
+            @Size(max = 50)
             @RequestParam(required = false) String search
     ) {
         return ResponseEntity.ok(recipeService.getAllWithIngredients(search));
