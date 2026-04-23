@@ -1,6 +1,6 @@
 package org.example.planner_backend.service;
 
-
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -17,36 +17,15 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String secret;
+    private final SecretKey signingKey;
     private final long expiryMinutes;
-
 
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-token-expiry-minutes}") long expiryMinutes
     ) {
-        this.secret = secret;
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expiryMinutes = expiryMinutes;
-    }
-
-
-    public String extractEmail(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
-    }
-
-    public Role extractRole(String token) {
-        String roleName = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .get("role", String.class);
-        return Role.valueOf(roleName);
     }
 
     public String generateToken(String email, Role role) {
@@ -58,22 +37,32 @@ public class JwtService {
                 .claim("role", role.name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
-                .signWith(getSigningKey())
+                .signWith(signingKey)
                 .compact();
+    }
+
+    public String extractEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public Role extractRole(String token) {
+        return Role.valueOf(parseClaims(token).get("role", String.class));
     }
 
     public boolean isValid(String token) {
         try {
-            extractEmail(token);
+            parseClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
