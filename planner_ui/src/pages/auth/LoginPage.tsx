@@ -1,4 +1,4 @@
-import {Link, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {useLogin} from '@/hooks/useAuth';
 import {AuthCard} from '@/components/auth/AuthCard';
 import {LoginForm} from '@/components/auth/LoginForm';
@@ -14,14 +14,14 @@ export function LoginPage() {
     };
 
     return (
-        <AuthCard title="Family Food Planner" subtitle="Sign in to your account">
+        <AuthCard
+            title="Family Food Planner"
+            subtitle="Sign in to your account"
+            footerPrompt="No account?"
+            footerLinkText="Register"
+            footerLinkTo="/register"
+        >
             <LoginForm onSubmit={handleSubmit} isPending={loginMutation.isPending}/>
-            <p className="text-center text-sm">
-                No account?{' '}
-                <Link to="/register" className="font-medium text-primary hover:underline">
-                    Register
-                </Link>
-            </p>
         </AuthCard>
     );
 }
