@@ -2,6 +2,7 @@ import {QueryCache, QueryClient, QueryClientProvider} from '@tanstack/react-quer
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import {toast} from 'sonner';
 import {AppLayout} from '@/components/layout/AppLayout';
+import {ProtectedRoute} from '@/components/layout/ProtectedRoute';
 import {LoginPage} from '@/pages/auth/LoginPage';
 import {RegisterPage} from '@/pages/auth/RegisterPage';
 import {RecipeListPage} from '@/pages/recipes/RecipeListPage';
@@ -28,18 +29,20 @@ function App() {
                 <Routes>
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/register" element={<RegisterPage/>}/>
-                    <Route element={<AppLayout/>}>
-                        <Route path="/" element={<div>Home</div>}/>
-                        <Route path="/recipes">
-                            <Route index element={<RecipeListPage/>}/>
-                            <Route path="new" element={<RecipeNewPage/>}/>
-                            <Route path=":id" element={<RecipeDetailPage/>}/>
-                            <Route path=":id/edit" element={<RecipeEditPage/>}/>
+                    <Route element={<ProtectedRoute/>}>
+                        <Route element={<AppLayout/>}>
+                            <Route path="/" element={<div>Home</div>}/>
+                            <Route path="/recipes">
+                                <Route index element={<RecipeListPage/>}/>
+                                <Route path="new" element={<RecipeNewPage/>}/>
+                                <Route path=":id" element={<RecipeDetailPage/>}/>
+                                <Route path=":id/edit" element={<RecipeEditPage/>}/>
+                            </Route>
+                            <Route path="/planner" element={<div>Planner</div>}/>
+                            <Route path="/shopping" element={<div>Shopping</div>}/>
+                            <Route path="/basics" element={<div>Always Buy</div>}/>
+                            <Route path="*" element={<Navigate to="/" replace/>}/>
                         </Route>
-                        <Route path="/planner" element={<div>Planner</div>}/>
-                        <Route path="/shopping" element={<div>Shopping</div>}/>
-                        <Route path="/basics" element={<div>Always Buy</div>}/>
-                        <Route path="*" element={<Navigate to="/" replace/>}/>
                     </Route>
 
                 </Routes>
