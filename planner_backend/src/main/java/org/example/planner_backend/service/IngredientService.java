@@ -10,6 +10,7 @@ import org.example.planner_backend.exception.ResourceNotFoundException;
 import org.example.planner_backend.mapper.IngredientMapper;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.repository.IngredientRepository;
+import org.example.planner_backend.util.TextUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,13 +68,13 @@ public class IngredientService {
 
     @Transactional
     public IngredientResponseDto create(final IngredientRequestDto newIngredient) {
-        if (ingredientRepository.existsByNameLtIgnoreCase(newIngredient.nameLt())) {
-            throw new ConflictException("Ingredient '" + newIngredient.nameLt() + "' already exists"
-            );
+        String nameLt = TextUtil.capitalize(newIngredient.nameLt());
+        if (ingredientRepository.existsByNameLtIgnoreCase(nameLt)) {
+            throw new ConflictException("Ingredient '" + nameLt + "' already exists");
         }
         Ingredient ingredient = ingredientRepository.save(
                 Ingredient.builder()
-                        .nameLt(newIngredient.nameLt())
+                        .nameLt(nameLt)
                         .unit(newIngredient.unit())
                         .build()
         );
@@ -84,14 +85,13 @@ public class IngredientService {
     public IngredientResponseDto update(final UUID id, final IngredientRequestDto updateIngredient) {
         Ingredient ingredient = ingredientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ingredient not found"));
-        if (!ingredient.getNameLt().equalsIgnoreCase(updateIngredient.nameLt())
-                && ingredientRepository.existsByNameLtIgnoreCase(updateIngredient.nameLt())) {
-            throw new ConflictException(
-                    "Ingredient '" + updateIngredient.nameLt() + "' already exists"
-            );
+        String nameLt = TextUtil.capitalize(updateIngredient.nameLt());
+        if (!ingredient.getNameLt().equalsIgnoreCase(nameLt)
+                && ingredientRepository.existsByNameLtIgnoreCase(nameLt)) {
+            throw new ConflictException("Ingredient '" + nameLt + "' already exists");
         }
 
-        ingredient.setNameLt(updateIngredient.nameLt());
+        ingredient.setNameLt(nameLt);
         ingredient.setUnit(updateIngredient.unit());
         return ingredientMapper.toResponse(ingredientRepository.save(ingredient));
     }

@@ -115,21 +115,11 @@ export function RecipeForm({
     return (
         <form onSubmit={handleFormSubmit} className="space-y-4">
             <FormField label="Recipe Name" error={errors.name?.message}>
-                <Controller
-                    control={control}
-                    name="name"
-                    render={({field}) => (
-                        <input
-                            type="text"
-                            value={field.value}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                field.onChange(val ? val.charAt(0).toUpperCase() + val.slice(1) : '');
-                            }}
-                            className={inputClass(!!errors.name)}
-                            placeholder="e.g. Chicken with Rice"
-                        />
-                    )}
+                <input
+                    type="text"
+                    {...register('name')}
+                    className={inputClass(!!errors.name)}
+                    placeholder="e.g. Chicken with Rice"
                 />
             </FormField>
 

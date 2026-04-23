@@ -1,6 +1,8 @@
 import {useRef, useState} from 'react';
+import {toast} from 'sonner';
 import {Check, X} from 'lucide-react';
 import {UNITS} from '@/constants/units';
+import {ingredientSchema} from '@/schemas/ingredient';
 
 interface IngredientFormProps {
     initialName?: string;
@@ -20,8 +22,12 @@ export function IngredientForm({
     const unitRef = useRef<HTMLSelectElement>(null);
 
     const handleSave = () => {
-        if (!name.trim()) return;
-        onSave({nameLt: name.trim(), unit});
+        const parsed = ingredientSchema.safeParse({nameLt: name.trim(), unit});
+        if (!parsed.success) {
+            toast.error(parsed.error.issues[0].message);
+            return;
+        }
+        onSave(parsed.data);
     };
 
     const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

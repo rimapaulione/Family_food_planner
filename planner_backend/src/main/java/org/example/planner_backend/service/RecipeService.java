@@ -18,6 +18,7 @@ import org.example.planner_backend.repository.CategoryRepository;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.RecipeRepository;
 import org.example.planner_backend.repository.TagRepository;
+import org.example.planner_backend.util.TextUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +71,7 @@ public class RecipeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         Recipe recipe = Recipe.builder()
-                .name(request.name())
+                .name(TextUtil.capitalize(request.name()))
                 .category(category)
                 .defaultServing(request.defaultServing())
                 .cookingTimeMinutes(request.cookingTimeMinutes())
@@ -93,7 +94,7 @@ public class RecipeService {
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        recipe.setName(request.name());
+        recipe.setName(TextUtil.capitalize(request.name()));
         recipe.setCategory(category);
         recipe.setDefaultServing(request.defaultServing());
         recipe.setCookingTimeMinutes(request.cookingTimeMinutes());

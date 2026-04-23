@@ -68,7 +68,7 @@ export function RecipeIngredientPicker({
                         onChange={(e) => updateRow(idx, {quantity: Number(e.target.value)})}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRow(); } }}
                         placeholder="Qty"
-                        className="w-20 rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+                        className="w-20 rounded-md border border-input bg-background px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
                     />
                     <span className="w-10 text-center text-sm text-muted-foreground">
                         {row.unit || '—'}

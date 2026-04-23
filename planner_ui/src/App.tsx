@@ -3,6 +3,7 @@ import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import {toast} from 'sonner';
 import {AppLayout} from '@/components/layout/AppLayout';
 import {ProtectedRoute} from '@/components/layout/ProtectedRoute';
+import {PublicOnlyRoute} from '@/components/layout/PublicOnlyRoute';
 import {HomePage} from '@/pages/HomePage';
 import {LoginPage} from '@/pages/auth/LoginPage';
 import {RegisterPage} from '@/pages/auth/RegisterPage';
@@ -28,8 +29,10 @@ function App() {
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/login" element={<LoginPage/>}/>
-                    <Route path="/register" element={<RegisterPage/>}/>
+                    <Route element={<PublicOnlyRoute/>}>
+                        <Route path="/login" element={<LoginPage/>}/>
+                        <Route path="/register" element={<RegisterPage/>}/>
+                    </Route>
                     <Route element={<ProtectedRoute/>}>
                         <Route element={<AppLayout/>}>
                             <Route path="/" element={<HomePage/>}/>

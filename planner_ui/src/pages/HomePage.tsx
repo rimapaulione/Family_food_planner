@@ -1,7 +1,6 @@
 import {Plus, UtensilsCrossed} from 'lucide-react';
 import {useAuthStore} from '@/stores/useAuthStore';
 import {ShortcutCard} from '@/components/ui/ShortcutCard';
-import {capitalize} from '@/utils/capitalize';
 
 export function HomePage() {
     const displayName = useAuthStore((s) => s.displayName);
@@ -10,7 +9,7 @@ export function HomePage() {
         <div className="space-y-8">
             <div>
                 <h1 className="text-2xl font-bold text-foreground">
-                    Hello, {capitalize(displayName)}!
+                    Hello, {displayName}!
                 </h1>
                 <p className="text-muted-foreground">
                     Welcome to your family food planner.

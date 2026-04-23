@@ -10,6 +10,7 @@ import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.enums.AuthProvider;
 import org.example.planner_backend.model.enums.Role;
 import org.example.planner_backend.repository.AppUserRepository;
+import org.example.planner_backend.util.TextUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,7 @@ public class AuthService {
         AppUser user = AppUser.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .displayName(request.displayName())
+                .displayName(TextUtil.capitalize(request.displayName()))
                 .authProvider(AuthProvider.LOCAL)
                 .role(Role.USER)
                 .build();
