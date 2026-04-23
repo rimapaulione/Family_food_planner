@@ -3,6 +3,7 @@ import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import {toast} from 'sonner';
 import {AppLayout} from '@/components/layout/AppLayout';
 import {ProtectedRoute} from '@/components/layout/ProtectedRoute';
+import {HomePage} from '@/pages/HomePage';
 import {LoginPage} from '@/pages/auth/LoginPage';
 import {RegisterPage} from '@/pages/auth/RegisterPage';
 import {RecipeListPage} from '@/pages/recipes/RecipeListPage';
@@ -31,7 +32,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage/>}/>
                     <Route element={<ProtectedRoute/>}>
                         <Route element={<AppLayout/>}>
-                            <Route path="/" element={<div>Home</div>}/>
+                            <Route path="/" element={<HomePage/>}/>
                             <Route path="/recipes">
                                 <Route index element={<RecipeListPage/>}/>
                                 <Route path="new" element={<RecipeNewPage/>}/>

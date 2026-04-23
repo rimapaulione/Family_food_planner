@@ -1,4 +1,4 @@
-import {useForm} from 'react-hook-form';
+import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {UserPlus} from 'lucide-react';
 import {registerSchema, type RegisterFormData} from '@/schemas/auth';
@@ -12,7 +12,7 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({onSubmit, isPending}: RegisterFormProps) {
-    const {register, handleSubmit, formState: {errors}} = useForm<RegisterFormData>({
+    const {register, handleSubmit, control, formState: {errors}} = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
         defaultValues: {email: '', password: '', confirmPassword: '', displayName: ''},
     });
@@ -20,12 +20,22 @@ export function RegisterForm({onSubmit, isPending}: RegisterFormProps) {
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <FormField label="Name" error={errors.displayName?.message}>
-                <input
-                    type="text"
-                    autoComplete="name"
-                    {...register('displayName')}
-                    className={inputClass(!!errors.displayName)}
-                    placeholder="Your name"
+                <Controller
+                    control={control}
+                    name="displayName"
+                    render={({field}) => (
+                        <input
+                            type="text"
+                            autoComplete="name"
+                            value={field.value}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                field.onChange(val ? val.charAt(0).toUpperCase() + val.slice(1) : '');
+                            }}
+                            className={inputClass(!!errors.displayName)}
+                            placeholder="Your name"
+                        />
+                    )}
                 />
             </FormField>
 
