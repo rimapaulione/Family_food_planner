@@ -8,6 +8,8 @@ import {
 } from '@/hooks/useIngredients';
 import type {IngredientDetail} from '@/types/ingredient';
 import {Spinner} from '@/components/ui/Spinner';
+import {ErrorMessage} from '@/components/ui/ErrorMessage';
+import {NotFound} from '@/components/ui/NotFound';
 import {PageHeader} from '@/components/ui/PageHeader';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {IngredientCard} from '@/components/ingredients/IngredientCard';
@@ -60,13 +62,11 @@ export function IngredientsTab() {
             {isLoading ? (
                 <Spinner/>
             ) : isError ? (
-                <p className="text-destructive">
-                    Failed to load ingredients. {error instanceof Error ? error.message : ''}
-                </p>
+                <ErrorMessage error={error} fallback="Failed to load ingredients."/>
             ) : !ingredients || ingredients.length === 0 ? (
-                <p className="text-muted-foreground">No ingredients yet.</p>
+                <NotFound message="No ingredients yet."/>
             ) : filtered.length === 0 ? (
-                <p className="text-muted-foreground">No ingredients match your search.</p>
+                <NotFound message="No ingredients match your search."/>
             ) : (
                 <div className="space-y-1">
                     {filtered.map((ing) =>

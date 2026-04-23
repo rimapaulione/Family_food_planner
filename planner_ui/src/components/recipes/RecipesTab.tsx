@@ -2,6 +2,8 @@ import {useState} from 'react';
 import {useRecipes} from '@/hooks/useRecipes';
 import {normalize} from '@/utils/normalize';
 import {Spinner} from '@/components/ui/Spinner';
+import {ErrorMessage} from '@/components/ui/ErrorMessage';
+import {NotFound} from '@/components/ui/NotFound';
 import {PageHeader} from '@/components/ui/PageHeader';
 import {RecipeCard} from '@/components/recipes/RecipeCard';
 
@@ -27,13 +29,11 @@ export function RecipesTab() {
             {isLoading ? (
                 <Spinner/>
             ) : isError ? (
-                <p className="text-destructive">
-                    Failed to load recipes. {error instanceof Error ? error.message : ''}
-                </p>
+                <ErrorMessage error={error} fallback="Failed to load recipes."/>
             ) : !recipes || recipes.length === 0 ? (
-                <p className="text-muted-foreground">No recipes yet. Create your first recipe!</p>
+                <NotFound message="No recipes yet. Create your first recipe!"/>
             ) : filtered.length === 0 ? (
-                <p className="text-muted-foreground">No recipes match your search.</p>
+                <NotFound message="No recipes match your search."/>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filtered.map((recipe) => (

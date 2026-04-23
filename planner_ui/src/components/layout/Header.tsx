@@ -29,7 +29,6 @@ export function Header() {
                     <NavLink to="/shopping" icon={ShoppingCart} label="Shopping"/>
                     <NavLink to="/basics" icon={ShoppingBasket} label="Always Buy"/>
                     <Button variant="outline" icon={LogOut} onClick={handleLogout}></Button>
-
                 </nav>
             </div>
         </header>
