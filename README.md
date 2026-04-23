@@ -1,4 +1,4 @@
-i# Family Food Shopping Planner
+# Family Food Shopping Planner
 
 A collaborative family meal planning app where family members plan weekly meals together, manage recipes, and generate shopping lists automatically.
 
