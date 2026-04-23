@@ -2,13 +2,14 @@ import {Link, useNavigate} from 'react-router-dom';
 import {ChefHat, UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket, LogOut} from 'lucide-react';
 import {NavLink} from '@/components/layout/NavLink';
 import {Button} from '@/components/ui/Button';
-import {clearToken} from '@/hooks/useAuth';
+import {useAuthStore} from '@/stores/useAuthStore';
 
 export function Header() {
     const navigate = useNavigate();
+    const clearAuth = useAuthStore((s) => s.clearAuth);
 
     const handleLogout = () => {
-        clearToken();
+        clearAuth();
         navigate('/login');
     };
 

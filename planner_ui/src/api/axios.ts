@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const TOKEN_KEY = 'auth_token';
+import {useAuthStore} from '@/stores/useAuthStore';
 
 const api = axios.create({
     baseURL: '/api/v1',
@@ -10,7 +9,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = useAuthStore.getState().token;
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,7 +24,7 @@ api.interceptors.response.use(
         const isAuthEndpoint = url.includes('/auth/');
 
         if (status === 401 && !isAuthEndpoint) {
-            localStorage.removeItem(TOKEN_KEY);
+            useAuthStore.getState().clearAuth();
             if (window.location.pathname !== '/login') {
                 window.location.href = '/login';
             }
