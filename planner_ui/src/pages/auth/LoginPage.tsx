@@ -14,7 +14,7 @@ export function LoginPage() {
     };
 
     return (
-        <AuthCard title="Log in">
+        <AuthCard title="Family Food Planner" subtitle="Sign in to your account">
             <LoginForm onSubmit={handleSubmit} isPending={loginMutation.isPending}/>
             <p className="text-center text-sm">
                 No account?{' '}

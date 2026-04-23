@@ -15,7 +15,7 @@ export function RegisterPage() {
     };
 
     return (
-        <AuthCard title="Create account">
+        <AuthCard title="Family Food Planner" subtitle="Create your account">
             <RegisterForm onSubmit={handleSubmit} isPending={registerMutation.isPending}/>
             <p className="text-center text-sm">
                 Already have an account?{' '}

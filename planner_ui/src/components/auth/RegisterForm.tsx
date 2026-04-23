@@ -58,7 +58,7 @@ export function RegisterForm({onSubmit, isPending}: RegisterFormProps) {
                 />
             </FormField>
 
-            <Button variant="primary" icon={UserPlus} type="submit" disabled={isPending}>
+            <Button variant="primary" icon={UserPlus} type="submit" disabled={isPending} className="w-full justify-center">
                 {isPending ? 'Creating account...' : 'Register'}
             </Button>
         </form>

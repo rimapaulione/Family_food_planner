@@ -38,7 +38,7 @@ export function LoginForm({onSubmit, isPending}: LoginFormProps) {
                 />
             </FormField>
 
-            <Button variant="primary" icon={LogIn} type="submit" disabled={isPending}>
+            <Button variant="primary" icon={LogIn} type="submit" disabled={isPending} className="w-full justify-center">
                 {isPending ? 'Logging in...' : 'Log in'}
             </Button>
         </form>
