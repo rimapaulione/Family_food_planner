@@ -67,7 +67,7 @@ class AuthServiceTest {
         AuthResponseDto response = authService.register(request);
 
         assertThat(response.token()).isEqualTo(TOKEN);
-        assertThat(response.userId()).isEqualTo(USER_ID);
+        assertThat(response.id()).isEqualTo(USER_ID);
         assertThat(response.email()).isEqualTo(EMAIL);
         assertThat(response.displayName()).isEqualTo(DISPLAY_NAME);
         assertThat(response.role()).isEqualTo(Role.USER);
@@ -131,7 +131,7 @@ class AuthServiceTest {
         AuthResponseDto response = authService.login(request);
 
         assertThat(response.token()).isEqualTo(TOKEN);
-        assertThat(response.userId()).isEqualTo(USER_ID);
+        assertThat(response.id()).isEqualTo(USER_ID);
         assertThat(response.email()).isEqualTo(EMAIL);
         assertThat(response.role()).isEqualTo(Role.USER);
     }

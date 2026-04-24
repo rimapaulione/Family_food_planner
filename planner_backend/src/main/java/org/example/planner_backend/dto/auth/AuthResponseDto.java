@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record AuthResponseDto(
           String token,                                                                       
-          UUID userId,
+          UUID id,
           String email,                                                                       
           String displayName,            
           Role role

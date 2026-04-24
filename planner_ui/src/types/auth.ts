@@ -14,7 +14,7 @@ export type Role = 'USER' | 'ADMIN';
 
 export interface AuthResponse {
     token: string;
-    userId: string;
+    id: string;
     email: string;
     displayName: string;
     role: Role;

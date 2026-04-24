@@ -4,7 +4,7 @@ import type {AuthResponse, Role} from '@/types/auth';
 
 interface AuthState {
     token: string | null;
-    userId: string | null;
+    id: string | null;
     email: string | null;
     displayName: string | null;
     role: Role | null;
@@ -17,7 +17,7 @@ export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
             token: null,
-            userId: null,
+            id: null,
             email: null,
             displayName: null,
             role: null,
@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
             setAuth: (data) =>
                 set({
                     token: data.token,
-                    userId: data.userId,
+                    id: data.id,
                     email: data.email,
                     displayName: data.displayName,
                     role: data.role,
@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
             clearAuth: () =>
                 set({
                     token: null,
-                    userId: null,
+                    id: null,
                     email: null,
                     displayName: null,
                     role: null,
