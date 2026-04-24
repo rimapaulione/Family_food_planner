@@ -36,6 +36,7 @@ export function RecipeIngredientPicker({
     };
 
     const focusQuantity = (index: number) => {
+        if (!window.matchMedia('(pointer: fine)').matches) return;
         setTimeout(() => document.getElementById(`qty-${index}`)?.focus(), 0);
     };
 

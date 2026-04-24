@@ -59,14 +59,14 @@ export function IngredientForm({
                 onKeyDown={handleNameKeyDown}
                 autoFocus
                 placeholder="Ingredient name..."
-                className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-ring"
+                className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-base md:text-sm outline-none focus:ring-2 focus:ring-ring"
             />
             <select
                 ref={unitRef}
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 onKeyDown={handleUnitKeyDown}
-                className="w-16 rounded-md border border-input bg-background px-1 py-1 text-sm"
+                className="w-16 rounded-md border border-input bg-background px-1 py-1 text-base md:text-sm"
             >
                 {UNITS.map((u) => (
                     <option key={u} value={u}>{u}</option>
