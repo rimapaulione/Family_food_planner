@@ -126,7 +126,7 @@ export function IngredientSearch({
                 onKeyDown={handleKeyDown}
                 autoFocus={autoFocus}
                 placeholder="Type ingredient name..."
-                className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+                className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-base md:text-sm outline-none focus:ring-2 focus:ring-ring"
             />
             {open && (
                 <div
