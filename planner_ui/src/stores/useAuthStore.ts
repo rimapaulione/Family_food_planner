@@ -7,9 +7,11 @@ interface AuthState {
     id: string | null;
     email: string | null;
     displayName: string | null;
+    avatarUrl: string | null;
     role: Role | null;
     isAuthenticated: boolean;
     setAuth: (data: AuthResponse) => void;
+    setProfile: (data: {displayName: string; avatarUrl: string | null}) => void;
     clearAuth: () => void;
 }
 
@@ -20,6 +22,7 @@ export const useAuthStore = create<AuthState>()(
             id: null,
             email: null,
             displayName: null,
+            avatarUrl: null,
             role: null,
             isAuthenticated: false,
             setAuth: (data) =>
@@ -28,8 +31,14 @@ export const useAuthStore = create<AuthState>()(
                     id: data.id,
                     email: data.email,
                     displayName: data.displayName,
+                    avatarUrl: data.avatarUrl,
                     role: data.role,
                     isAuthenticated: true,
+                }),
+            setProfile: (data) =>
+                set({
+                    displayName: data.displayName,
+                    avatarUrl: data.avatarUrl,
                 }),
             clearAuth: () =>
                 set({
@@ -37,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
                     id: null,
                     email: null,
                     displayName: null,
+                    avatarUrl: null,
                     role: null,
                     isAuthenticated: false,
                 }),

@@ -11,7 +11,7 @@ export function Header() {
     const navigate = useNavigate();
     const clearAuth = useAuthStore((s) => s.clearAuth);
     const displayName = useAuthStore((s) => s.displayName);
-    const avatarUrl: string | null = null;
+    const avatarUrl = useAuthStore((s) => s.avatarUrl);
     const [drawerOpen, setDrawerOpen] = useState(false);
 
     const handleLogout = () => {

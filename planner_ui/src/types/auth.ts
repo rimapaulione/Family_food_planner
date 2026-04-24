@@ -17,5 +17,6 @@ export interface AuthResponse {
     id: string;
     email: string;
     displayName: string;
+    avatarUrl: string | null;
     role: Role;
 }

@@ -5,10 +5,11 @@ import org.example.planner_backend.model.enums.Role;
 import java.util.UUID;
 
 public record AuthResponseDto(
-          String token,                                                                       
+          String token,
           UUID id,
-          String email,                                                                       
-          String displayName,            
+          String email,
+          String displayName,
+          String avatarUrl,
           Role role
-  ) {                        
-  }            
+  ) {
+  }
