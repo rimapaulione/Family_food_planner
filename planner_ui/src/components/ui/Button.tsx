@@ -15,7 +15,7 @@ interface ButtonProps {
     onClick?: () => void;
     type?: 'button' | 'submit';
     disabled?: boolean;
-    children: ReactNode;
+    children?: ReactNode;
     className?: string;
 }
 
