@@ -5,9 +5,10 @@ interface NavLinkProps {
     to: string;
     icon: LucideIcon;
     label: string;
+    avatarUrl?: string | null;
 }
 
-export function NavLink({to, icon: Icon, label}: NavLinkProps) {
+export function NavLink({to, icon: Icon, label, avatarUrl}: NavLinkProps) {
     const {pathname} = useLocation();
     const isActive = pathname.startsWith(to);
 
@@ -20,7 +21,11 @@ export function NavLink({to, icon: Icon, label}: NavLinkProps) {
                     : 'text-muted-foreground hover:text-foreground'
             }`}
         >
-            <Icon className="h-4 w-4"/>
+            {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="h-5 w-5 rounded-full object-cover"/>
+            ) : (
+                <Icon className="h-4 w-4"/>
+            )}
             {label}
         </Link>
     );

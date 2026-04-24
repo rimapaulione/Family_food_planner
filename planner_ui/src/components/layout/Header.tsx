@@ -1,5 +1,5 @@
 import {Link, useNavigate} from 'react-router-dom';
-import {ChefHat, UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket, LogOut} from 'lucide-react';
+import {ChefHat, UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket, LogOut, UserCircle} from 'lucide-react';
 import {NavLink} from '@/components/layout/NavLink';
 import {Button} from '@/components/ui/Button';
 import {useAuthStore} from '@/stores/useAuthStore';
@@ -7,6 +7,8 @@ import {useAuthStore} from '@/stores/useAuthStore';
 export function Header() {
     const navigate = useNavigate();
     const clearAuth = useAuthStore((s) => s.clearAuth);
+    const displayName = useAuthStore((s) => s.displayName);
+    const avatarUrl: string | null = null;
 
     const handleLogout = () => {
         clearAuth();
@@ -29,6 +31,7 @@ export function Header() {
                     <NavLink to="/planner" icon={CalendarDays} label="Planner"/>
                     <NavLink to="/shopping" icon={ShoppingCart} label="Shopping"/>
                     <NavLink to="/basics" icon={ShoppingBasket} label="Always Buy"/>
+                    <NavLink to="/profile" icon={UserCircle} label={displayName ?? ''} avatarUrl={avatarUrl}/>
                     <Button variant="outline" icon={LogOut} onClick={handleLogout}></Button>
                 </nav>
             </div>
