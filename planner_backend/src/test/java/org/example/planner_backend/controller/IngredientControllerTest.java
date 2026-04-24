@@ -8,10 +8,12 @@ import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
 import org.example.planner_backend.model.enums.Unit;
 import org.example.planner_backend.service.IngredientService;
+import org.example.planner_backend.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(IngredientController.class)
+@WithMockUser(username = "test@example.com", roles = "USER")
 class IngredientControllerTest {
 
     private static final UUID INGREDIENT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
@@ -40,6 +44,9 @@ class IngredientControllerTest {
 
     @MockitoBean
     private IngredientService ingredientService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     // ---------- GET /api/v1/ingredients ----------
 
@@ -148,6 +155,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/ingredients")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -163,6 +171,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/ingredients")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -174,6 +183,7 @@ class IngredientControllerTest {
         String body = String.format("{\"nameLt\": \"%s\", \"unit\": \"ML\"}", tooLong);
 
         mockMvc.perform(post("/api/v1/ingredients")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -186,6 +196,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/ingredients")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -201,6 +212,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/ingredients")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isConflict());
@@ -218,6 +230,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/ingredients/" + INGREDIENT_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -236,6 +249,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/ingredients/" + INGREDIENT_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isNotFound());
@@ -251,6 +265,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/ingredients/" + INGREDIENT_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isConflict());
@@ -263,6 +278,7 @@ class IngredientControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/ingredients/" + INGREDIENT_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -272,7 +288,7 @@ class IngredientControllerTest {
 
     @Test
     void test_shouldReturn204WhenDeleteSucceeds() throws Exception {
-        mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID))
+        mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID).with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -281,7 +297,7 @@ class IngredientControllerTest {
         doThrow(new ResourceNotFoundException("Ingredient not found"))
                 .when(ingredientService).delete(INGREDIENT_ID);
 
-        mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID))
+        mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -290,7 +306,7 @@ class IngredientControllerTest {
         doThrow(new ConflictException("Ingredient is used in recipes and cannot be deleted."))
                 .when(ingredientService).delete(INGREDIENT_ID);
 
-        mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID))
+        mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID).with(csrf()))
                 .andExpect(status().isConflict());
     }
 }

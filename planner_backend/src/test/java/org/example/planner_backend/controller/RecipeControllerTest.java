@@ -6,11 +6,13 @@ import org.example.planner_backend.dto.recipe.RecipeRequestDto;
 import org.example.planner_backend.dto.recipe.RecipeResponseDto;
 import org.example.planner_backend.dto.tag.TagResponseDto;
 import org.example.planner_backend.exception.ResourceNotFoundException;
+import org.example.planner_backend.service.JwtService;
 import org.example.planner_backend.service.RecipeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(RecipeController.class)
+@WithMockUser(username = "test@example.com", roles = "USER")
 class RecipeControllerTest {
     private static final UUID RECIPE_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final String RECIPE_NAME = "Blynai";
@@ -41,6 +45,9 @@ class RecipeControllerTest {
 
     @MockitoBean
     RecipeService recipeService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     // ---------- GET /api/v1/recipes ----------
 
@@ -121,6 +128,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/recipes")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -135,6 +143,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/recipes")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -147,6 +156,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/recipes")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -166,6 +176,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/recipes")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -181,6 +192,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/recipes")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isNotFound());
@@ -197,6 +209,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/recipes/" + RECIPE_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -214,6 +227,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/recipes/" + RECIPE_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isNotFound());
@@ -226,6 +240,7 @@ class RecipeControllerTest {
                 """;
 
         mockMvc.perform(put("/api/v1/recipes/" + RECIPE_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -235,7 +250,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn204WhenDeleteSucceeds() throws Exception {
-        mockMvc.perform(delete("/api/v1/recipes/" + RECIPE_ID))
+        mockMvc.perform(delete("/api/v1/recipes/" + RECIPE_ID).with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -244,7 +259,7 @@ class RecipeControllerTest {
         doThrow(new ResourceNotFoundException("Recipe not found"))
                 .when(recipeService).delete(RECIPE_ID);
 
-        mockMvc.perform(delete("/api/v1/recipes/" + RECIPE_ID))
+        mockMvc.perform(delete("/api/v1/recipes/" + RECIPE_ID).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
