@@ -7,9 +7,9 @@ interface PasswordViewProps {
 
 export function PasswordView({onChange}: PasswordViewProps) {
     return (
-        <section className="flex items-center justify-between">
+        <section className="flex items-center">
             <h2 className="text-lg font-semibold text-foreground">Password</h2>
-            <Button variant="outline" icon={KeyRound} onClick={onChange}>
+            <Button variant="outline" icon={KeyRound} onClick={onChange} className="ml-auto">
                 Change
             </Button>
         </section>

@@ -8,7 +8,7 @@ interface AvatarProps {
 const sizeClass = {
     sm: 'h-7 w-7',
     md: 'h-10 w-10',
-    lg: 'h-16 w-16',
+    lg: 'h-12 w-12 sm:h-16 sm:w-16',
 } as const;
 
 export function Avatar({src, size = 'md'}: AvatarProps) {
