@@ -40,23 +40,23 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "password_hash")
+    @Column(name = "password_hash", length = 60)
     private String passwordHash;
 
-    @Column(name = "display_name", nullable = false)
+    @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
 
-    @Column(name = "avatar_url")
+    @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
-    @Column(name = "auth_provider", nullable = false)
+    @Column(name = "auth_provider", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Role role;
 

@@ -46,7 +46,7 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -81,6 +81,7 @@ public class Recipe {
     @Builder.Default
     private Boolean isFavorite = false;
 
+    @Column(length = 1000)
     @Size(max = 1000)
     private String notes;
 

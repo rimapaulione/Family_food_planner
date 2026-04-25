@@ -34,11 +34,11 @@ public class Ingredient {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "name_lt", nullable = false, unique = true)
+    @Column(name = "name_lt", nullable = false, unique = true, length = 100)
     @Size(max = 100)
     private String nameLt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Unit unit;
 
