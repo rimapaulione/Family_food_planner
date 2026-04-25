@@ -18,59 +18,55 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.planner_backend.model.enums.AuthProvider;
+import org.example.planner_backend.model.enums.InvitationStatus;
 import org.example.planner_backend.model.enums.Role;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "app_user")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "family_invitation")
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
 @Builder
-public class AppUser {
-
+public class FamilyInvitation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(name = "password_hash")
-    private String passwordHash;
-
-    @Column(name = "display_name", nullable = false)
-    private String displayName;
-
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    @Column(name = "auth_provider", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AuthProvider authProvider;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "family_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_id", nullable = false)
     private Family family;
+
+    @Column(name = "invited_email", nullable = false, length = 255)
+    private String invitedEmail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invited_by", nullable = false)
+    private AppUser invitedBy;
+
+    @Column(nullable = false, unique = true, length = 64)
+    private String token;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private InvitationStatus status = InvitationStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private Role role = Role.USER;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
 
 }
