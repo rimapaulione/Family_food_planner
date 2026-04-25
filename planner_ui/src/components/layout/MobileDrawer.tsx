@@ -33,14 +33,14 @@ export function MobileDrawer({open, onClose, displayName, avatarUrl, onLogout}: 
     return (
         <>
             <div
-                className={`fixed inset-0 z-40 bg-black/40 transition-opacity md:hidden ${
+                className={`fixed inset-0 z-40 bg-black/40 transition-opacity lg:hidden ${
                     open ? 'opacity-100' : 'pointer-events-none opacity-0'
                 }`}
                 onClick={onClose}
                 aria-hidden="true"
             />
             <aside
-                className={`fixed inset-y-0 right-0 z-50 w-64 bg-card border-l border-border transition-transform md:hidden ${
+                className={`fixed inset-y-0 right-0 z-50 w-64 bg-card border-l border-border transition-transform lg:hidden ${
                     open ? 'translate-x-0' : 'translate-x-full'
                 }`}
                 role="dialog"

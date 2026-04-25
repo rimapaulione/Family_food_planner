@@ -1,7 +1,6 @@
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import type {RecipeListResponse} from '@/types/recipe';
-import {useDeleteRecipe} from '@/hooks/useRecipes';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {IconStat} from '@/components/ui/IconStat';
 import {RecipeCategoryBadge} from '@/components/recipes/RecipeCategoryBadge';
@@ -11,10 +10,10 @@ import {FavoriteStar} from '@/components/recipes/FavoriteStar';
 
 interface RecipeCardProps {
     recipe: RecipeListResponse;
+    onDelete: (id: string) => void;
 }
 
-export function RecipeCard({recipe}: RecipeCardProps) {
-    const deleteMutation = useDeleteRecipe();
+export function RecipeCard({recipe, onDelete}: RecipeCardProps) {
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     return (
@@ -52,7 +51,7 @@ export function RecipeCard({recipe}: RecipeCardProps) {
                 description={`"${recipe.name}" will be permanently deleted.`}
                 confirmText="Delete"
                 destructive
-                onConfirm={() => deleteMutation.mutate(recipe.id)}
+                onConfirm={() => onDelete(recipe.id)}
             />
         </div>
     );

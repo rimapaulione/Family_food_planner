@@ -1,19 +1,15 @@
 import {useEffect} from 'react';
-import {useForm, Controller} from 'react-hook-form';
+import {Controller, FormProvider, useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Save} from 'lucide-react';
 import {useCategories} from '@/hooks/useCategories';
-import {useTags} from '@/hooks/useTags';
 import {useIngredients, useCreateIngredient} from '@/hooks/useIngredients';
-import {useRecipes} from '@/hooks/useRecipes';
 import type {RecipeRequest, RecipeResponse} from '@/types/recipe';
 import {recipeSchema, type RecipeFormData} from '@/schemas/recipe';
 import {Button} from '@/components/ui/Button';
-import {FormField} from '@/components/ui/FormField';
-import {RecipeTagPicker} from '@/components/recipes/RecipeTagPicker';
+import {RecipeBasicFields} from '@/components/recipes/RecipeBasicFields';
+import {RecipeMetaFields} from '@/components/recipes/RecipeMetaFields';
 import {RecipeIngredientPicker} from '@/components/recipes/RecipeIngredientPicker';
-import {CATEGORY_LABELS} from '@/constants/categories';
-import {inputClass} from '@/utils/inputClass';
 
 interface RecipeFormProps {
     initialData?: RecipeResponse;
@@ -33,9 +29,7 @@ export function RecipeForm({
     excludeRecipeId,
 }: RecipeFormProps) {
     const {data: categories} = useCategories();
-    const {data: allTags} = useTags();
     const {data: ingredients} = useIngredients();
-    const {data: allRecipes} = useRecipes();
     const createIngredientMutation = useCreateIngredient();
 
     const form = useForm<RecipeFormData>({
@@ -53,7 +47,7 @@ export function RecipeForm({
         },
     });
 
-    const {register, control, formState: {errors}} = form;
+    const {control, formState: {errors}} = form;
 
     useEffect(() => {
         if (initialData) {
@@ -113,154 +107,42 @@ export function RecipeForm({
     };
 
     return (
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-            <FormField label="Recipe Name" error={errors.name?.message}>
-                <input
-                    type="text"
-                    {...register('name')}
-                    className={inputClass(!!errors.name)}
-                    placeholder="e.g. Chicken with Rice"
-                />
-            </FormField>
+        <FormProvider {...form}>
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+                <RecipeBasicFields/>
+                <RecipeMetaFields excludeRecipeId={excludeRecipeId}/>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <FormField label="Category" error={errors.categoryId?.message}>
-                    <Controller
-                        control={control}
-                        name="categoryId"
-                        render={({field}) => (
-                            <select
-                                value={field.value}
-                                onChange={(e) => field.onChange(Number(e.target.value))}
-                                className={inputClass(!!errors.categoryId)}
-                            >
-                                {categories?.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {CATEGORY_LABELS[c.name] || c.name}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    />
-                </FormField>
-
-                <FormField label="Servings" error={errors.defaultServing?.message}>
-                    <input
-                        type="number"
-                        min={1}
-                        max={50}
-                        {...register('defaultServing', {valueAsNumber: true})}
-                        className={inputClass(!!errors.defaultServing)}
-                    />
-                </FormField>
-
-                <FormField label="Cooking time (min)" error={errors.cookingTimeMinutes?.message}>
-                    <Controller
-                        control={control}
-                        name="cookingTimeMinutes"
-                        render={({field}) => (
-                            <input
-                                type="number"
-                                min={1}
-                                max={500}
-                                value={field.value ?? ''}
-                                onChange={(e) =>
-                                    field.onChange(e.target.value ? Number(e.target.value) : undefined)
-                                }
-                                placeholder="e.g. 30"
-                                className={inputClass(!!errors.cookingTimeMinutes)}
-                            />
-                        )}
-                    />
-                </FormField>
-            </div>
-
-            <div>
-                <label className="mb-1 block text-sm font-medium">Tags</label>
                 <Controller
                     control={control}
-                    name="tagIds"
+                    name="ingredients"
                     render={({field}) => (
-                        <RecipeTagPicker
-                            tags={allTags ?? []}
-                            selectedIds={new Set(field.value ?? [])}
-                            onChange={(ids) => field.onChange([...ids])}
+                        <RecipeIngredientPicker
+                            ingredients={ingredients ?? []}
+                            rows={field.value ?? []}
+                            onChange={field.onChange}
+                            onCreateIngredient={handleCreateIngredient}
                         />
                     )}
                 />
-            </div>
-
-            <FormField label="Uses leftovers from">
-                <Controller
-                    control={control}
-                    name="leftoverRecipeId"
-                    render={({field}) => (
-                        <select
-                            value={field.value ?? ''}
-                            onChange={(e) => field.onChange(e.target.value || null)}
-                            className={inputClass(false)}
-                        >
-                            <option value="">— none —</option>
-                            {allRecipes
-                                ?.filter((r) => r.id !== excludeRecipeId)
-                                .map((r) => (
-                                    <option key={r.id} value={r.id}>
-                                        {r.name}
-                                    </option>
-                                ))}
-                        </select>
-                    )}
-                />
-            </FormField>
-
-            <label className="flex items-center gap-2 text-sm">
-                <input
-                    type="checkbox"
-                    {...register('isFavorite')}
-                    className="rounded accent-primary"
-                />
-                Favorite recipe
-            </label>
-
-            <FormField label="Notes" error={errors.notes?.message}>
-                <textarea
-                    {...register('notes')}
-                    rows={2}
-                    className={inputClass(!!errors.notes)}
-                    placeholder="Optional notes..."
-                />
-            </FormField>
-
-            <Controller
-                control={control}
-                name="ingredients"
-                render={({field}) => (
-                    <RecipeIngredientPicker
-                        ingredients={ingredients ?? []}
-                        rows={field.value ?? []}
-                        onChange={field.onChange}
-                        onCreateIngredient={handleCreateIngredient}
-                    />
-                )}
-            />
-            <p className="min-h-4 text-xs text-destructive">
-                {errors.ingredients ? 'Some ingredients have errors — check quantities' : ''}
-            </p>
-
-            {errors.root && (
-                <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                    {errors.root.message}
+                <p className="min-h-4 text-xs text-destructive">
+                    {errors.ingredients ? 'Some ingredients have errors — check quantities' : ''}
                 </p>
-            )}
 
-            <div className="flex gap-3 pt-4">
-                <Button variant="primary" icon={Save} type="submit" disabled={isPending}>
-                    {isPending ? 'Saving...' : submitLabel}
-                </Button>
-                <Button variant="outline" onClick={onCancel}>
-                    Cancel
-                </Button>
-            </div>
-        </form>
+                {errors.root && (
+                    <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        {errors.root.message}
+                    </p>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                    <Button variant="primary" icon={Save} type="submit" disabled={isPending}>
+                        {isPending ? 'Saving...' : submitLabel}
+                    </Button>
+                    <Button variant="outline" onClick={onCancel}>
+                        Cancel
+                    </Button>
+                </div>
+            </form>
+        </FormProvider>
     );
 }

@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {useRecipes} from '@/hooks/useRecipes';
+import {useDeleteRecipe, useRecipes} from '@/hooks/useRecipes';
 import {normalize} from '@/utils/normalize';
 import {Spinner} from '@/components/ui/Spinner';
 import {ErrorMessage} from '@/components/ui/ErrorMessage';
@@ -10,6 +10,7 @@ import {RecipeCard} from '@/components/recipes/RecipeCard';
 export function RecipesTab() {
     const [search, setSearch] = useState('');
     const {data: recipes, isLoading, isError, error} = useRecipes();
+    const deleteMutation = useDeleteRecipe();
 
     const filtered = (recipes ?? []).filter(
         (r) => !search || normalize(r.name).includes(normalize(search)),
@@ -37,7 +38,11 @@ export function RecipesTab() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filtered.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe}/>
+                        <RecipeCard
+                            key={recipe.id}
+                            recipe={recipe}
+                            onDelete={(id) => deleteMutation.mutate(id)}
+                        />
                     ))}
                 </div>
             )}

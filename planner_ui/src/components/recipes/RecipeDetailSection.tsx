@@ -1,6 +1,8 @@
 import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {Clock, Pencil, Trash2, Users} from 'lucide-react';
 import type {RecipeResponse} from '@/types/recipe';
+import {useDeleteRecipe} from '@/hooks/useRecipes';
 import {IconStat} from '@/components/ui/IconStat';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {Button} from '@/components/ui/Button';
@@ -9,17 +11,22 @@ import {RecipeTagList} from '@/components/recipes/RecipeTagList';
 import {RecipeIngredientList} from '@/components/recipes/RecipeIngredientList';
 import {FavoriteStar} from '@/components/recipes/FavoriteStar';
 
-interface RecipeDetailContentProps {
+interface RecipeDetailSectionProps {
     recipe: RecipeResponse;
-    onDelete: () => void;
 }
 
-export function RecipeDetailContent({recipe, onDelete}: RecipeDetailContentProps) {
+export function RecipeDetailSection({recipe}: RecipeDetailSectionProps) {
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const navigate = useNavigate();
+    const deleteMutation = useDeleteRecipe();
+
+    const handleDelete = () => {
+        deleteMutation.mutate(recipe.id, {onSuccess: () => navigate('/recipes')});
+    };
 
     return (
         <>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex flex-col gap-2">
                     <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
                         {recipe.name}
@@ -60,7 +67,7 @@ export function RecipeDetailContent({recipe, onDelete}: RecipeDetailContentProps
                 description={`"${recipe.name}" will be permanently deleted.`}
                 confirmText="Delete"
                 destructive
-                onConfirm={onDelete}
+                onConfirm={handleDelete}
             />
         </>
     );

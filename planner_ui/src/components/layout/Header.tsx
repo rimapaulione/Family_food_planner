@@ -21,7 +21,7 @@ export function Header() {
 
     return (
         <header className="border-b border-border bg-card">
-            <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+            <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:px-6 lg:px-8">
                 <Link
                     to="/"
                     className="flex items-center gap-2 text-lg font-semibold text-foreground no-underline"
@@ -30,7 +30,7 @@ export function Header() {
                     Food Planner
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-4">
+                <nav className="hidden lg:flex items-center gap-4">
                     {navItems.map(({to, icon, label}) => (
                         <NavLink key={to} to={to} icon={icon} label={label}/>
                     ))}
@@ -42,7 +42,7 @@ export function Header() {
                     type="button"
                     onClick={() => setDrawerOpen(true)}
                     aria-label="Open menu"
-                    className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+                    className="lg:hidden p-2 text-muted-foreground hover:text-foreground"
                 >
                     <Menu className="h-6 w-6"/>
                 </button>
