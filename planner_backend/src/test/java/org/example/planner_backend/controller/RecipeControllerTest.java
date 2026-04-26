@@ -188,7 +188,7 @@ class RecipeControllerTest {
                 .thenThrow(new ResourceNotFoundException("Category not found"));
 
         String body = """
-                {"name": "Blynai", "categoryId": 999, "cookingTimeMinutes": 30}
+                {"name": "Blynai", "categoryId": 999, "cookingTimeMinutes": 30, "defaultServing": 4}
                 """;
 
         mockMvc.perform(post("/api/v1/recipes")
@@ -205,7 +205,7 @@ class RecipeControllerTest {
         when(recipeService.update(eq(RECIPE_ID), any(RecipeRequestDto.class))).thenReturn(sampleRecipeResponse());
 
         String body = """
-                {"name": "Blynai", "categoryId": 1, "cookingTimeMinutes": 30}
+                {"name": "Blynai", "categoryId": 1, "cookingTimeMinutes": 30, "defaultServing": 4}
                 """;
 
         mockMvc.perform(put("/api/v1/recipes/" + RECIPE_ID)
@@ -223,7 +223,7 @@ class RecipeControllerTest {
                 .thenThrow(new ResourceNotFoundException("Recipe not found"));
 
         String body = """
-                {"name": "Blynai", "categoryId": 1, "cookingTimeMinutes": 30}
+                {"name": "Blynai", "categoryId": 1, "cookingTimeMinutes": 30, "defaultServing": 4}
                 """;
 
         mockMvc.perform(put("/api/v1/recipes/" + RECIPE_ID)

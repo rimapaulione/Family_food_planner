@@ -1,11 +1,15 @@
 CREATE TABLE family
 (
-    id                 UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
-    name               VARCHAR(100) NOT NULL,
-    created_by         UUID         NOT NULL REFERENCES app_user (id),
-    is_setup_completed BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at         TIMESTAMP    NOT NULL DEFAULT now(),
-    updated_at         TIMESTAMP    NOT NULL DEFAULT now()
+    id                       UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
+    name                     VARCHAR(100) NOT NULL,
+    created_by               UUID         NOT NULL REFERENCES app_user (id),
+    is_setup_completed       BOOLEAN      NOT NULL DEFAULT FALSE,
+    shopping_day             VARCHAR(20)  NOT NULL DEFAULT 'SUNDAY' CHECK
+        (shopping_day IN ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY')),
+    default_weekday_servings JSONB        NOT NULL DEFAULT '{"breakfast":3,"lunch":null,"dinner":4}'::jsonb,
+    default_weekend_servings JSONB        NOT NULL DEFAULT '{"breakfast":4,"lunch":4,"dinner":4}'::jsonb,
+    created_at               TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_at               TIMESTAMP    NOT NULL DEFAULT now()
 );
 
 CREATE TABLE family_invitation

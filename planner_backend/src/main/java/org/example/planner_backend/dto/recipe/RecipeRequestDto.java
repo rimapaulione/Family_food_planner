@@ -20,12 +20,13 @@ public record RecipeRequestDto(
         @NotNull
         Long categoryId,
 
-        @Min(1) @Max(50)
+        @NotNull @Min(1) @Max(50)
         Short defaultServing,
 
         @NotNull @Min(1) @Max(500)
         Short cookingTimeMinutes,
 
+        @Size(max = 20)
         Set<Long> tagIds,
 
         UUID leftoverRecipeId,
@@ -35,7 +36,7 @@ public record RecipeRequestDto(
         @Size(max = 1000)
         String notes,
 
-        @Valid
+        @Valid @Size(max = 50)
         List<RecipeIngredientRequestDto> ingredients
 ) {
 
