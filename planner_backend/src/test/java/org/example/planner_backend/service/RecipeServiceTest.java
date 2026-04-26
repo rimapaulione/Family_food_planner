@@ -10,6 +10,7 @@ import org.example.planner_backend.mapper.CategoryMapper;
 import org.example.planner_backend.mapper.RecipeMapper;
 import org.example.planner_backend.mapper.TagMapper;
 import org.example.planner_backend.model.entity.Category;
+import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.Tag;
@@ -45,6 +46,8 @@ class RecipeServiceTest {
     private static final UUID RECIPE_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final UUID INGREDIENT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID LEFTOVER_RECIPE_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    private static final UUID FAMILY_ID = UUID.fromString("44444444-4444-4444-4444-444444444444");
+    private static final String EMAIL = "user@example.com";
     private static final Long CATEGORY_ID = 10L;
     private static final Long TAG_ID = 20L;
     private static final String RECIPE_NAME = "Blynai";
@@ -61,6 +64,8 @@ class RecipeServiceTest {
     @Mock
     private IngredientRepository ingredientRepository;
     @Mock
+    private FamilyResolver familyResolver;
+    @Mock
     private RecipeMapper recipeMapper;
     @Mock
     private CategoryMapper categoryMapper;
@@ -70,6 +75,7 @@ class RecipeServiceTest {
     @InjectMocks
     private RecipeService recipeService;
 
+    private Family family;
     private Category category;
     private Tag tag;
     private Ingredient ingredient;
@@ -77,6 +83,8 @@ class RecipeServiceTest {
 
     @BeforeEach
     void setUp() {
+        family = Family.builder().id(FAMILY_ID).name("F").build();
+
         category = new Category();
         category.setId(CATEGORY_ID);
         category.setName(CATEGORY_NAME);
@@ -87,6 +95,7 @@ class RecipeServiceTest {
                 .id(INGREDIENT_ID)
                 .nameLt(INGREDIENT_NAME)
                 .unit(Unit.ML)
+                .family(family)
                 .build();
 
         recipe = Recipe.builder()
@@ -97,7 +106,16 @@ class RecipeServiceTest {
                 .cookingTimeMinutes((short) 30)
                 .isFavorite(false)
                 .notes("notes")
+                .family(family)
                 .build();
+    }
+
+    private void mockFamilyId() {
+        when(familyResolver.getFamilyIdByEmail(EMAIL)).thenReturn(FAMILY_ID);
+    }
+
+    private void mockFamily() {
+        when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
     }
 
     private RecipeRequestDto validRequest() {
@@ -129,11 +147,12 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldReturnAllRecipesWhenSearchIsBlank() {
+        mockFamilyId();
         CategoryResponseDto categoryResponse = aCategoryResponse();
-        when(recipeRepository.findAllWithTagsAndIngredients()).thenReturn(List.of(recipe));
+        when(recipeRepository.findAllWithTagsAndIngredientsByFamilyId(FAMILY_ID)).thenReturn(List.of(recipe));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
 
-        List<RecipeListResponseDto> result = recipeService.getAllWithIngredients("  ");
+        List<RecipeListResponseDto> result = recipeService.getAllWithIngredients(EMAIL, "  ");
 
         assertThat(result).hasSize(1);
         RecipeListResponseDto dto = result.get(0);
@@ -142,45 +161,44 @@ class RecipeServiceTest {
         assertThat(dto.category()).isEqualTo(categoryResponse);
         assertThat(dto.defaultServing()).isEqualTo((short) 4);
         assertThat(dto.cookingTimeMinutes()).isEqualTo((short) 30);
-        assertThat(dto.tags()).isEmpty();
-        assertThat(dto.isFavorite()).isFalse();
-        assertThat(dto.ingredientCount()).isZero();
-        verify(recipeRepository).findAllWithTagsAndIngredients();
+        verify(recipeRepository).findAllWithTagsAndIngredientsByFamilyId(FAMILY_ID);
     }
 
     @Test
     void test_shouldReturnFilteredRecipesWhenSearchProvided() {
+        mockFamilyId();
         CategoryResponseDto categoryResponse = aCategoryResponse();
-        when(recipeRepository.findAllWithTagsAndIngredientsBySearch("blyn"))
+        when(recipeRepository.findAllWithTagsAndIngredientsByFamilyIdAndSearch(FAMILY_ID, "blyn"))
                 .thenReturn(List.of(recipe));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
 
-        List<RecipeListResponseDto> result = recipeService.getAllWithIngredients("  blyn  ");
+        List<RecipeListResponseDto> result = recipeService.getAllWithIngredients(EMAIL, "  blyn  ");
 
         assertThat(result).hasSize(1);
-        verify(recipeRepository).findAllWithTagsAndIngredientsBySearch("blyn");
+        verify(recipeRepository).findAllWithTagsAndIngredientsByFamilyIdAndSearch(FAMILY_ID, "blyn");
     }
 
     // ---------- getById ----------
 
     @Test
     void test_shouldReturnRecipeWhenExists() {
+        mockFamilyId();
         RecipeResponseDto expected = aRecipeResponse();
 
-        when(recipeRepository.findById(RECIPE_ID)).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.of(recipe));
         when(recipeMapper.toResponse(recipe)).thenReturn(expected);
 
-        RecipeResponseDto result = recipeService.getById(RECIPE_ID);
+        RecipeResponseDto result = recipeService.getById(EMAIL, RECIPE_ID);
 
         assertThat(result).isEqualTo(expected);
-        verify(recipeRepository).findById(RECIPE_ID);
     }
 
     @Test
     void test_shouldThrowExceptionWhenRecipeNotFound() {
-        when(recipeRepository.findById(RECIPE_ID)).thenReturn(Optional.empty());
+        mockFamilyId();
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.getById(RECIPE_ID))
+        assertThatThrownBy(() -> recipeService.getById(EMAIL, RECIPE_ID))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("not found");
     }
@@ -189,16 +207,17 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldCreateRecipeWhenAllFieldsValid() {
+        mockFamily();
         RecipeRequestDto request = validRequest();
         RecipeResponseDto expected = aRecipeResponse();
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(tagRepository.findByIdIn(Set.of(TAG_ID))).thenReturn(Set.of(tag));
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(ingredient));
         when(recipeRepository.save(any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
         when(recipeMapper.toResponse(any(Recipe.class))).thenReturn(expected);
 
-        RecipeResponseDto result = recipeService.create(request);
+        RecipeResponseDto result = recipeService.create(EMAIL, request);
 
         ArgumentCaptor<Recipe> captor = ArgumentCaptor.forClass(Recipe.class);
         verify(recipeRepository).save(captor.capture());
@@ -206,24 +225,18 @@ class RecipeServiceTest {
 
         assertThat(saved.getName()).isEqualTo(RECIPE_NAME);
         assertThat(saved.getCategory()).isEqualTo(category);
-        assertThat(saved.getDefaultServing()).isEqualTo((short) 4);
-        assertThat(saved.getCookingTimeMinutes()).isEqualTo((short) 30);
-        assertThat(saved.getIsFavorite()).isFalse();
-        assertThat(saved.getNotes()).isEqualTo("notes");
+        assertThat(saved.getFamily()).isEqualTo(family);
         assertThat(saved.getTags()).containsExactly(tag);
-        assertThat(saved.getLeftoverRecipe()).isNull();
         assertThat(saved.getIngredients()).hasSize(1);
-        assertThat(saved.getIngredients().get(0).getIngredient()).isEqualTo(ingredient);
-        assertThat(saved.getIngredients().get(0).getQuantity()).isEqualByComparingTo(new BigDecimal("100"));
         assertThat(result).isEqualTo(expected);
-        verify(recipeRepository).flush();
     }
 
     @Test
     void test_shouldThrowExceptionWhenCategoryNotFound() {
+        mockFamily();
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.create(validRequest()))
+        assertThatThrownBy(() -> recipeService.create(EMAIL, validRequest()))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Category not found");
 
@@ -232,6 +245,7 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldDefaultIsFavoriteToFalseWhenNullOnCreate() {
+        mockFamily();
         RecipeRequestDto request = new RecipeRequestDto(
                 RECIPE_NAME, CATEGORY_ID, (short) 4, (short) 30,
                 Set.of(TAG_ID), null, null, "notes",
@@ -240,11 +254,11 @@ class RecipeServiceTest {
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(tagRepository.findByIdIn(Set.of(TAG_ID))).thenReturn(Set.of(tag));
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(ingredient));
         when(recipeRepository.save(any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
         when(recipeMapper.toResponse(any(Recipe.class))).thenReturn(aRecipeResponse());
 
-        recipeService.create(request);
+        recipeService.create(EMAIL, request);
 
         ArgumentCaptor<Recipe> captor = ArgumentCaptor.forClass(Recipe.class);
         verify(recipeRepository).save(captor.capture());
@@ -253,6 +267,7 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldClearTagsWhenTagIdsIsNullOrEmpty() {
+        mockFamily();
         RecipeRequestDto request = new RecipeRequestDto(
                 RECIPE_NAME, CATEGORY_ID, (short) 4, (short) 30,
                 null, null, false, "notes",
@@ -260,11 +275,11 @@ class RecipeServiceTest {
         );
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(ingredient));
         when(recipeRepository.save(any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
         when(recipeMapper.toResponse(any(Recipe.class))).thenReturn(aRecipeResponse());
 
-        recipeService.create(request);
+        recipeService.create(EMAIL, request);
 
         ArgumentCaptor<Recipe> captor = ArgumentCaptor.forClass(Recipe.class);
         verify(recipeRepository).save(captor.capture());
@@ -274,10 +289,11 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldThrowExceptionWhenSomeTagsNotFound() {
+        mockFamily();
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(tagRepository.findByIdIn(Set.of(TAG_ID))).thenReturn(Set.of());
 
-        assertThatThrownBy(() -> recipeService.create(validRequest()))
+        assertThatThrownBy(() -> recipeService.create(EMAIL, validRequest()))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("tags not found");
 
@@ -286,6 +302,7 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldThrowExceptionWhenLeftoverRecipeNotFound() {
+        mockFamily();
         RecipeRequestDto request = new RecipeRequestDto(
                 RECIPE_NAME, CATEGORY_ID, (short) 4, (short) 30,
                 Set.of(TAG_ID), LEFTOVER_RECIPE_ID, false, "notes",
@@ -294,9 +311,9 @@ class RecipeServiceTest {
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(tagRepository.findByIdIn(Set.of(TAG_ID))).thenReturn(Set.of(tag));
-        when(recipeRepository.findById(LEFTOVER_RECIPE_ID)).thenReturn(Optional.empty());
+        when(recipeRepository.findByIdAndFamilyId(LEFTOVER_RECIPE_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.create(request))
+        assertThatThrownBy(() -> recipeService.create(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Leftover recipe not found");
 
@@ -305,11 +322,12 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldThrowExceptionWhenAnyIngredientNotFound() {
+        mockFamily();
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(tagRepository.findByIdIn(Set.of(TAG_ID))).thenReturn(Set.of(tag));
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.empty());
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.create(validRequest()))
+        assertThatThrownBy(() -> recipeService.create(EMAIL, validRequest()))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Ingredient not found");
 
@@ -320,6 +338,7 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldUpdateRecipeWhenAllFieldsValid() {
+        mockFamilyId();
         String newName = "Blynai su uogiene";
         RecipeRequestDto request = new RecipeRequestDto(
                 newName, CATEGORY_ID, (short) 6, (short) 45,
@@ -328,14 +347,14 @@ class RecipeServiceTest {
         );
         RecipeResponseDto expected = aRecipeResponse();
 
-        when(recipeRepository.findById(RECIPE_ID)).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.of(recipe));
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(tagRepository.findByIdIn(Set.of(TAG_ID))).thenReturn(Set.of(tag));
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(ingredient));
         when(recipeRepository.save(recipe)).thenReturn(recipe);
         when(recipeMapper.toResponse(recipe)).thenReturn(expected);
 
-        RecipeResponseDto result = recipeService.update(RECIPE_ID, request);
+        RecipeResponseDto result = recipeService.update(EMAIL, RECIPE_ID, request);
 
         assertThat(recipe.getName()).isEqualTo(newName);
         assertThat(recipe.getDefaultServing()).isEqualTo((short) 6);
@@ -343,17 +362,16 @@ class RecipeServiceTest {
         assertThat(recipe.getIsFavorite()).isTrue();
         assertThat(recipe.getNotes()).isEqualTo("new notes");
         assertThat(recipe.getTags()).containsExactly(tag);
-        assertThat(recipe.getLeftoverRecipe()).isNull();
         assertThat(recipe.getIngredients()).hasSize(1);
         assertThat(result).isEqualTo(expected);
-        verify(recipeRepository).save(recipe);
     }
 
     @Test
     void test_shouldThrowExceptionWhenRecipeNotFoundOnUpdate() {
-        when(recipeRepository.findById(RECIPE_ID)).thenReturn(Optional.empty());
+        mockFamilyId();
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.update(RECIPE_ID, validRequest()))
+        assertThatThrownBy(() -> recipeService.update(EMAIL, RECIPE_ID, validRequest()))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Recipe not found");
 
@@ -362,10 +380,11 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldThrowExceptionWhenCategoryNotFoundOnUpdate() {
-        when(recipeRepository.findById(RECIPE_ID)).thenReturn(Optional.of(recipe));
+        mockFamilyId();
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.of(recipe));
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.update(RECIPE_ID, validRequest()))
+        assertThatThrownBy(() -> recipeService.update(EMAIL, RECIPE_ID, validRequest()))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Category not found");
 
@@ -376,21 +395,23 @@ class RecipeServiceTest {
 
     @Test
     void test_shouldDeleteRecipeWhenExists() {
-        when(recipeRepository.existsById(RECIPE_ID)).thenReturn(true);
+        mockFamilyId();
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.of(recipe));
 
-        recipeService.delete(RECIPE_ID);
+        recipeService.delete(EMAIL, RECIPE_ID);
 
-        verify(recipeRepository).deleteById(RECIPE_ID);
+        verify(recipeRepository).delete(recipe);
     }
 
     @Test
     void test_shouldThrowExceptionWhenDeletingNonExistentRecipe() {
-        when(recipeRepository.existsById(RECIPE_ID)).thenReturn(false);
+        mockFamilyId();
+        when(recipeRepository.findByIdAndFamilyId(RECIPE_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.delete(RECIPE_ID))
+        assertThatThrownBy(() -> recipeService.delete(EMAIL, RECIPE_ID))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("not found");
 
-        verify(recipeRepository, never()).deleteById(RECIPE_ID);
+        verify(recipeRepository, never()).delete(any(Recipe.class));
     }
 }

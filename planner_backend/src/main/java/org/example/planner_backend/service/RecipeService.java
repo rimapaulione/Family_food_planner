@@ -10,6 +10,7 @@ import org.example.planner_backend.mapper.CategoryMapper;
 import org.example.planner_backend.mapper.RecipeMapper;
 import org.example.planner_backend.mapper.TagMapper;
 import org.example.planner_backend.model.entity.Category;
+import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.RecipeIngredient;
@@ -35,15 +36,17 @@ public class RecipeService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final IngredientRepository ingredientRepository;
+    private final FamilyResolver familyResolver;
     private final RecipeMapper recipeMapper;
     private final CategoryMapper categoryMapper;
     private final TagMapper tagMapper;
 
     @Transactional(readOnly = true)
-    public List<RecipeListResponseDto> getAllWithIngredients(final String search) {
+    public List<RecipeListResponseDto> getAllWithIngredients(final String email, final String search) {
+        UUID familyId = familyResolver.getFamilyIdByEmail(email);
         List<Recipe> recipes = (search != null && !search.isBlank())
-                ? recipeRepository.findAllWithTagsAndIngredientsBySearch(search.trim())
-                : recipeRepository.findAllWithTagsAndIngredients();
+                ? recipeRepository.findAllWithTagsAndIngredientsByFamilyIdAndSearch(familyId, search.trim())
+                : recipeRepository.findAllWithTagsAndIngredientsByFamilyId(familyId);
 
         return recipes.stream().map(r -> new RecipeListResponseDto(
                 r.getId(),
@@ -58,15 +61,17 @@ public class RecipeService {
     }
 
     @Transactional(readOnly = true)
-    public RecipeResponseDto getById(final UUID id) {
-        Recipe recipe = recipeRepository.findById(id)
+    public RecipeResponseDto getById(final String email, final UUID id) {
+        UUID familyId = familyResolver.getFamilyIdByEmail(email);
+        Recipe recipe = recipeRepository.findByIdAndFamilyId(id, familyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe not found"));
 
         return recipeMapper.toResponse(recipe);
     }
 
     @Transactional
-    public RecipeResponseDto create(final RecipeRequestDto request) {
+    public RecipeResponseDto create(final String email, final RecipeRequestDto request) {
+        Family family = familyResolver.getFamilyByEmail(email);
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
@@ -77,18 +82,20 @@ public class RecipeService {
                 .cookingTimeMinutes(request.cookingTimeMinutes())
                 .isFavorite(request.isFavorite() != null ? request.isFavorite() : false)
                 .notes(request.notes())
+                .family(family)
                 .build();
 
         setTags(recipe, request.tagIds());
-        setLeftoverRecipe(recipe, request.leftoverRecipeId());
-        setIngredients(recipe, request.ingredients());
+        setLeftoverRecipe(recipe, family.getId(), request.leftoverRecipeId());
+        setIngredients(recipe, family.getId(), request.ingredients());
 
         return recipeMapper.toResponse(recipeRepository.save(recipe));
     }
 
     @Transactional
-    public RecipeResponseDto update(final UUID id, final RecipeRequestDto request) {
-        Recipe recipe = recipeRepository.findById(id)
+    public RecipeResponseDto update(final String email, final UUID id, final RecipeRequestDto request) {
+        UUID familyId = familyResolver.getFamilyIdByEmail(email);
+        Recipe recipe = recipeRepository.findByIdAndFamilyId(id, familyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe not found"));
 
         Category category = categoryRepository.findById(request.categoryId())
@@ -102,18 +109,18 @@ public class RecipeService {
         recipe.setNotes(request.notes());
 
         setTags(recipe, request.tagIds());
-        setLeftoverRecipe(recipe, request.leftoverRecipeId());
-        setIngredients(recipe, request.ingredients());
+        setLeftoverRecipe(recipe, familyId, request.leftoverRecipeId());
+        setIngredients(recipe, familyId, request.ingredients());
 
         return recipeMapper.toResponse(recipeRepository.save(recipe));
     }
 
     @Transactional
-    public void delete(final UUID id) {
-        if (!recipeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Recipe not found");
-        }
-        recipeRepository.deleteById(id);
+    public void delete(final String email, final UUID id) {
+        UUID familyId = familyResolver.getFamilyIdByEmail(email);
+        Recipe recipe = recipeRepository.findByIdAndFamilyId(id, familyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe not found"));
+        recipeRepository.delete(recipe);
     }
 
     private void setTags(final Recipe recipe, final Set<Long> tagIds) {
@@ -128,9 +135,9 @@ public class RecipeService {
         }
     }
 
-    private void setLeftoverRecipe(final Recipe recipe, final UUID leftoverRecipeId) {
+    private void setLeftoverRecipe(final Recipe recipe, final UUID familyId, final UUID leftoverRecipeId) {
         if (leftoverRecipeId != null) {
-            Recipe leftover = recipeRepository.findById(leftoverRecipeId)
+            Recipe leftover = recipeRepository.findByIdAndFamilyId(leftoverRecipeId, familyId)
                     .orElseThrow(() -> new ResourceNotFoundException("Leftover recipe not found"));
             recipe.setLeftoverRecipe(leftover);
         } else {
@@ -138,13 +145,14 @@ public class RecipeService {
         }
     }
 
-    private void setIngredients(final Recipe recipe, final List<RecipeRequestDto.RecipeIngredientRequestDto> ingredients) {
+    private void setIngredients(final Recipe recipe, final UUID familyId,
+                                final List<RecipeRequestDto.RecipeIngredientRequestDto> ingredients) {
         recipe.getIngredients().clear();
         recipeRepository.flush();
         if (ingredients != null && !ingredients.isEmpty()) {
             List<RecipeIngredient> recipeIngredients = ingredients.stream()
                     .map(ri -> {
-                        Ingredient ingredient = ingredientRepository.findById(ri.ingredientId())
+                        Ingredient ingredient = ingredientRepository.findByIdAndFamilyId(ri.ingredientId(), familyId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Ingredient not found: " + ri.ingredientId()));
                         return RecipeIngredient.builder()
                                 .recipe(recipe)

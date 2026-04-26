@@ -10,6 +10,7 @@ import org.example.planner_backend.dto.recipe.RecipeResponseDto;
 import org.example.planner_backend.service.RecipeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,35 +35,42 @@ public class RecipeController {
 
     @GetMapping
     public ResponseEntity<List<RecipeListResponseDto>> getAll(
+            @AuthenticationPrincipal String email,
             @Size(max = 50)
             @RequestParam(required = false) String search
     ) {
-        return ResponseEntity.ok(recipeService.getAllWithIngredients(search));
+        return ResponseEntity.ok(recipeService.getAllWithIngredients(email, search));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponseDto> getById(
+            @AuthenticationPrincipal String email,
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok(recipeService.getById(id));
+        return ResponseEntity.ok(recipeService.getById(email, id));
     }
 
     @PostMapping
     public ResponseEntity<RecipeResponseDto> create(
+            @AuthenticationPrincipal String email,
             @Valid @RequestBody RecipeRequestDto newRecipe
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(newRecipe));
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(email, newRecipe));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RecipeResponseDto> update(@PathVariable UUID id,
-                                                    @Valid @RequestBody RecipeRequestDto request) {
-        return ResponseEntity.ok(recipeService.update(id, request));
+    public ResponseEntity<RecipeResponseDto> update(
+            @AuthenticationPrincipal String email,
+            @PathVariable UUID id,
+            @Valid @RequestBody RecipeRequestDto request) {
+        return ResponseEntity.ok(recipeService.update(email, id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        recipeService.delete(id);
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal String email,
+            @PathVariable UUID id) {
+        recipeService.delete(email, id);
         return ResponseEntity.noContent().build();
     }
 }

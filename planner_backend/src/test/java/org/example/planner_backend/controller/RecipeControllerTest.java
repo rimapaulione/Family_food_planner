@@ -53,7 +53,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn200WithRecipeListWhenNoSearch() throws Exception {
-        when(recipeService.getAllWithIngredients(null)).thenReturn(List.of(sampleRecipeListResponse()));
+        when(recipeService.getAllWithIngredients(any(), eq(null))).thenReturn(List.of(sampleRecipeListResponse()));
 
         mockMvc.perform(get("/api/v1/recipes"))
                 .andExpect(status().isOk())
@@ -66,7 +66,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn200WithRecipeListWhenSearchProvided() throws Exception {
-        when(recipeService.getAllWithIngredients("bly")).thenReturn(List.of(sampleRecipeListResponse()));
+        when(recipeService.getAllWithIngredients(any(), eq("bly"))).thenReturn(List.of(sampleRecipeListResponse()));
 
         mockMvc.perform(get("/api/v1/recipes").param("search", "bly"))
                 .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn200WithRecipeWhenGetById() throws Exception {
-        when(recipeService.getById(RECIPE_ID)).thenReturn(sampleRecipeResponse());
+        when(recipeService.getById(any(), eq(RECIPE_ID))).thenReturn(sampleRecipeResponse());
 
         mockMvc.perform(get("/api/v1/recipes/" + RECIPE_ID))
                 .andExpect(status().isOk())
@@ -102,7 +102,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn404WhenGetByIdNotFound() throws Exception {
-        when(recipeService.getById(RECIPE_ID))
+        when(recipeService.getById(any(), eq(RECIPE_ID)))
                 .thenThrow(new ResourceNotFoundException("Recipe not found"));
 
         mockMvc.perform(get("/api/v1/recipes/" + RECIPE_ID))
@@ -113,7 +113,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn201WhenCreateSucceeds() throws Exception {
-        when(recipeService.create(any(RecipeRequestDto.class))).thenReturn(sampleRecipeResponse());
+        when(recipeService.create(any(), any(RecipeRequestDto.class))).thenReturn(sampleRecipeResponse());
 
         String body = """
                 {
@@ -184,7 +184,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn404WhenCreateCategoryNotFound() throws Exception {
-        when(recipeService.create(any(RecipeRequestDto.class)))
+        when(recipeService.create(any(), any(RecipeRequestDto.class)))
                 .thenThrow(new ResourceNotFoundException("Category not found"));
 
         String body = """
@@ -202,7 +202,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn200WhenUpdateSucceeds() throws Exception {
-        when(recipeService.update(eq(RECIPE_ID), any(RecipeRequestDto.class))).thenReturn(sampleRecipeResponse());
+        when(recipeService.update(any(), eq(RECIPE_ID), any(RecipeRequestDto.class))).thenReturn(sampleRecipeResponse());
 
         String body = """
                 {"name": "Blynai", "categoryId": 1, "cookingTimeMinutes": 30, "defaultServing": 4}
@@ -219,7 +219,7 @@ class RecipeControllerTest {
 
     @Test
     void test_shouldReturn404WhenUpdateNotFound() throws Exception {
-        when(recipeService.update(eq(RECIPE_ID), any(RecipeRequestDto.class)))
+        when(recipeService.update(any(), eq(RECIPE_ID), any(RecipeRequestDto.class)))
                 .thenThrow(new ResourceNotFoundException("Recipe not found"));
 
         String body = """
@@ -257,7 +257,7 @@ class RecipeControllerTest {
     @Test
     void test_shouldReturn404WhenDeleteNotFound() throws Exception {
         doThrow(new ResourceNotFoundException("Recipe not found"))
-                .when(recipeService).delete(RECIPE_ID);
+                .when(recipeService).delete(any(), eq(RECIPE_ID));
 
         mockMvc.perform(delete("/api/v1/recipes/" + RECIPE_ID).with(csrf()))
                 .andExpect(status().isNotFound());
