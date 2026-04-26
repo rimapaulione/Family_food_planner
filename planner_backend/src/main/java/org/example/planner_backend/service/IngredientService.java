@@ -8,7 +8,10 @@ import org.example.planner_backend.dto.ingredient.IngredientResponseDto;
 import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
 import org.example.planner_backend.mapper.IngredientMapper;
+import org.example.planner_backend.model.entity.AppUser;
+import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
+import org.example.planner_backend.repository.AppUserRepository;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.util.TextUtil;
 import org.springframework.stereotype.Service;
@@ -22,36 +25,39 @@ import java.util.UUID;
 public class IngredientService {
 
     private final IngredientRepository ingredientRepository;
+    private final AppUserRepository appUserRepository;
     private final IngredientMapper ingredientMapper;
 
     @Transactional(readOnly = true)
-    public List<IngredientResponseDto> getAll(final String search) {
-        return findIngredients(search).stream()
+    public List<IngredientResponseDto> getAll(final String email, final String search) {
+        UUID familyId = getFamilyIdByEmail(email);
+        return findIngredients(familyId, search).stream()
                 .map(ingredientMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<IngredientDetailResponseDto> getAllWithRecipesCount(final String search) {
+    public List<IngredientDetailResponseDto> getAllWithRecipesCount(final String email, final String search) {
+        UUID familyId = getFamilyIdByEmail(email);
         String trimmedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
-        return ingredientRepository.findAllWithRecipeCount(trimmedSearch);
+        return ingredientRepository.findAllWithRecipeCount(familyId, trimmedSearch);
     }
 
     @Transactional(readOnly = true)
-    public IngredientCheckNameResponseDto checkName(final String name) {
+    public IngredientCheckNameResponseDto checkName(final String email, final String name) {
+        UUID familyId = getFamilyIdByEmail(email);
         String trimmed = name.trim();
         if (trimmed.length() < 2) {
             return new IngredientCheckNameResponseDto(false, null, List.of());
         }
-        String prefix = trimmed.length() >= 4 ?
-                trimmed.substring(0, 4) : trimmed;
+        String prefix = trimmed.length() >= 4 ? trimmed.substring(0, 4) : trimmed;
 
-        List<Ingredient> matches = ingredientRepository.findByNameLtIgnoreCaseStartingWith(prefix);
+        List<Ingredient> matches = ingredientRepository
+                .findByFamilyIdAndNameLtIgnoreCaseStartingWith(familyId, prefix);
 
         String existingName = matches.stream()
                 .map(Ingredient::getNameLt)
-                .filter(nameLt ->
-                        nameLt.equalsIgnoreCase(trimmed))
+                .filter(nameLt -> nameLt.equalsIgnoreCase(trimmed))
                 .findFirst()
                 .orElse(null);
         boolean exactMatch = existingName != null;
@@ -67,27 +73,30 @@ public class IngredientService {
     }
 
     @Transactional
-    public IngredientResponseDto create(final IngredientRequestDto newIngredient) {
+    public IngredientResponseDto create(final String email, final IngredientRequestDto newIngredient) {
+        Family family = getFamilyByEmail(email);
         String nameLt = TextUtil.capitalize(newIngredient.nameLt());
-        if (ingredientRepository.existsByNameLtIgnoreCase(nameLt)) {
+        if (ingredientRepository.existsByFamilyIdAndNameLtIgnoreCase(family.getId(), nameLt)) {
             throw new ConflictException("Ingredient '" + nameLt + "' already exists");
         }
         Ingredient ingredient = ingredientRepository.save(
                 Ingredient.builder()
                         .nameLt(nameLt)
                         .unit(newIngredient.unit())
+                        .family(family)
                         .build()
         );
         return ingredientMapper.toResponse(ingredient);
     }
 
     @Transactional
-    public IngredientResponseDto update(final UUID id, final IngredientRequestDto updateIngredient) {
-        Ingredient ingredient = ingredientRepository.findById(id)
+    public IngredientResponseDto update(final String email, final UUID id, final IngredientRequestDto updateIngredient) {
+        UUID familyId = getFamilyIdByEmail(email);
+        Ingredient ingredient = ingredientRepository.findByIdAndFamilyId(id, familyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ingredient not found"));
         String nameLt = TextUtil.capitalize(updateIngredient.nameLt());
         if (!ingredient.getNameLt().equalsIgnoreCase(nameLt)
-                && ingredientRepository.existsByNameLtIgnoreCase(nameLt)) {
+                && ingredientRepository.existsByFamilyIdAndNameLtIgnoreCase(familyId, nameLt)) {
             throw new ConflictException("Ingredient '" + nameLt + "' already exists");
         }
 
@@ -97,20 +106,33 @@ public class IngredientService {
     }
 
     @Transactional
-    public void delete(final UUID id) {
-        if (!ingredientRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Ingredient not found");
-        }
-        if (ingredientRepository.countRecipesByIngredientId(id) > 0) {
+    public void delete(final String email, final UUID id) {
+        UUID familyId = getFamilyIdByEmail(email);
+        Ingredient ingredient = ingredientRepository.findByIdAndFamilyId(id, familyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ingredient not found"));
+        if (ingredientRepository.countRecipesByIngredientId(ingredient.getId()) > 0) {
             throw new ConflictException("Ingredient is used in recipes and cannot be deleted.");
         }
-        ingredientRepository.deleteById(id);
+        ingredientRepository.delete(ingredient);
     }
 
-    private List<Ingredient> findIngredients(final String search) {
+    private List<Ingredient> findIngredients(final UUID familyId, final String search) {
         if (search != null && !search.isBlank()) {
-            return ingredientRepository.findByNameLtContainingIgnoreCase(search.trim());
+            return ingredientRepository.findByFamilyIdAndNameLtContainingIgnoreCase(familyId, search.trim());
         }
-        return ingredientRepository.findAll();
+        return ingredientRepository.findByFamilyId(familyId);
+    }
+
+    private Family getFamilyByEmail(final String email) {
+        AppUser user = appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        if (user.getFamily() == null) {
+            throw new ResourceNotFoundException("User has no family");
+        }
+        return user.getFamily();
+    }
+
+    private UUID getFamilyIdByEmail(final String email) {
+        return getFamilyByEmail(email).getId();
     }
 }

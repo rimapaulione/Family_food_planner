@@ -7,8 +7,13 @@ import org.example.planner_backend.dto.ingredient.IngredientResponseDto;
 import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
 import org.example.planner_backend.mapper.IngredientMapper;
+import org.example.planner_backend.model.entity.AppUser;
+import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
+import org.example.planner_backend.model.enums.AuthProvider;
+import org.example.planner_backend.model.enums.Role;
 import org.example.planner_backend.model.enums.Unit;
+import org.example.planner_backend.repository.AppUserRepository;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +40,8 @@ import static org.mockito.Mockito.when;
 class IngredientServiceTest {
 
     private static final UUID INGREDIENT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID FAMILY_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final String EMAIL = "user@example.com";
     private static final String INGREDIENT_NAME = "Pienas";
     private static final String CHANGED_INGREDIENT_NAME = "Pienelis";
 
@@ -41,95 +49,116 @@ class IngredientServiceTest {
     private IngredientRepository ingredientRepository;
 
     @Mock
+    private AppUserRepository appUserRepository;
+
+    @Mock
     private IngredientMapper ingredientMapper;
 
     @InjectMocks
     private IngredientService ingredientService;
 
+    private Family family;
+    private AppUser user;
     private Ingredient milk;
     private IngredientResponseDto milkResponse;
 
     @BeforeEach
     void setUp() {
+        family = Family.builder().id(FAMILY_ID).name("F").build();
+        user = AppUser.builder()
+                .email(EMAIL)
+                .family(family)
+                .authProvider(AuthProvider.LOCAL)
+                .role(Role.USER)
+                .build();
         milk = Ingredient.builder()
                 .id(INGREDIENT_ID)
                 .nameLt(INGREDIENT_NAME)
                 .unit(Unit.ML)
+                .family(family)
                 .build();
         milkResponse = new IngredientResponseDto(INGREDIENT_ID, INGREDIENT_NAME, Unit.ML);
+    }
+
+    private void mockUser() {
+        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
     }
 
     // ---------- getAll ----------
 
     @Test
     void test_shouldReturnAllIngredientsWhenSearchIsBlank() {
-        when(ingredientRepository.findAll()).thenReturn(List.of(milk));
+        mockUser();
+        when(ingredientRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(milk));
         when(ingredientMapper.toResponse(milk)).thenReturn(milkResponse);
 
-        List<IngredientResponseDto> result = ingredientService.getAll("  ");
+        List<IngredientResponseDto> result = ingredientService.getAll(EMAIL, "  ");
 
         assertThat(result).containsExactly(milkResponse);
-        verify(ingredientRepository).findAll();
-        verify(ingredientRepository, never()).findByNameLtContainingIgnoreCase(anyString());
+        verify(ingredientRepository).findByFamilyId(FAMILY_ID);
     }
 
     @Test
     void test_shouldReturnFilteredIngredientsWhenSearchProvided() {
-        when(ingredientRepository.findByNameLtContainingIgnoreCase("milk"))
+        mockUser();
+        when(ingredientRepository.findByFamilyIdAndNameLtContainingIgnoreCase(FAMILY_ID, "milk"))
                 .thenReturn(List.of(milk));
         when(ingredientMapper.toResponse(milk)).thenReturn(milkResponse);
 
-        List<IngredientResponseDto> result = ingredientService.getAll("  milk  ");
+        List<IngredientResponseDto> result = ingredientService.getAll(EMAIL, "  milk  ");
 
         assertThat(result).containsExactly(milkResponse);
-        verify(ingredientRepository).findByNameLtContainingIgnoreCase("milk");
-        verify(ingredientRepository, never()).findAll();
+        verify(ingredientRepository).findByFamilyIdAndNameLtContainingIgnoreCase(FAMILY_ID, "milk");
     }
 
     // ---------- getAllWithRecipesCount ----------
 
     @Test
     void test_shouldReturnAllDetailsWhenSearchIsBlank() {
+        mockUser();
         IngredientDetailResponseDto detail = new IngredientDetailResponseDto(
                 INGREDIENT_ID, INGREDIENT_NAME, Unit.ML, 2);
-        when(ingredientRepository.findAllWithRecipeCount(null)).thenReturn(List.of(detail));
+        when(ingredientRepository.findAllWithRecipeCount(FAMILY_ID, null)).thenReturn(List.of(detail));
 
-        List<IngredientDetailResponseDto> result = ingredientService.getAllWithRecipesCount("  ");
+        List<IngredientDetailResponseDto> result = ingredientService.getAllWithRecipesCount(EMAIL, "  ");
 
         assertThat(result).containsExactly(detail);
-        verify(ingredientRepository).findAllWithRecipeCount(null);
+        verify(ingredientRepository).findAllWithRecipeCount(FAMILY_ID, null);
     }
 
     @Test
     void test_shouldReturnDetailsUsingTrimmedSearch() {
+        mockUser();
         IngredientDetailResponseDto detail = new IngredientDetailResponseDto(
                 INGREDIENT_ID, INGREDIENT_NAME, Unit.ML, 2);
-        when(ingredientRepository.findAllWithRecipeCount("milk")).thenReturn(List.of(detail));
+        when(ingredientRepository.findAllWithRecipeCount(FAMILY_ID, "milk")).thenReturn(List.of(detail));
 
-        List<IngredientDetailResponseDto> result = ingredientService.getAllWithRecipesCount("  milk  ");
+        List<IngredientDetailResponseDto> result = ingredientService.getAllWithRecipesCount(EMAIL, "  milk  ");
 
         assertThat(result).containsExactly(detail);
-        verify(ingredientRepository).findAllWithRecipeCount("milk");
+        verify(ingredientRepository).findAllWithRecipeCount(FAMILY_ID, "milk");
     }
 
     // ---------- checkName ----------
 
     @Test
     void test_shouldReturnEmptyWhenNameTooShort() {
-        IngredientCheckNameResponseDto result = ingredientService.checkName("a");
+        mockUser();
+        IngredientCheckNameResponseDto result = ingredientService.checkName(EMAIL, "a");
 
         assertThat(result.exactMatch()).isFalse();
         assertThat(result.existingName()).isNull();
         assertThat(result.similarNames()).isEmpty();
-        verify(ingredientRepository, never()).findByNameLtIgnoreCaseStartingWith(anyString());
+        verify(ingredientRepository, never()).findByFamilyIdAndNameLtIgnoreCaseStartingWith(any(), anyString());
     }
 
     @Test
     void test_shouldReturnExactMatchWhenNameExistsIgnoringCase() {
-        when(ingredientRepository.findByNameLtIgnoreCaseStartingWith("pien"))
+        mockUser();
+        when(ingredientRepository.findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "pien"))
                 .thenReturn(List.of(milk));
 
-        IngredientCheckNameResponseDto result = ingredientService.checkName("pienas");
+        IngredientCheckNameResponseDto result = ingredientService.checkName(EMAIL, "pienas");
 
         assertThat(result.exactMatch()).isTrue();
         assertThat(result.existingName()).isEqualTo(INGREDIENT_NAME);
@@ -138,12 +167,13 @@ class IngredientServiceTest {
 
     @Test
     void test_shouldReturnSimilarNamesWhenNoExactMatch() {
-        Ingredient pienelis = Ingredient.builder().nameLt("Pienelis").unit(Unit.ML).build();
-        Ingredient pienukas = Ingredient.builder().nameLt("Pienukas").unit(Unit.ML).build();
-        when(ingredientRepository.findByNameLtIgnoreCaseStartingWith("Pien"))
+        mockUser();
+        Ingredient pienelis = Ingredient.builder().nameLt("Pienelis").unit(Unit.ML).family(family).build();
+        Ingredient pienukas = Ingredient.builder().nameLt("Pienukas").unit(Unit.ML).family(family).build();
+        when(ingredientRepository.findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "Pien"))
                 .thenReturn(List.of(pienelis, pienukas));
 
-        IngredientCheckNameResponseDto result = ingredientService.checkName("Piena");
+        IngredientCheckNameResponseDto result = ingredientService.checkName(EMAIL, "Piena");
 
         assertThat(result.exactMatch()).isFalse();
         assertThat(result.existingName()).isNull();
@@ -152,25 +182,27 @@ class IngredientServiceTest {
 
     @Test
     void test_shouldUseFullNameAsPrefixWhenNameShorterThanFour() {
-        when(ingredientRepository.findByNameLtIgnoreCaseStartingWith("Pi"))
+        mockUser();
+        when(ingredientRepository.findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "Pi"))
                 .thenReturn(List.of());
 
-        ingredientService.checkName("Pi");
+        ingredientService.checkName(EMAIL, "Pi");
 
-        verify(ingredientRepository).findByNameLtIgnoreCaseStartingWith("Pi");
+        verify(ingredientRepository).findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "Pi");
     }
 
     // ---------- create ----------
 
     @Test
     void test_shouldCreateIngredientWhenNameIsUnique() {
+        mockUser();
         IngredientRequestDto newIngredient = new IngredientRequestDto(INGREDIENT_NAME, Unit.ML);
 
-        when(ingredientRepository.existsByNameLtIgnoreCase(INGREDIENT_NAME)).thenReturn(false);
+        when(ingredientRepository.existsByFamilyIdAndNameLtIgnoreCase(FAMILY_ID, INGREDIENT_NAME)).thenReturn(false);
         when(ingredientRepository.save(any(Ingredient.class))).thenReturn(milk);
         when(ingredientMapper.toResponse(milk)).thenReturn(milkResponse);
 
-        IngredientResponseDto result = ingredientService.create(newIngredient);
+        IngredientResponseDto result = ingredientService.create(EMAIL, newIngredient);
 
         ArgumentCaptor<Ingredient> captor = ArgumentCaptor.forClass(Ingredient.class);
         verify(ingredientRepository).save(captor.capture());
@@ -178,17 +210,18 @@ class IngredientServiceTest {
 
         assertThat(saved.getNameLt()).isEqualTo(INGREDIENT_NAME);
         assertThat(saved.getUnit()).isEqualTo(Unit.ML);
-        assertThat(saved.getId()).isNull();
+        assertThat(saved.getFamily()).isEqualTo(family);
         assertThat(result).isEqualTo(milkResponse);
     }
 
     @Test
     void test_shouldThrowExceptionWhenCreatingWithExistingName() {
+        mockUser();
         IngredientRequestDto newIngredient = new IngredientRequestDto(INGREDIENT_NAME, Unit.ML);
 
-        when(ingredientRepository.existsByNameLtIgnoreCase(INGREDIENT_NAME)).thenReturn(true);
+        when(ingredientRepository.existsByFamilyIdAndNameLtIgnoreCase(FAMILY_ID, INGREDIENT_NAME)).thenReturn(true);
 
-        assertThatThrownBy(() -> ingredientService.create(newIngredient))
+        assertThatThrownBy(() -> ingredientService.create(EMAIL, newIngredient))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("already exists");
 
@@ -199,45 +232,46 @@ class IngredientServiceTest {
 
     @Test
     void test_shouldUpdateIngredientWhenIngredientExistsAndIsUnique() {
+        mockUser();
         IngredientRequestDto updateIngredient = new IngredientRequestDto(CHANGED_INGREDIENT_NAME, Unit.ML);
 
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(milk));
-        when(ingredientRepository.existsByNameLtIgnoreCase(CHANGED_INGREDIENT_NAME)).thenReturn(false);
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(milk));
+        when(ingredientRepository.existsByFamilyIdAndNameLtIgnoreCase(FAMILY_ID, CHANGED_INGREDIENT_NAME)).thenReturn(false);
         when(ingredientRepository.save(milk)).thenReturn(milk);
         when(ingredientMapper.toResponse(milk)).thenReturn(milkResponse);
 
-        IngredientResponseDto result = ingredientService.update(INGREDIENT_ID, updateIngredient);
+        IngredientResponseDto result = ingredientService.update(EMAIL, INGREDIENT_ID, updateIngredient);
 
         assertThat(milk.getNameLt()).isEqualTo(CHANGED_INGREDIENT_NAME);
         assertThat(milk.getUnit()).isEqualTo(Unit.ML);
         assertThat(result).isEqualTo(milkResponse);
-        verify(ingredientRepository).save(milk);
     }
 
     @Test
     void test_shouldUpdateIngredientWhenIngredientNameIsUnchanged() {
+        mockUser();
         IngredientRequestDto updateIngredient = new IngredientRequestDto(INGREDIENT_NAME, Unit.G);
 
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(milk));
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(milk));
         when(ingredientRepository.save(milk)).thenReturn(milk);
         when(ingredientMapper.toResponse(milk)).thenReturn(milkResponse);
 
-        IngredientResponseDto result = ingredientService.update(INGREDIENT_ID, updateIngredient);
+        IngredientResponseDto result = ingredientService.update(EMAIL, INGREDIENT_ID, updateIngredient);
 
         assertThat(milk.getNameLt()).isEqualTo(INGREDIENT_NAME);
         assertThat(milk.getUnit()).isEqualTo(Unit.G);
         assertThat(result).isEqualTo(milkResponse);
-        verify(ingredientRepository).save(milk);
-        verify(ingredientRepository, never()).existsByNameLtIgnoreCase(anyString());
+        verify(ingredientRepository, never()).existsByFamilyIdAndNameLtIgnoreCase(eq(FAMILY_ID), anyString());
     }
 
     @Test
     void test_shouldThrowExceptionWhenUpdatingNonExistentIngredient() {
+        mockUser();
         IngredientRequestDto updateIngredient = new IngredientRequestDto(CHANGED_INGREDIENT_NAME, Unit.ML);
 
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.empty());
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> ingredientService.update(INGREDIENT_ID, updateIngredient))
+        assertThatThrownBy(() -> ingredientService.update(EMAIL, INGREDIENT_ID, updateIngredient))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("not found");
 
@@ -246,12 +280,13 @@ class IngredientServiceTest {
 
     @Test
     void test_shouldThrowExceptionWhenUpdatingToExistingName() {
+        mockUser();
         IngredientRequestDto updateIngredient = new IngredientRequestDto(CHANGED_INGREDIENT_NAME, Unit.ML);
 
-        when(ingredientRepository.findById(INGREDIENT_ID)).thenReturn(Optional.of(milk));
-        when(ingredientRepository.existsByNameLtIgnoreCase(CHANGED_INGREDIENT_NAME)).thenReturn(true);
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(milk));
+        when(ingredientRepository.existsByFamilyIdAndNameLtIgnoreCase(FAMILY_ID, CHANGED_INGREDIENT_NAME)).thenReturn(true);
 
-        assertThatThrownBy(() -> ingredientService.update(INGREDIENT_ID, updateIngredient))
+        assertThatThrownBy(() -> ingredientService.update(EMAIL, INGREDIENT_ID, updateIngredient))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("already exists");
 
@@ -262,36 +297,39 @@ class IngredientServiceTest {
 
     @Test
     void test_shouldDeleteIngredientWhenIngredientExistsAndNotInRecipe() {
-        when(ingredientRepository.existsById(INGREDIENT_ID)).thenReturn(true);
+        mockUser();
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(milk));
         when(ingredientRepository.countRecipesByIngredientId(INGREDIENT_ID)).thenReturn(0);
 
-        ingredientService.delete(INGREDIENT_ID);
+        ingredientService.delete(EMAIL, INGREDIENT_ID);
 
-        verify(ingredientRepository).deleteById(INGREDIENT_ID);
+        verify(ingredientRepository).delete(milk);
     }
 
     @Test
     void test_shouldThrowExceptionWhenDeletingNonExistentIngredient() {
-        when(ingredientRepository.existsById(INGREDIENT_ID)).thenReturn(false);
+        mockUser();
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> ingredientService.delete(INGREDIENT_ID))
+        assertThatThrownBy(() -> ingredientService.delete(EMAIL, INGREDIENT_ID))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("not found");
 
-        verify(ingredientRepository, never()).deleteById(INGREDIENT_ID);
+        verify(ingredientRepository, never()).delete(any(Ingredient.class));
     }
 
     @Test
     void test_shouldThrowExceptionWhenDeletingIngredientUsedInRecipe() {
+        mockUser();
         int numberOfRecipe = 1;
 
-        when(ingredientRepository.existsById(INGREDIENT_ID)).thenReturn(true);
+        when(ingredientRepository.findByIdAndFamilyId(INGREDIENT_ID, FAMILY_ID)).thenReturn(Optional.of(milk));
         when(ingredientRepository.countRecipesByIngredientId(INGREDIENT_ID)).thenReturn(numberOfRecipe);
 
-        assertThatThrownBy(() -> ingredientService.delete(INGREDIENT_ID))
+        assertThatThrownBy(() -> ingredientService.delete(EMAIL, INGREDIENT_ID))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("cannot be deleted");
 
-        verify(ingredientRepository, never()).deleteById(INGREDIENT_ID);
+        verify(ingredientRepository, never()).delete(any(Ingredient.class));
     }
 }

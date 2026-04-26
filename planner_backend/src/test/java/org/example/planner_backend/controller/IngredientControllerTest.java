@@ -53,7 +53,7 @@ class IngredientControllerTest {
     @Test
     void test_shouldReturn200WithIngredientListWhenNoSearch() throws Exception {
         IngredientResponseDto response = new IngredientResponseDto(INGREDIENT_ID, INGREDIENT_NAME, Unit.ML);
-        when(ingredientService.getAll(null)).thenReturn(List.of(response));
+        when(ingredientService.getAll(any(), eq(null))).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/v1/ingredients"))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class IngredientControllerTest {
     @Test
     void test_shouldReturn200WithIngredientListWhenSearchProvided() throws Exception {
         IngredientResponseDto response = new IngredientResponseDto(INGREDIENT_ID, INGREDIENT_NAME, Unit.ML);
-        when(ingredientService.getAll("pie")).thenReturn(List.of(response));
+        when(ingredientService.getAll(any(), eq("pie"))).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/v1/ingredients").param("search", "pie"))
                 .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class IngredientControllerTest {
     void test_shouldReturn200WithDetailList() throws Exception {
         IngredientDetailResponseDto detail = new IngredientDetailResponseDto(
                 INGREDIENT_ID, INGREDIENT_NAME, Unit.ML, 2);
-        when(ingredientService.getAllWithRecipesCount(null)).thenReturn(List.of(detail));
+        when(ingredientService.getAllWithRecipesCount(any(), eq(null))).thenReturn(List.of(detail));
 
         mockMvc.perform(get("/api/v1/ingredients/with-recipes-count"))
                 .andExpect(status().isOk())
@@ -102,7 +102,7 @@ class IngredientControllerTest {
     void test_shouldReturn200WithExactMatchWhenNameExists() throws Exception {
         IngredientCheckNameResponseDto response = new IngredientCheckNameResponseDto(
                 true, INGREDIENT_NAME, List.of());
-        when(ingredientService.checkName(INGREDIENT_NAME)).thenReturn(response);
+        when(ingredientService.checkName(any(), eq(INGREDIENT_NAME))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/ingredients/check").param("name", INGREDIENT_NAME))
                 .andExpect(status().isOk())
@@ -115,7 +115,7 @@ class IngredientControllerTest {
     void test_shouldReturn200WithSimilarNamesWhenNoExactMatch() throws Exception {
         IngredientCheckNameResponseDto response = new IngredientCheckNameResponseDto(
                 false, null, List.of("Pienas", "Pienelis"));
-        when(ingredientService.checkName("Pie")).thenReturn(response);
+        when(ingredientService.checkName(any(), eq("Pie"))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/ingredients/check").param("name", "Pie"))
                 .andExpect(status().isOk())
@@ -148,7 +148,7 @@ class IngredientControllerTest {
     @Test
     void test_shouldReturn201WhenCreateSucceeds() throws Exception {
         IngredientResponseDto response = new IngredientResponseDto(INGREDIENT_ID, INGREDIENT_NAME, Unit.ML);
-        when(ingredientService.create(any(IngredientRequestDto.class))).thenReturn(response);
+        when(ingredientService.create(any(), any(IngredientRequestDto.class))).thenReturn(response);
 
         String body = """
                 {"nameLt": "Pienas", "unit": "ML"}
@@ -204,7 +204,7 @@ class IngredientControllerTest {
 
     @Test
     void test_shouldReturn409WhenCreateDuplicate() throws Exception {
-        when(ingredientService.create(any(IngredientRequestDto.class)))
+        when(ingredientService.create(any(), any(IngredientRequestDto.class)))
                 .thenThrow(new ConflictException("Ingredient 'Pienas' already exists"));
 
         String body = """
@@ -223,7 +223,7 @@ class IngredientControllerTest {
     @Test
     void test_shouldReturn200WhenUpdateSucceeds() throws Exception {
         IngredientResponseDto response = new IngredientResponseDto(INGREDIENT_ID, "Pienelis", Unit.ML);
-        when(ingredientService.update(eq(INGREDIENT_ID), any(IngredientRequestDto.class))).thenReturn(response);
+        when(ingredientService.update(any(), eq(INGREDIENT_ID), any(IngredientRequestDto.class))).thenReturn(response);
 
         String body = """
                 {"nameLt": "Pienelis", "unit": "ML"}
@@ -241,7 +241,7 @@ class IngredientControllerTest {
 
     @Test
     void test_shouldReturn404WhenUpdateNotFound() throws Exception {
-        when(ingredientService.update(eq(INGREDIENT_ID), any(IngredientRequestDto.class)))
+        when(ingredientService.update(any(), eq(INGREDIENT_ID), any(IngredientRequestDto.class)))
                 .thenThrow(new ResourceNotFoundException("Ingredient not found"));
 
         String body = """
@@ -257,7 +257,7 @@ class IngredientControllerTest {
 
     @Test
     void test_shouldReturn409WhenUpdateRenameToExistingName() throws Exception {
-        when(ingredientService.update(eq(INGREDIENT_ID), any(IngredientRequestDto.class)))
+        when(ingredientService.update(any(), eq(INGREDIENT_ID), any(IngredientRequestDto.class)))
                 .thenThrow(new ConflictException("Ingredient 'Sviestas' already exists"));
 
         String body = """
@@ -295,7 +295,7 @@ class IngredientControllerTest {
     @Test
     void test_shouldReturn404WhenDeleteNotFound() throws Exception {
         doThrow(new ResourceNotFoundException("Ingredient not found"))
-                .when(ingredientService).delete(INGREDIENT_ID);
+                .when(ingredientService).delete(any(), eq(INGREDIENT_ID));
 
         mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID).with(csrf()))
                 .andExpect(status().isNotFound());
@@ -304,7 +304,7 @@ class IngredientControllerTest {
     @Test
     void test_shouldReturn409WhenDeleteUsedInRecipes() throws Exception {
         doThrow(new ConflictException("Ingredient is used in recipes and cannot be deleted."))
-                .when(ingredientService).delete(INGREDIENT_ID);
+                .when(ingredientService).delete(any(), eq(INGREDIENT_ID));
 
         mockMvc.perform(delete("/api/v1/ingredients/" + INGREDIENT_ID).with(csrf()))
                 .andExpect(status().isConflict());
