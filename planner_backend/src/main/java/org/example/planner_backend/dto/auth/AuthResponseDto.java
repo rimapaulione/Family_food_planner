@@ -10,6 +10,7 @@ public record AuthResponseDto(
           String email,
           String displayName,
           String avatarUrl,
-          Role role
+          Role role,
+          UUID familyId
   ) {
   }

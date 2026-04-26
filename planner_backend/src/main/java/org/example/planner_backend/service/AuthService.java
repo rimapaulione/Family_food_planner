@@ -70,7 +70,8 @@ public class AuthService {
                 user.getEmail(),
                 user.getDisplayName(),
                 user.getAvatarUrl(),
-                user.getRole()
+                user.getRole(),
+                user.getFamily() != null ? user.getFamily().getId() : null
         );
     }
 }

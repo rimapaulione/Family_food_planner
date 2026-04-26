@@ -47,7 +47,7 @@ class AuthControllerTest {
 
     @Test
     void test_shouldReturn201WithTokenWhenRegisterSucceeds() throws Exception {
-        AuthResponseDto response = new AuthResponseDto(TOKEN, USER_ID, EMAIL, DISPLAY_NAME, null, Role.USER);
+        AuthResponseDto response = new AuthResponseDto(TOKEN, USER_ID, EMAIL, DISPLAY_NAME, null, Role.USER, null);
         when(authService.register(any(RegisterRequestDto.class))).thenReturn(response);
 
         String body = """
@@ -99,7 +99,7 @@ class AuthControllerTest {
 
     @Test
     void test_shouldReturn200WithTokenWhenLoginSucceeds() throws Exception {
-        AuthResponseDto response = new AuthResponseDto(TOKEN, USER_ID, EMAIL, DISPLAY_NAME, null, Role.USER);
+        AuthResponseDto response = new AuthResponseDto(TOKEN, USER_ID, EMAIL, DISPLAY_NAME, null, Role.USER, null);
         when(authService.login(any(LoginRequestDto.class))).thenReturn(response);
 
         String body = """

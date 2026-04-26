@@ -19,4 +19,5 @@ export interface AuthResponse {
     displayName: string;
     avatarUrl: string | null;
     role: Role;
+    familyId: string | null;
 }
