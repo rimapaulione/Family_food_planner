@@ -16,7 +16,6 @@ import org.example.planner_backend.repository.FamilyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,6 +46,9 @@ class FamilyServiceTest {
 
     @Mock
     private AppUserRepository appUserRepository;
+
+    @Mock
+    private FamilyResolver familyResolver;
 
     @Mock
     private FamilyMapper familyMapper;
@@ -126,8 +128,7 @@ class FamilyServiceTest {
 
     @Test
     void getMyFamily_shouldReturnDtoOnSuccess() {
-        user.setFamily(family);
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
         when(appUserRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(user));
         when(familyMapper.toMembers(any())).thenReturn(List.of());
 
@@ -138,16 +139,9 @@ class FamilyServiceTest {
     }
 
     @Test
-    void getMyFamily_shouldThrowNotFoundWhenUserMissing() {
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> familyService.getMyFamily(EMAIL))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    void getMyFamily_shouldThrowNotFoundWhenUserHasNoFamily() {
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+    void getMyFamily_shouldThrowNotFoundWhenResolverFails() {
+        when(familyResolver.getFamilyByEmail(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User has no family"));
 
         assertThatThrownBy(() -> familyService.getMyFamily(EMAIL))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -158,7 +152,6 @@ class FamilyServiceTest {
 
     @Test
     void updateSettings_shouldUpdateAllFields() {
-        user.setFamily(family);
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
                 "New Name",
                 DayOfWeek.MONDAY,
@@ -166,7 +159,7 @@ class FamilyServiceTest {
                 new MealServings(6, 6, 6),
                 true
         );
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
         when(appUserRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(user));
         when(familyMapper.toMembers(any())).thenReturn(List.of());
 
@@ -180,22 +173,12 @@ class FamilyServiceTest {
     }
 
     @Test
-    void updateSettings_shouldThrowNotFoundWhenUserMissing() {
+    void updateSettings_shouldThrowNotFoundWhenResolverFails() {
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
                 "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), true
         );
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> familyService.updateSettings(EMAIL, request))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    void updateSettings_shouldThrowNotFoundWhenUserHasNoFamily() {
-        FamilySettingsRequestDto request = new FamilySettingsRequestDto(
-                "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), true
-        );
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getFamilyByEmail(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User has no family"));
 
         assertThatThrownBy(() -> familyService.updateSettings(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class)

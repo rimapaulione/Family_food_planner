@@ -23,6 +23,7 @@ import java.util.List;
 public class FamilyService {
     private final FamilyRepository familyRepository;
     private final AppUserRepository appUserRepository;
+    private final FamilyResolver familyResolver;
     private final FamilyMapper familyMapper;
 
 
@@ -61,14 +62,7 @@ public class FamilyService {
 
     @Transactional(readOnly = true)
     public FamilyResponseDto getMyFamily(final String email) {
-        AppUser user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
-
-        if (user.getFamily() == null) {
-            throw new ResourceNotFoundException("User has no family");
-        }
-
-        Family family = user.getFamily();
+        Family family = familyResolver.getFamilyByEmail(email);
         List<AppUser> members = appUserRepository.findByFamilyId(family.getId());
 
         return new FamilyResponseDto(
@@ -85,15 +79,7 @@ public class FamilyService {
     @Transactional
     public FamilyResponseDto updateSettings(final String email,
                                             final FamilySettingsRequestDto request) {
-        AppUser user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new
-                        ResourceNotFoundException("User does not exist"));
-
-        if (user.getFamily() == null) {
-            throw new ResourceNotFoundException("User has no family");
-        }
-
-        Family family = user.getFamily();
+        Family family = familyResolver.getFamilyByEmail(email);
         family.setName(request.name());
         family.setShoppingDay(request.shoppingDay());
         family.setDefaultWeekdayServings(request.defaultWeekdayServings());
