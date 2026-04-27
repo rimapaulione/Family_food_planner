@@ -2,11 +2,14 @@ import {QueryCache, QueryClient, QueryClientProvider} from '@tanstack/react-quer
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import {toast} from 'sonner';
 import {AppLayout} from '@/components/layout/AppLayout';
+import {FamilyGuard} from '@/components/layout/FamilyGuard';
 import {ProtectedRoute} from '@/components/layout/ProtectedRoute';
 import {PublicOnlyRoute} from '@/components/layout/PublicOnlyRoute';
 import {HomePage} from '@/pages/HomePage';
 import {LoginPage} from '@/pages/auth/LoginPage';
 import {RegisterPage} from '@/pages/auth/RegisterPage';
+import {NoFamilyPage} from '@/pages/family/NoFamilyPage';
+import {FamilySetupPage} from '@/pages/family/FamilySetupPage';
 import {RecipeListPage} from '@/pages/recipes/RecipeListPage';
 import {RecipeDetailPage} from '@/pages/recipes/RecipeDetailPage';
 import {RecipeNewPage} from '@/pages/recipes/RecipeNewPage';
@@ -35,19 +38,23 @@ function App() {
                         <Route path="/register" element={<RegisterPage/>}/>
                     </Route>
                     <Route element={<ProtectedRoute/>}>
-                        <Route element={<AppLayout/>}>
-                            <Route path="/" element={<HomePage/>}/>
-                            <Route path="/recipes">
-                                <Route index element={<RecipeListPage/>}/>
-                                <Route path="new" element={<RecipeNewPage/>}/>
-                                <Route path=":id" element={<RecipeDetailPage/>}/>
-                                <Route path=":id/edit" element={<RecipeEditPage/>}/>
+                        <Route path="/family/no-family" element={<NoFamilyPage/>}/>
+                        <Route path="/family/setup" element={<FamilySetupPage/>}/>
+                        <Route element={<FamilyGuard/>}>
+                            <Route element={<AppLayout/>}>
+                                <Route path="/" element={<HomePage/>}/>
+                                <Route path="/recipes">
+                                    <Route index element={<RecipeListPage/>}/>
+                                    <Route path="new" element={<RecipeNewPage/>}/>
+                                    <Route path=":id" element={<RecipeDetailPage/>}/>
+                                    <Route path=":id/edit" element={<RecipeEditPage/>}/>
+                                </Route>
+                                <Route path="/planner" element={<div>Planner</div>}/>
+                                <Route path="/shopping" element={<div>Shopping</div>}/>
+                                <Route path="/basics" element={<div>Always Buy</div>}/>
+                                <Route path="/profile" element={<ProfilePage/>}/>
+                                <Route path="*" element={<Navigate to="/" replace/>}/>
                             </Route>
-                            <Route path="/planner" element={<div>Planner</div>}/>
-                            <Route path="/shopping" element={<div>Shopping</div>}/>
-                            <Route path="/basics" element={<div>Always Buy</div>}/>
-                            <Route path="/profile" element={<ProfilePage/>}/>
-                            <Route path="*" element={<Navigate to="/" replace/>}/>
                         </Route>
                     </Route>
 
