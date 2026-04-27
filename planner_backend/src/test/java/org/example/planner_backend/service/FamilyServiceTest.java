@@ -13,6 +13,8 @@ import org.example.planner_backend.model.enums.AuthProvider;
 import org.example.planner_backend.model.enums.Role;
 import org.example.planner_backend.repository.AppUserRepository;
 import org.example.planner_backend.repository.FamilyRepository;
+import org.example.planner_backend.repository.IngredientRepository;
+import org.example.planner_backend.repository.IngredientTemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,12 @@ class FamilyServiceTest {
 
     @Mock
     private AppUserRepository appUserRepository;
+
+    @Mock
+    private IngredientRepository ingredientRepository;
+
+    @Mock
+    private IngredientTemplateRepository ingredientTemplateRepository;
 
     @Mock
     private FamilyResolver familyResolver;

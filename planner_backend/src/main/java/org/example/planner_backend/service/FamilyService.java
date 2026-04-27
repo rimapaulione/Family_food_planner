@@ -10,9 +10,13 @@ import org.example.planner_backend.exception.ResourceNotFoundException;
 import org.example.planner_backend.mapper.FamilyMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.entity.Family;
+import org.example.planner_backend.model.entity.Ingredient;
+import org.example.planner_backend.model.entity.IngredientTemplate;
 import org.example.planner_backend.model.enums.Role;
 import org.example.planner_backend.repository.AppUserRepository;
 import org.example.planner_backend.repository.FamilyRepository;
+import org.example.planner_backend.repository.IngredientRepository;
+import org.example.planner_backend.repository.IngredientTemplateRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +27,8 @@ import java.util.List;
 public class FamilyService {
     private final FamilyRepository familyRepository;
     private final AppUserRepository appUserRepository;
+    private final IngredientRepository ingredientRepository;
+    private final IngredientTemplateRepository ingredientTemplateRepository;
     private final FamilyResolver familyResolver;
     private final FamilyMapper familyMapper;
 
@@ -46,6 +52,8 @@ public class FamilyService {
         creator.setFamily(family);
         creator.setRole(Role.ADMIN);
         appUserRepository.save(creator);
+
+        copySeedIngredients(family);
 
         List<AppUser> users = appUserRepository.findByFamilyId(family.getId());
 
@@ -100,5 +108,15 @@ public class FamilyService {
         );
     }
 
-
+    private void copySeedIngredients(final Family family) {
+        List<IngredientTemplate> templates = ingredientTemplateRepository.findAll();
+        List<Ingredient> seeds = templates.stream()
+                .map(t -> Ingredient.builder()
+                        .nameLt(t.getNameLt())
+                        .unit(t.getUnit())
+                        .family(family)
+                        .build())
+                .toList();
+        ingredientRepository.saveAll(seeds);
+    }
 }
