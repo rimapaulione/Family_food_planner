@@ -1,4 +1,4 @@
-import {useNavigate} from 'react-router-dom';
+import {Navigate, useNavigate} from 'react-router-dom';
 import {LogOut} from 'lucide-react';
 import {useCreateFamily} from '@/hooks/useFamily';
 import {useAuthStore} from '@/stores/useAuthStore';
@@ -8,8 +8,11 @@ import type {FamilyCreateFormData} from '@/schemas/family';
 
 export function NoFamilyPage() {
     const navigate = useNavigate();
+    const familyId = useAuthStore((s) => s.familyId);
     const clearAuth = useAuthStore((s) => s.clearAuth);
     const createMutation = useCreateFamily();
+
+    if (familyId !== null) return <Navigate to="/" replace/>;
 
     const handleSubmit = async (data: FamilyCreateFormData) => {
         await createMutation.mutateAsync(data);

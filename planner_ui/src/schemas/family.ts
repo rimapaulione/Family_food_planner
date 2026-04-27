@@ -16,13 +16,17 @@ export const familyCreateSchema = z.object({
     name: z.string().min(2, 'Min 2 characters').max(100, 'Max 100 characters'),
 });
 
-export const familyUpdateSchema = z.object({
+export const familyFormSchema = z.object({
     name: z.string().min(2, 'Min 2 characters').max(100, 'Max 100 characters'),
     shoppingDay: z.enum(dayOfWeekValues),
     defaultWeekdayServings: mealServingsSchema,
     defaultWeekendServings: mealServingsSchema,
+});
+
+export const familyUpdateSchema = familyFormSchema.extend({
     isSetupCompleted: z.boolean(),
 });
 
 export type FamilyCreateFormData = z.infer<typeof familyCreateSchema>;
+export type FamilyFormData = z.infer<typeof familyFormSchema>;
 export type FamilyUpdateFormData = z.infer<typeof familyUpdateSchema>;
