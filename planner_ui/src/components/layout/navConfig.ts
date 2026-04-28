@@ -1,4 +1,4 @@
-import {UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket} from 'lucide-react';
+import {UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket, Users} from 'lucide-react';
 import type {LucideIcon} from 'lucide-react';
 
 export interface NavItem {
@@ -12,4 +12,5 @@ export const navItems: NavItem[] = [
     {to: '/planner', icon: CalendarDays, label: 'Planner'},
     {to: '/shopping', icon: ShoppingCart, label: 'Shopping'},
     {to: '/basics', icon: ShoppingBasket, label: 'Always Buy'},
+    {to: '/family', icon: Users, label: 'Family'},
 ];
