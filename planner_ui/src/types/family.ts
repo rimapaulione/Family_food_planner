@@ -19,6 +19,7 @@ export interface FamilyMember {
     userId: string;
     displayName: string;
     email: string;
+    avatarUrl: string | null;
     role: Role;
 }
 

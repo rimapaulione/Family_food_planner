@@ -16,6 +16,7 @@ import {RecipeNewPage} from '@/pages/recipes/RecipeNewPage';
 import {RecipeEditPage} from '@/pages/recipes/RecipeEditPage';
 import {ProfilePage} from '@/pages/ProfilePage';
 import {FamilyPage} from '@/pages/family/FamilyPage';
+import {JoinPage} from '@/pages/family/JoinPage';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -34,6 +35,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
+                    <Route path="/join/:token" element={<JoinPage/>}/>
                     <Route element={<PublicOnlyRoute/>}>
                         <Route path="/login" element={<LoginPage/>}/>
                         <Route path="/register" element={<RegisterPage/>}/>

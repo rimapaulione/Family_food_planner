@@ -8,6 +8,7 @@ public record FamilyMemberDto(
         UUID userId,
         String displayName,
         String email,
+        String avatarUrl,
         Role role
 ) {
 }

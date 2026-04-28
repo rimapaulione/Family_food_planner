@@ -9,12 +9,13 @@ import {inputClass} from '@/utils/inputClass';
 interface LoginFormProps {
     onSubmit: (data: LoginFormData) => Promise<void>;
     isPending: boolean;
+    prefilledEmail?: string;
 }
 
-export function LoginForm({onSubmit, isPending}: LoginFormProps) {
+export function LoginForm({onSubmit, isPending, prefilledEmail}: LoginFormProps) {
     const {register, handleSubmit, formState: {errors}} = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
-        defaultValues: {email: '', password: ''},
+        defaultValues: {email: prefilledEmail ?? '', password: ''},
     });
 
     return (

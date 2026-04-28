@@ -1,3 +1,4 @@
+import {Avatar} from '@/components/ui/Avatar';
 import {Card} from '@/components/ui/Card';
 import type {FamilyMember} from '@/types/family';
 
@@ -16,9 +17,7 @@ export function FamilyMemberCard({member, isCurrentUser}: FamilyMemberCardProps)
         <Card padding="sm">
             <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">
-                        {initial}
-                    </div>
+                    <Avatar src={member.avatarUrl} size="sm" initials={initial}/>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-foreground">
                             {member.displayName}

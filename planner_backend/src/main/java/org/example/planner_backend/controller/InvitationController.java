@@ -3,6 +3,7 @@ package org.example.planner_backend.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.planner_backend.dto.family.FamilyResponseDto;
+import org.example.planner_backend.dto.invitation.InvitationPublicDto;
 import org.example.planner_backend.dto.invitation.InvitationRequestDto;
 import org.example.planner_backend.dto.invitation.InvitationResponseDto;
 import org.example.planner_backend.service.InvitationService;
@@ -37,6 +38,11 @@ public class InvitationController {
     @GetMapping("/family")
     public List<InvitationResponseDto> listPending(@AuthenticationPrincipal String email) {
         return invitationService.getListPending(email);
+    }
+
+    @GetMapping("/public/{token}")
+    public InvitationPublicDto getPublic(@PathVariable String token) {
+        return invitationService.getPublicByToken(token);
     }
 
     @PostMapping("/accept/{token}")

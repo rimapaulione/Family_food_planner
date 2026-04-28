@@ -6,7 +6,7 @@ interface CenteredCardProps {
     title: string;
     subtitle?: string;
     icon?: LucideIcon;
-    children: ReactNode;
+    children?: ReactNode;
     footer?: ReactNode;
     maxWidth?: 'sm' | 'md';
 }

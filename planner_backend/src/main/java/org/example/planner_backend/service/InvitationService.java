@@ -2,6 +2,7 @@ package org.example.planner_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.planner_backend.dto.family.FamilyResponseDto;
+import org.example.planner_backend.dto.invitation.InvitationPublicDto;
 import org.example.planner_backend.dto.invitation.InvitationRequestDto;
 import org.example.planner_backend.dto.invitation.InvitationResponseDto;
 import org.example.planner_backend.exception.ConflictException;
@@ -68,6 +69,13 @@ public class InvitationService {
         invitation = invitationRepository.save(invitation);
 
         return invitationMapper.toDto(invitation);
+    }
+
+    @Transactional(readOnly = true)
+    public InvitationPublicDto getPublicByToken(final String token) {
+        FamilyInvitation invitation = invitationRepository.findByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Invitation does not exist"));
+        return invitationMapper.toPublicDto(invitation);
     }
 
     @Transactional(readOnly = true)

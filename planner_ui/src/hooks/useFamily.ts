@@ -15,6 +15,7 @@ export function useFamily() {
             return data;
         },
         enabled: familyId !== null,
+        staleTime: 0,
     });
 }
 

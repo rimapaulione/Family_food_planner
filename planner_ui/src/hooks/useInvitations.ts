@@ -3,8 +3,20 @@ import {toast} from 'sonner';
 import api from '@/api/axios';
 import {useAuthStore} from '@/stores/useAuthStore';
 import type {Family} from '@/types/family';
-import type {Invitation, InvitationCreateRequest} from '@/types/invitation';
+import type {Invitation, InvitationCreateRequest, InvitationPublic} from '@/types/invitation';
 import {getErrorMessage} from '@/utils/getErrorMessage';
+
+export function usePublicInvitation(token: string | undefined) {
+    return useQuery({
+        queryKey: ['invitations', 'public', token],
+        queryFn: async () => {
+            const {data} = await api.get<InvitationPublic>(`/invitations/public/${token}`);
+            return data;
+        },
+        enabled: !!token,
+        retry: false,
+    });
+}
 
 export function useFamilyInvitations() {
     const role = useAuthStore((s) => s.role);
@@ -15,6 +27,7 @@ export function useFamilyInvitations() {
             return data;
         },
         enabled: role === 'ADMIN',
+        staleTime: 0,
     });
 }
 

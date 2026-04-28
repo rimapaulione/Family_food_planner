@@ -9,12 +9,13 @@ import {inputClass} from '@/utils/inputClass';
 interface RegisterFormProps {
     onSubmit: (data: RegisterFormData) => Promise<void>;
     isPending: boolean;
+    lockedEmail?: string;
 }
 
-export function RegisterForm({onSubmit, isPending}: RegisterFormProps) {
+export function RegisterForm({onSubmit, isPending, lockedEmail}: RegisterFormProps) {
     const {register, handleSubmit, formState: {errors}} = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
-        defaultValues: {email: '', password: '', confirmPassword: '', displayName: ''},
+        defaultValues: {email: lockedEmail ?? '', password: '', confirmPassword: '', displayName: ''},
     });
 
     return (
@@ -33,6 +34,7 @@ export function RegisterForm({onSubmit, isPending}: RegisterFormProps) {
                 <input
                     type="email"
                     autoComplete="email"
+                    readOnly={!!lockedEmail}
                     {...register('email')}
                     className={inputClass(!!errors.email)}
                     placeholder="you@example.com"

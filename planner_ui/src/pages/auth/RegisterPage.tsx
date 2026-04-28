@@ -1,4 +1,4 @@
-import {useNavigate} from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useRegister} from '@/hooks/useAuth';
 import {AuthCard} from '@/components/auth/AuthCard';
 import {RegisterForm} from '@/components/auth/RegisterForm';
@@ -6,12 +6,19 @@ import type {RegisterFormData} from '@/schemas/auth';
 
 export function RegisterPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const redirectTo = searchParams.get('redirectTo') ?? '/';
+    const lockedEmail = searchParams.get('email') ?? undefined;
     const registerMutation = useRegister();
+
+    const loginHref = lockedEmail || redirectTo !== '/'
+        ? `/login?${searchParams.toString()}`
+        : '/login';
 
     const handleSubmit = async (data: RegisterFormData) => {
         const {confirmPassword: _unused, ...payload} = data;
         await registerMutation.mutateAsync(payload);
-        navigate('/');
+        navigate(redirectTo);
     };
 
     return (
@@ -20,9 +27,13 @@ export function RegisterPage() {
             subtitle="Create your account"
             footerPrompt="Already have an account?"
             footerLinkText="Log in"
-            footerLinkTo="/login"
+            footerLinkTo={loginHref}
         >
-            <RegisterForm onSubmit={handleSubmit} isPending={registerMutation.isPending}/>
+            <RegisterForm
+                onSubmit={handleSubmit}
+                isPending={registerMutation.isPending}
+                lockedEmail={lockedEmail}
+            />
         </AuthCard>
     );
 }

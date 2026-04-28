@@ -9,6 +9,12 @@ export interface Invitation {
     expiresAt: string;
 }
 
+export interface InvitationPublic {
+    familyName: string;
+    invitedEmail: string;
+    status: InvitationStatus;
+}
+
 export interface InvitationCreateRequest {
     email: string;
 }
