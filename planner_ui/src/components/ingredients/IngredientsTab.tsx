@@ -45,7 +45,8 @@ export function IngredientsTab() {
         <div className="flex flex-col gap-4">
             <PageHeader
                 title="Ingredients"
-                addLabel="Add Ingredient"
+                addLabel="Add"
+                addLabelExtra="Ingredient"
                 onAddClick={() => setAddIngredient(true)}
                 search={search}
                 onSearchChange={setSearch}

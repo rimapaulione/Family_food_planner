@@ -20,7 +20,8 @@ export function RecipesTab() {
         <div className="flex flex-col gap-4">
             <PageHeader
                 title="Recipes"
-                addLabel="Add Recipe"
+                addLabel="Add"
+                addLabelExtra="Recipe"
                 addTo="/recipes/new"
                 search={search}
                 onSearchChange={setSearch}

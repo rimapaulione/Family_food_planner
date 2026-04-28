@@ -4,6 +4,7 @@ import {Button} from '@/components/ui/Button';
 interface PageHeaderProps {
     title: string;
     addLabel: string;
+    addLabelExtra?: string;
     /** Provide `addTo` for a Link, or `onAddClick` for a button. */
     addTo?: string;
     onAddClick?: () => void;
@@ -15,6 +16,7 @@ interface PageHeaderProps {
 export function PageHeader({
     title,
     addLabel,
+    addLabelExtra,
     addTo,
     onAddClick,
     search,
@@ -27,6 +29,7 @@ export function PageHeader({
                 <h1 className="text-2xl font-bold text-foreground">{title}</h1>
                 <Button variant="primary" icon={Plus} to={addTo} onClick={onAddClick}>
                     {addLabel}
+                    {addLabelExtra && <span className="hidden md:inline">&nbsp;{addLabelExtra}</span>}
                 </Button>
             </div>
 
