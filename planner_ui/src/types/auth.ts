@@ -12,6 +12,11 @@ export interface RegisterRequest {
 
 export type Role = 'USER' | 'ADMIN';
 
+export const ROLE = {
+    USER: 'USER',
+    ADMIN: 'ADMIN',
+} as const;
+
 export interface AuthResponse {
     token: string;
     id: string;

@@ -40,7 +40,7 @@ public class AuthService {
 
         user = appUserRepository.save(user);
 
-        String token = jwtService.generateToken(user.getEmail(), user.getRole());
+        String token = jwtService.generateToken(user.getEmail());
 
         return toAuthResponse(user, token);
     }
@@ -57,7 +57,7 @@ public class AuthService {
             throw new UnauthorizedException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getEmail(), user.getRole());
+        String token = jwtService.generateToken(user.getEmail());
 
         return toAuthResponse(user, token);
     }

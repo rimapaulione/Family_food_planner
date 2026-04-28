@@ -62,7 +62,7 @@ class AuthServiceTest {
             u.setId(USER_ID);
             return u;
         });
-        when(jwtService.generateToken(EMAIL, Role.USER)).thenReturn(TOKEN);
+        when(jwtService.generateToken(EMAIL)).thenReturn(TOKEN);
 
         AuthResponseDto response = authService.register(request);
 
@@ -84,7 +84,7 @@ class AuthServiceTest {
                 .hasMessageContaining("Email already exists");
 
         verify(appUserRepository, never()).save(any(AppUser.class));
-        verify(jwtService, never()).generateToken(any(), any());
+        verify(jwtService, never()).generateToken(any());
     }
 
     @Test
@@ -95,7 +95,7 @@ class AuthServiceTest {
         when(appUserRepository.existsByEmail(EMAIL)).thenReturn(false);
         when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(HASHED_PASSWORD);
         when(appUserRepository.save(any(AppUser.class))).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken(EMAIL, Role.USER)).thenReturn(TOKEN);
+        when(jwtService.generateToken(EMAIL)).thenReturn(TOKEN);
 
         authService.register(request);
 
@@ -126,7 +126,7 @@ class AuthServiceTest {
 
         when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(RAW_PASSWORD, HASHED_PASSWORD)).thenReturn(true);
-        when(jwtService.generateToken(EMAIL, Role.USER)).thenReturn(TOKEN);
+        when(jwtService.generateToken(EMAIL)).thenReturn(TOKEN);
 
         AuthResponseDto response = authService.login(request);
 
@@ -146,7 +146,7 @@ class AuthServiceTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("Invalid email or password");
 
-        verify(jwtService, never()).generateToken(any(), any());
+        verify(jwtService, never()).generateToken(any());
     }
 
     @Test
@@ -166,7 +166,7 @@ class AuthServiceTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("Invalid email or password");
 
-        verify(jwtService, never()).generateToken(any(), any());
+        verify(jwtService, never()).generateToken(any());
     }
 
     @Test
@@ -186,6 +186,6 @@ class AuthServiceTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("Invalid email or password");
 
-        verify(jwtService, never()).generateToken(any(), any());
+        verify(jwtService, never()).generateToken(any());
     }
 }

@@ -7,6 +7,7 @@ import org.example.planner_backend.dto.family.FamilyResponseDto;
 import org.example.planner_backend.dto.family.FamilySettingsRequestDto;
 import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
+import org.example.planner_backend.exception.UnauthorizedException;
 import org.example.planner_backend.mapper.FamilyMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.entity.Family;
@@ -87,7 +88,15 @@ public class FamilyService {
     @Transactional
     public FamilyResponseDto updateSettings(final String email,
                                             final FamilySettingsRequestDto request) {
-        Family family = familyResolver.getFamilyByEmail(email);
+        AppUser user = appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        if (user.getFamily() == null) {
+            throw new ResourceNotFoundException("User has no family");
+        }
+        if (user.getRole() != Role.ADMIN) {
+            throw new UnauthorizedException("Only admins can update family settings");
+        }
+        Family family = user.getFamily();
         family.setName(request.name());
         family.setShoppingDay(request.shoppingDay());
         family.setDefaultWeekdayServings(request.defaultWeekdayServings());

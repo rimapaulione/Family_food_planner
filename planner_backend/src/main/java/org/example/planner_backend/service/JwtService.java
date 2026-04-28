@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.example.planner_backend.model.enums.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +27,12 @@ public class JwtService {
         this.expiryMinutes = expiryMinutes;
     }
 
-    public String generateToken(String email, Role role) {
+    public String generateToken(String email) {
         Instant now = Instant.now();
         Instant expiry = now.plus(expiryMinutes, ChronoUnit.MINUTES);
 
         return Jwts.builder()
                 .subject(email)
-                .claim("role", role.name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(signingKey)
@@ -43,10 +41,6 @@ public class JwtService {
 
     public String extractEmail(String token) {
         return parseClaims(token).getSubject();
-    }
-
-    public Role extractRole(String token) {
-        return Role.valueOf(parseClaims(token).get("role", String.class));
     }
 
     public boolean isValid(String token) {

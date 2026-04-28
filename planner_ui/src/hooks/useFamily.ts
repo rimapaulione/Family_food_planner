@@ -2,6 +2,7 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {toast} from 'sonner';
 import api from '@/api/axios';
 import {useAuthStore} from '@/stores/useAuthStore';
+import {ROLE} from '@/types/auth';
 import type {Family, FamilyCreateRequest, FamilyUpdateRequest} from '@/types/family';
 import {getErrorMessage} from '@/utils/getErrorMessage';
 
@@ -20,6 +21,7 @@ export function useFamily() {
 export function useCreateFamily() {
     const queryClient = useQueryClient();
     const setFamilyId = useAuthStore((s) => s.setFamilyId);
+    const setRole = useAuthStore((s) => s.setRole);
     return useMutation({
         mutationFn: async (request: FamilyCreateRequest) => {
             const {data} = await api.post<Family>('/families', request);
@@ -27,6 +29,7 @@ export function useCreateFamily() {
         },
         onSuccess: (data) => {
             setFamilyId(data.id);
+            setRole(ROLE.ADMIN);
             queryClient.setQueryData(['family', 'me'], data);
             toast.success('Family created');
         },

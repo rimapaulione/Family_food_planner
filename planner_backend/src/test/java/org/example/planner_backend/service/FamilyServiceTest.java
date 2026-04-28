@@ -160,6 +160,8 @@ class FamilyServiceTest {
 
     @Test
     void updateSettings_shouldUpdateAllFields() {
+        user.setFamily(family);
+        user.setRole(Role.ADMIN);
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
                 "New Name",
                 DayOfWeek.MONDAY,
@@ -167,7 +169,7 @@ class FamilyServiceTest {
                 new MealServings(6, 6, 6),
                 true
         );
-        when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
+        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(appUserRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(user));
         when(familyMapper.toMembers(any())).thenReturn(List.of());
 
@@ -181,15 +183,28 @@ class FamilyServiceTest {
     }
 
     @Test
-    void updateSettings_shouldThrowNotFoundWhenResolverFails() {
+    void updateSettings_shouldThrowNotFoundWhenUserHasNoFamily() {
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
                 "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), true
         );
-        when(familyResolver.getFamilyByEmail(EMAIL))
-                .thenThrow(new ResourceNotFoundException("User has no family"));
+        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> familyService.updateSettings(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("no family");
+    }
+
+    @Test
+    void updateSettings_shouldThrowUnauthorizedWhenUserIsNotAdmin() {
+        user.setFamily(family);
+        user.setRole(Role.USER);
+        FamilySettingsRequestDto request = new FamilySettingsRequestDto(
+                "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), true
+        );
+        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> familyService.updateSettings(EMAIL, request))
+                .isInstanceOf(org.example.planner_backend.exception.UnauthorizedException.class)
+                .hasMessageContaining("admins");
     }
 }

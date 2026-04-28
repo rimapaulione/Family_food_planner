@@ -14,6 +14,7 @@ interface AuthState {
     setAuth: (data: AuthResponse) => void;
     setProfile: (data: {displayName: string; avatarUrl: string | null}) => void;
     setFamilyId: (familyId: string | null) => void;
+    setRole: (role: Role | null) => void;
     clearAuth: () => void;
 }
 
@@ -45,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
                     avatarUrl: data.avatarUrl,
                 }),
             setFamilyId: (familyId) => set({familyId}),
+            setRole: (role) => set({role}),
             clearAuth: () =>
                 set({
                     token: null,
