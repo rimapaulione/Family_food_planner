@@ -1,6 +1,7 @@
 package org.example.planner_backend.repository;
 
 import org.example.planner_backend.model.entity.AppUser;
+import org.example.planner_backend.model.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +18,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
     boolean existsByEmail(String email);
 
     List<AppUser> findByFamilyId(UUID familyId);
+
+    Long countByFamilyIdAndRole(UUID familyId, Role role);
 }

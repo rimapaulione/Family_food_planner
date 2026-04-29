@@ -2,11 +2,13 @@ package org.example.planner_backend.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.example.planner_backend.dto.family.FamilyMemberRoleRequestDto;
 import org.example.planner_backend.dto.family.FamilyRequestDto;
 import org.example.planner_backend.dto.family.FamilyResponseDto;
 import org.example.planner_backend.dto.family.FamilySettingsRequestDto;
 import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
+import org.example.planner_backend.exception.UnauthorizedException;
 import org.example.planner_backend.mapper.FamilyMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.entity.Family;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -98,6 +101,45 @@ public class FamilyService {
         List<AppUser> members =
                 appUserRepository.findByFamilyId(family.getId());
 
+        return new FamilyResponseDto(
+                family.getId(),
+                family.getName(),
+                family.getShoppingDay(),
+                family.getDefaultWeekdayServings(),
+                family.getDefaultWeekendServings(),
+                family.isSetupCompleted(),
+                familyMapper.toMembers(members)
+        );
+    }
+
+    @Transactional
+    public FamilyResponseDto updateMemberRole(final String email,
+                                              final UUID id,
+                                              final FamilyMemberRoleRequestDto request) {
+        AppUser admin = familyResolver.getAdminUser(email);
+        AppUser member = appUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Member does not exist"));
+
+        if (member.getFamily() == null
+                || !member.getFamily().getId().equals(admin.getFamily().getId())) {
+            throw new UnauthorizedException("Member is not in your family");
+        }
+        if (admin.getId().equals(member.getId())) {
+            throw new ConflictException("You cannot change your own role");
+        }
+
+        long adminCount = appUserRepository.countByFamilyIdAndRole(
+                admin.getFamily().getId(), Role.ADMIN);
+        if (member.getRole() == Role.ADMIN
+                && request.role() == Role.USER
+                && adminCount <= 1) {
+            throw new ConflictException("Family must have at least one admin");
+        }
+
+        member.setRole(request.role());
+
+        Family family = admin.getFamily();
+        List<AppUser> members = appUserRepository.findByFamilyId(family.getId());
         return new FamilyResponseDto(
                 family.getId(),
                 family.getName(),

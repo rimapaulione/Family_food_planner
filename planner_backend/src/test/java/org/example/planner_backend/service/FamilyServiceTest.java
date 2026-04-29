@@ -1,10 +1,12 @@
 package org.example.planner_backend.service;
 
+import org.example.planner_backend.dto.family.FamilyMemberRoleRequestDto;
 import org.example.planner_backend.dto.family.FamilyRequestDto;
 import org.example.planner_backend.dto.family.FamilyResponseDto;
 import org.example.planner_backend.dto.family.FamilySettingsRequestDto;
 import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
+import org.example.planner_backend.exception.UnauthorizedException;
 import org.example.planner_backend.mapper.FamilyMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.entity.Family;
@@ -169,7 +171,7 @@ class FamilyServiceTest {
                 new MealServings(6, 6, 6),
                 true
         );
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(user);
         when(appUserRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(user));
         when(familyMapper.toMembers(any())).thenReturn(List.of());
 
@@ -187,7 +189,8 @@ class FamilyServiceTest {
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
                 "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), true
         );
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getAdminUser(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User has no family"));
 
         assertThatThrownBy(() -> familyService.updateSettings(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -196,15 +199,150 @@ class FamilyServiceTest {
 
     @Test
     void updateSettings_shouldThrowUnauthorizedWhenUserIsNotAdmin() {
-        user.setFamily(family);
-        user.setRole(Role.USER);
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
                 "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), true
         );
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getAdminUser(EMAIL))
+                .thenThrow(new UnauthorizedException("Admin role required"));
 
         assertThatThrownBy(() -> familyService.updateSettings(EMAIL, request))
-                .isInstanceOf(org.example.planner_backend.exception.UnauthorizedException.class)
-                .hasMessageContaining("admins");
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Admin");
+    }
+
+    // ---------- updateMemberRole ----------
+
+    private static final UUID MEMBER_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    private static final UUID OTHER_FAMILY_ID = UUID.fromString("44444444-4444-4444-4444-444444444444");
+
+    private AppUser adminUser() {
+        AppUser admin = AppUser.builder()
+                .id(USER_ID)
+                .email(EMAIL)
+                .displayName(DISPLAY_NAME)
+                .authProvider(AuthProvider.LOCAL)
+                .role(Role.ADMIN)
+                .family(family)
+                .build();
+        return admin;
+    }
+
+    private AppUser memberInSameFamily(Role role) {
+        return AppUser.builder()
+                .id(MEMBER_ID)
+                .email("member@example.com")
+                .displayName("Member")
+                .authProvider(AuthProvider.LOCAL)
+                .role(role)
+                .family(family)
+                .build();
+    }
+
+    @Test
+    void updateMemberRole_shouldPromoteUserToAdmin() {
+        AppUser admin = adminUser();
+        AppUser member = memberInSameFamily(Role.USER);
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.ADMIN);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(admin);
+        when(appUserRepository.findById(MEMBER_ID)).thenReturn(Optional.of(member));
+        when(appUserRepository.countByFamilyIdAndRole(FAMILY_ID, Role.ADMIN)).thenReturn(1L);
+        when(appUserRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(admin, member));
+        when(familyMapper.toMembers(any())).thenReturn(List.of());
+
+        familyService.updateMemberRole(EMAIL, MEMBER_ID, request);
+
+        assertThat(member.getRole()).isEqualTo(Role.ADMIN);
+    }
+
+    @Test
+    void updateMemberRole_shouldDemoteAdminToUserWhenMultipleAdminsExist() {
+        AppUser admin = adminUser();
+        AppUser member = memberInSameFamily(Role.ADMIN);
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.USER);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(admin);
+        when(appUserRepository.findById(MEMBER_ID)).thenReturn(Optional.of(member));
+        when(appUserRepository.countByFamilyIdAndRole(FAMILY_ID, Role.ADMIN)).thenReturn(2L);
+        when(appUserRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(admin, member));
+        when(familyMapper.toMembers(any())).thenReturn(List.of());
+
+        familyService.updateMemberRole(EMAIL, MEMBER_ID, request);
+
+        assertThat(member.getRole()).isEqualTo(Role.USER);
+    }
+
+    @Test
+    void updateMemberRole_shouldThrowNotFoundWhenMemberDoesNotExist() {
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.ADMIN);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(adminUser());
+        when(appUserRepository.findById(MEMBER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> familyService.updateMemberRole(EMAIL, MEMBER_ID, request))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void updateMemberRole_shouldThrowUnauthorizedWhenMemberInDifferentFamily() {
+        Family otherFamily = Family.builder().id(OTHER_FAMILY_ID).name("Other").build();
+        AppUser member = AppUser.builder()
+                .id(MEMBER_ID)
+                .email("other@example.com")
+                .displayName("Other")
+                .authProvider(AuthProvider.LOCAL)
+                .role(Role.USER)
+                .family(otherFamily)
+                .build();
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.ADMIN);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(adminUser());
+        when(appUserRepository.findById(MEMBER_ID)).thenReturn(Optional.of(member));
+
+        assertThatThrownBy(() -> familyService.updateMemberRole(EMAIL, MEMBER_ID, request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("not in your family");
+    }
+
+    @Test
+    void updateMemberRole_shouldThrowUnauthorizedWhenMemberHasNoFamily() {
+        AppUser member = AppUser.builder()
+                .id(MEMBER_ID)
+                .email("orphan@example.com")
+                .displayName("Orphan")
+                .authProvider(AuthProvider.LOCAL)
+                .role(Role.USER)
+                .build();
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.ADMIN);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(adminUser());
+        when(appUserRepository.findById(MEMBER_ID)).thenReturn(Optional.of(member));
+
+        assertThatThrownBy(() -> familyService.updateMemberRole(EMAIL, MEMBER_ID, request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("not in your family");
+    }
+
+    @Test
+    void updateMemberRole_shouldThrowConflictWhenChangingOwnRole() {
+        AppUser admin = adminUser();
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.USER);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(admin);
+        when(appUserRepository.findById(USER_ID)).thenReturn(Optional.of(admin));
+
+        assertThatThrownBy(() -> familyService.updateMemberRole(EMAIL, USER_ID, request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("your own role");
+    }
+
+    @Test
+    void updateMemberRole_shouldThrowConflictWhenDemotingLastAdmin() {
+        AppUser admin = adminUser();
+        AppUser member = memberInSameFamily(Role.ADMIN);
+        FamilyMemberRoleRequestDto request = new FamilyMemberRoleRequestDto(Role.USER);
+        when(familyResolver.getAdminUser(EMAIL)).thenReturn(admin);
+        when(appUserRepository.findById(MEMBER_ID)).thenReturn(Optional.of(member));
+        when(appUserRepository.countByFamilyIdAndRole(FAMILY_ID, Role.ADMIN)).thenReturn(1L);
+
+        assertThatThrownBy(() -> familyService.updateMemberRole(EMAIL, MEMBER_ID, request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("at least one admin");
+
+        assertThat(member.getRole()).isEqualTo(Role.ADMIN);
     }
 }

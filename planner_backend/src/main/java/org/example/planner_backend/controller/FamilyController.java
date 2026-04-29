@@ -3,19 +3,24 @@ package org.example.planner_backend.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.planner_backend.dto.family.FamilyMemberRoleRequestDto;
 import org.example.planner_backend.dto.family.FamilyRequestDto;
 import org.example.planner_backend.dto.family.FamilyResponseDto;
 import org.example.planner_backend.dto.family.FamilySettingsRequestDto;
 import org.example.planner_backend.service.FamilyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,4 +49,12 @@ public class FamilyController {
         return ResponseEntity.ok(familyService.updateSettings(email, request));
     }
 
+    @PatchMapping("/members/{id}/role")
+    public ResponseEntity<FamilyResponseDto> updateMemberRole(
+            @AuthenticationPrincipal String email,
+            @PathVariable UUID id,
+            @Valid @RequestBody FamilyMemberRoleRequestDto request
+            ) {
+        return ResponseEntity.ok(familyService.updateMemberRole(email, id, request));
+    }
 }
