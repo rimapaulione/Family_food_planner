@@ -17,9 +17,10 @@ public class FamilyResolver {
 
     private final AppUserRepository appUserRepository;
 
+
     public Family getFamilyByEmail(final String email) {
-        AppUser user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        AppUser user = this.getUserByEmail(email);
+
         if (user.getFamily() == null) {
             throw new ResourceNotFoundException("User has no family");
         }
@@ -31,8 +32,7 @@ public class FamilyResolver {
     }
 
     public AppUser getAdminUser(final String email) {
-        AppUser user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        AppUser user = this.getUserByEmail(email);
         if (user.getFamily() == null) {
             throw new ResourceNotFoundException("User has no family");
         }
@@ -40,5 +40,11 @@ public class FamilyResolver {
             throw new UnauthorizedException("Admin role required");
         }
         return user;
+    }
+
+    public AppUser getUserByEmail(final String email) {
+
+        return appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
     }
 }

@@ -227,7 +227,7 @@ class InvitationServiceTest {
                 .token(TOKEN).status(InvitationStatus.PENDING)
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .build();
-        when(appUserRepository.findByEmail(INVITED_EMAIL)).thenReturn(Optional.of(invitee));
+        when(familyResolver.getUserByEmail(INVITED_EMAIL)).thenReturn(invitee);
         when(invitationRepository.findByToken(TOKEN)).thenReturn(Optional.of(invitation));
 
         invitationService.accept(INVITED_EMAIL, TOKEN);
@@ -240,7 +240,7 @@ class InvitationServiceTest {
     @Test
     void accept_shouldThrowConflictWhenUserAlreadyHasFamily() {
         invitee.setFamily(Family.builder().id(OTHER_FAMILY_ID).name("Other").build());
-        when(appUserRepository.findByEmail(INVITED_EMAIL)).thenReturn(Optional.of(invitee));
+        when(familyResolver.getUserByEmail(INVITED_EMAIL)).thenReturn(invitee);
 
         assertThatThrownBy(() -> invitationService.accept(INVITED_EMAIL, TOKEN))
                 .isInstanceOf(ConflictException.class)
@@ -254,7 +254,7 @@ class InvitationServiceTest {
                 .token(TOKEN).status(InvitationStatus.PENDING)
                 .expiresAt(Instant.now().minus(1, ChronoUnit.DAYS))
                 .build();
-        when(appUserRepository.findByEmail(INVITED_EMAIL)).thenReturn(Optional.of(invitee));
+        when(familyResolver.getUserByEmail(INVITED_EMAIL)).thenReturn(invitee);
         when(invitationRepository.findByToken(TOKEN)).thenReturn(Optional.of(invitation));
 
         assertThatThrownBy(() -> invitationService.accept(INVITED_EMAIL, TOKEN))
@@ -271,7 +271,7 @@ class InvitationServiceTest {
                 .token(TOKEN).status(InvitationStatus.PENDING)
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .build();
-        when(appUserRepository.findByEmail(INVITED_EMAIL)).thenReturn(Optional.of(invitee));
+        when(familyResolver.getUserByEmail(INVITED_EMAIL)).thenReturn(invitee);
         when(invitationRepository.findByToken(TOKEN)).thenReturn(Optional.of(invitation));
 
         assertThatThrownBy(() -> invitationService.accept(INVITED_EMAIL, TOKEN))

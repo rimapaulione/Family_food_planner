@@ -10,6 +10,7 @@ import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.enums.AuthProvider;
 import org.example.planner_backend.model.enums.Role;
 import org.example.planner_backend.repository.AppUserRepository;
+import org.example.planner_backend.util.EmailUtil;
 import org.example.planner_backend.util.TextUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponseDto register(final RegisterRequestDto request) {
-        String email = request.email().trim().toLowerCase();
+        String email = EmailUtil.normalize(request.email());
         if (appUserRepository.existsByEmail(email)) {
             throw new ConflictException("Email already exists");
         }
@@ -47,7 +48,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponseDto login(final LoginRequestDto request) {
-        String email = request.email().trim().toLowerCase();
+        String email = EmailUtil.normalize(request.email());
 
         AppUser user = appUserRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));

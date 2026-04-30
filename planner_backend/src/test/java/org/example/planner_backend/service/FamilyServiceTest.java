@@ -94,7 +94,7 @@ class FamilyServiceTest {
     @Test
     void create_shouldCreateFamilyAndAssignUserAsAdmin() {
         FamilyRequestDto request = new FamilyRequestDto(FAMILY_NAME);
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(familyRepository.save(any(Family.class))).thenAnswer(i -> {
             Family f = i.getArgument(0);
             f.setId(FAMILY_ID);
@@ -113,7 +113,8 @@ class FamilyServiceTest {
     @Test
     void create_shouldThrowNotFoundWhenUserMissing() {
         FamilyRequestDto request = new FamilyRequestDto(FAMILY_NAME);
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+        when(familyResolver.getUserByEmail(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User does not exist"));
 
         assertThatThrownBy(() -> familyService.create(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -125,7 +126,7 @@ class FamilyServiceTest {
     void create_shouldThrowConflictWhenUserAlreadyHasFamily() {
         FamilyRequestDto request = new FamilyRequestDto(FAMILY_NAME);
         user.setFamily(family);
-        when(appUserRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
 
         assertThatThrownBy(() -> familyService.create(EMAIL, request))
                 .isInstanceOf(ConflictException.class)

@@ -5,13 +5,16 @@ import type {FamilyMember} from '@/types/family';
 interface FamilyMemberCardProps {
     member: FamilyMember;
     isCurrentUser: boolean;
+    canEditRole: boolean;
+    onRoleClick?: () => void;
 }
 
-export function FamilyMemberCard({member, isCurrentUser}: FamilyMemberCardProps) {
+export function FamilyMemberCard({member, isCurrentUser, canEditRole, onRoleClick}: FamilyMemberCardProps) {
     const initial = member.displayName.charAt(0).toUpperCase();
     const roleClass = member.role === 'ADMIN'
         ? 'bg-primary text-primary-foreground'
         : 'bg-secondary text-secondary-foreground';
+    const badgeClasses = `flex-none rounded-full px-2 py-0.5 text-xs ${roleClass}`;
 
     return (
         <Card padding="sm">
@@ -28,9 +31,17 @@ export function FamilyMemberCard({member, isCurrentUser}: FamilyMemberCardProps)
                         <p className="truncate text-xs text-muted-foreground">{member.email}</p>
                     </div>
                 </div>
-                <span className={`flex-none rounded-full px-2 py-0.5 text-xs ${roleClass}`}>
-                    {member.role}
-                </span>
+                {canEditRole ? (
+                    <button
+                        type="button"
+                        onClick={onRoleClick}
+                        className={`${badgeClasses} cursor-pointer hover:opacity-80`}
+                    >
+                        {member.role}
+                    </button>
+                ) : (
+                    <span className={badgeClasses}>{member.role}</span>
+                )}
             </div>
         </Card>
     );

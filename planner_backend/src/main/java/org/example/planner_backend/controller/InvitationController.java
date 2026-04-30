@@ -36,7 +36,7 @@ public class InvitationController {
     }
 
     @GetMapping("/family")
-    public List<InvitationResponseDto> listPending(@AuthenticationPrincipal String email) {
+    public List<InvitationResponseDto> getListPending(@AuthenticationPrincipal String email) {
         return invitationService.getListPending(email);
     }
 

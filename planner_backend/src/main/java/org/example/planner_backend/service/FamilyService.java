@@ -38,8 +38,7 @@ public class FamilyService {
 
     @Transactional
     public FamilyResponseDto create(final String creatorEmail, final FamilyRequestDto request) {
-        AppUser creator = appUserRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        AppUser creator = familyResolver.getUserByEmail(creatorEmail);
 
         if (creator.getFamily() != null) {
             throw new ConflictException("User already has a family");
@@ -58,39 +57,18 @@ public class FamilyService {
 
         copySeedIngredients(family);
 
-        List<AppUser> users = appUserRepository.findByFamilyId(family.getId());
-
-        return new FamilyResponseDto(
-                family.getId(),
-                family.getName(),
-                family.getShoppingDay(),
-                family.getDefaultWeekdayServings(),
-                family.getDefaultWeekendServings(),
-                family.isSetupCompleted(),
-                familyMapper.toMembers(users)
-        );
+        return this.buildFamilyResponse(family);
     }
 
     @Transactional(readOnly = true)
     public FamilyResponseDto getMyFamily(final String email) {
         Family family = familyResolver.getFamilyByEmail(email);
-        List<AppUser> members = appUserRepository.findByFamilyId(family.getId());
-
-        return new FamilyResponseDto(
-                family.getId(),
-                family.getName(),
-                family.getShoppingDay(),
-                family.getDefaultWeekdayServings(),
-                family.getDefaultWeekendServings(),
-                family.isSetupCompleted(),
-                familyMapper.toMembers(members)
-        );
+        return this.buildFamilyResponse(family);
     }
 
     @Transactional
     public FamilyResponseDto updateSettings(final String email,
                                             final FamilySettingsRequestDto request) {
-
         Family family = familyResolver.getAdminUser(email).getFamily();
         family.setName(request.name());
         family.setShoppingDay(request.shoppingDay());
@@ -98,18 +76,7 @@ public class FamilyService {
         family.setDefaultWeekendServings(request.defaultWeekendServings());
         family.setSetupCompleted(request.isSetupCompleted());
 
-        List<AppUser> members =
-                appUserRepository.findByFamilyId(family.getId());
-
-        return new FamilyResponseDto(
-                family.getId(),
-                family.getName(),
-                family.getShoppingDay(),
-                family.getDefaultWeekdayServings(),
-                family.getDefaultWeekendServings(),
-                family.isSetupCompleted(),
-                familyMapper.toMembers(members)
-        );
+        return this.buildFamilyResponse(family);
     }
 
     @Transactional
@@ -138,7 +105,11 @@ public class FamilyService {
 
         member.setRole(request.role());
 
-        Family family = admin.getFamily();
+        return this.buildFamilyResponse(admin.getFamily());
+
+    }
+
+    private FamilyResponseDto buildFamilyResponse(Family family) {
         List<AppUser> members = appUserRepository.findByFamilyId(family.getId());
         return new FamilyResponseDto(
                 family.getId(),

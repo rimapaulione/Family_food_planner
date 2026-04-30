@@ -10,7 +10,6 @@ import org.example.planner_backend.mapper.UserMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.enums.AuthProvider;
 import org.example.planner_backend.model.enums.Role;
-import org.example.planner_backend.repository.AppUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +40,7 @@ class UserServiceTest {
     private static final String NEW_PASSWORD = "newpassword456";
 
     @Mock
-    private AppUserRepository userRepository;
+    private FamilyResolver familyResolver;
 
     @Mock
     private UserMapper userMapper;
@@ -74,7 +72,7 @@ class UserServiceTest {
 
     @Test
     void getUser_shouldReturnDtoOnSuccess() {
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(userResponse);
 
         UserResponseDto response = userService.getUser(EMAIL);
@@ -84,7 +82,8 @@ class UserServiceTest {
 
     @Test
     void getUser_shouldThrowNotFoundWhenEmailUnknown() {
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+        when(familyResolver.getUserByEmail(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User does not exist"));
 
         assertThatThrownBy(() -> userService.getUser(EMAIL))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -96,7 +95,7 @@ class UserServiceTest {
     @Test
     void update_shouldUpdateDisplayNameAndAvatarUrl() {
         UserUpdateRequestDto request = new UserUpdateRequestDto("new name", "https://new.url/avatar.png");
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(userResponse);
 
         userService.update(EMAIL, request);
@@ -108,7 +107,7 @@ class UserServiceTest {
     @Test
     void update_shouldSetAvatarUrlToNullWhenNullProvided() {
         UserUpdateRequestDto request = new UserUpdateRequestDto("name", null);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(userResponse);
 
         userService.update(EMAIL, request);
@@ -119,7 +118,8 @@ class UserServiceTest {
     @Test
     void update_shouldThrowNotFoundWhenUserMissing() {
         UserUpdateRequestDto request = new UserUpdateRequestDto("name", null);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+        when(familyResolver.getUserByEmail(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User does not exist"));
 
         assertThatThrownBy(() -> userService.update(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -130,7 +130,7 @@ class UserServiceTest {
     @Test
     void changePassword_shouldEncodeAndSetNewPassword() {
         PasswordUpdateRequestDto request = new PasswordUpdateRequestDto(CURRENT_PASSWORD, NEW_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(passwordEncoder.matches(CURRENT_PASSWORD, CURRENT_HASH)).thenReturn(true);
         when(passwordEncoder.matches(NEW_PASSWORD, CURRENT_HASH)).thenReturn(false);
         when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(NEW_HASH);
@@ -150,7 +150,7 @@ class UserServiceTest {
                 .role(Role.USER)
                 .build();
         PasswordUpdateRequestDto request = new PasswordUpdateRequestDto(CURRENT_PASSWORD, NEW_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(oauthUser));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(oauthUser);
 
         assertThatThrownBy(() -> userService.changePassword(EMAIL, request))
                 .isInstanceOf(UnauthorizedException.class)
@@ -162,7 +162,7 @@ class UserServiceTest {
     @Test
     void changePassword_shouldThrowUnauthorizedWhenCurrentPasswordWrong() {
         PasswordUpdateRequestDto request = new PasswordUpdateRequestDto("wrong", NEW_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(passwordEncoder.matches("wrong", CURRENT_HASH)).thenReturn(false);
 
         assertThatThrownBy(() -> userService.changePassword(EMAIL, request))
@@ -175,7 +175,7 @@ class UserServiceTest {
     @Test
     void changePassword_shouldThrowConflictWhenNewEqualsCurrent() {
         PasswordUpdateRequestDto request = new PasswordUpdateRequestDto(CURRENT_PASSWORD, CURRENT_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(familyResolver.getUserByEmail(EMAIL)).thenReturn(user);
         when(passwordEncoder.matches(CURRENT_PASSWORD, CURRENT_HASH)).thenReturn(true);
 
         assertThatThrownBy(() -> userService.changePassword(EMAIL, request))
@@ -188,7 +188,8 @@ class UserServiceTest {
     @Test
     void changePassword_shouldThrowNotFoundWhenUserMissing() {
         PasswordUpdateRequestDto request = new PasswordUpdateRequestDto(CURRENT_PASSWORD, NEW_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+        when(familyResolver.getUserByEmail(EMAIL))
+                .thenThrow(new ResourceNotFoundException("User does not exist"));
 
         assertThatThrownBy(() -> userService.changePassword(EMAIL, request))
                 .isInstanceOf(ResourceNotFoundException.class);

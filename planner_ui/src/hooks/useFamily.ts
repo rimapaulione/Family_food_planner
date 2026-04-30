@@ -3,6 +3,7 @@ import {toast} from 'sonner';
 import api from '@/api/axios';
 import {useAuthStore} from '@/stores/useAuthStore';
 import {ROLE} from '@/types/auth';
+import type {Role} from '@/types/auth';
 import type {Family, FamilyCreateRequest, FamilyUpdateRequest} from '@/types/family';
 import {getErrorMessage} from '@/utils/getErrorMessage';
 
@@ -50,5 +51,23 @@ export function useUpdateFamily() {
             toast.success('Family updated');
         },
         onError: (err) => toast.error(getErrorMessage(err, 'Failed to update family')),
+    });
+}
+
+export function useUpdateMemberRole() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({memberId, role}: {memberId: string; role: Role}) => {
+            const {data} = await api.patch<Family>(
+                `/families/members/${memberId}/role`,
+                {role},
+            );
+            return data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(['family', 'me'], data);
+            toast.success('Member role updated');
+        },
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to update member role')),
     });
 }

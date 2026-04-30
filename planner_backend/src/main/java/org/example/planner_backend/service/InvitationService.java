@@ -15,6 +15,7 @@ import org.example.planner_backend.model.entity.FamilyInvitation;
 import org.example.planner_backend.model.enums.InvitationStatus;
 import org.example.planner_backend.repository.AppUserRepository;
 import org.example.planner_backend.repository.InvitationRepository;
+import org.example.planner_backend.util.EmailUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,9 +42,9 @@ public class InvitationService {
         AppUser admin = familyResolver.getAdminUser(email);
         Family family = admin.getFamily();
 
-        String invitedEmail = request.email().trim().toLowerCase();
+        String invitedEmail = EmailUtil.normalize(request.email());
 
-        if (invitedEmail.equalsIgnoreCase(email)) {
+        if (invitedEmail.equals(email)) {
             throw new ConflictException("You cannot invite yourself");
         }
 
@@ -104,8 +105,8 @@ public class InvitationService {
 
     @Transactional
     public FamilyResponseDto accept(final String email, final String token) {
-        AppUser user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        AppUser user = familyResolver.getUserByEmail(email);
+
         if (user.getFamily() != null) {
             throw new ConflictException("You already belong to a family");
         }
@@ -120,7 +121,7 @@ public class InvitationService {
             invitation.setStatus(InvitationStatus.EXPIRED);
             throw new ConflictException("Invitation has expired");
         }
-        if (!invitation.getInvitedEmail().equalsIgnoreCase(email)) {
+        if (!invitation.getInvitedEmail().equals(email)) {
             throw new UnauthorizedException("Invitation is for a different email");
         }
 
