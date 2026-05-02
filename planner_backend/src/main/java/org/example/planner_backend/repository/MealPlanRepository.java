@@ -14,4 +14,9 @@ public interface MealPlanRepository extends JpaRepository<MealPlan, UUID> {
 
     @EntityGraph(attributePaths = {"slots", "slots.recipe"})
     Optional<MealPlan> findByFamilyIdAndStartDate(UUID familyId, LocalDate startDate);
+
+    @Override
+    @EntityGraph(attributePaths = {"slots", "slots.recipe"})
+    @SuppressWarnings("NullableProblems")
+    Optional<MealPlan> findById(UUID id);
 }
