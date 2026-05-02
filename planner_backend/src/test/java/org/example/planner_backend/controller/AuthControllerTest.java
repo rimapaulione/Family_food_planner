@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@WithMockUser
+@WithMockUser(username = "user@example.com", roles = "USER")
 class AuthControllerTest {
 
     private static final UUID USER_ID = UUID.fromString("55555555-5555-5555-5555-555555555555");

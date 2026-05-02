@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(RecipeController.class)
-@WithMockUser(username = "test@example.com", roles = "USER")
+@WithMockUser(username = "user@example.com", roles = "USER")
 class RecipeControllerTest {
     private static final UUID RECIPE_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final String RECIPE_NAME = "Blynai";

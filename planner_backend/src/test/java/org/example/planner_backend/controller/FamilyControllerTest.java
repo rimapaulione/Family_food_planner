@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FamilyController.class)
-@WithMockUser(username = "user@example.com", roles = "ADMIN")
+@WithMockUser(username = "user@example.com", roles = "USER")
 class FamilyControllerTest {
 
     private static final UUID USER_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
