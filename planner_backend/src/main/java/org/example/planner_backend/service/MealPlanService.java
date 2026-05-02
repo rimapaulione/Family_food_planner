@@ -44,7 +44,7 @@ public class MealPlanService {
 
 
     @Transactional
-    public MealPlanWindowResponseDto getWindow(final String email) {
+    public MealPlanWindowResponseDto getCurrentAndNext(final String email) {
 
         Family family = familyResolver.getFamilyByEmail(email);
         LocalDate startOfCurrentWeek = LocalDate.now().with(DayOfWeek.MONDAY);

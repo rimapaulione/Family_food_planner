@@ -92,10 +92,10 @@ class MealPlanServiceTest {
         recipe = Recipe.builder().id(RECIPE_ID).name("Pasta").family(family).build();
     }
 
-    // ---------- getWindow ----------
+    // ---------- getCurrentAndNext ----------
 
     @Test
-    void getWindow_shouldCreateBothPlansWhenMissing() {
+    void getCurrentAndNext_shouldCreateBothPlansWhenMissing() {
         when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
         when(mealPlanRepository.findByFamilyIdAndStartDate(any(), any())).thenReturn(Optional.empty());
         when(mealPlanRepository.save(any(MealPlan.class))).thenAnswer(i -> {
@@ -105,19 +105,19 @@ class MealPlanServiceTest {
         });
         when(mealSlotRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
 
-        mealPlanService.getWindow(EMAIL);
+        mealPlanService.getCurrentAndNext(EMAIL);
 
         verify(mealPlanRepository, times(2)).save(any(MealPlan.class));
         verify(mealSlotRepository, times(2)).saveAll(any());
     }
 
     @Test
-    void getWindow_shouldReturnExistingPlansWithoutCreating() {
+    void getCurrentAndNext_shouldReturnExistingPlansWithoutCreating() {
         MealPlan existing = MealPlan.builder().id(PLAN_ID).family(family).status(PlanStatus.DRAFT).build();
         when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
         when(mealPlanRepository.findByFamilyIdAndStartDate(any(), any())).thenReturn(Optional.of(existing));
 
-        mealPlanService.getWindow(EMAIL);
+        mealPlanService.getCurrentAndNext(EMAIL);
 
         verify(mealPlanRepository, never()).save(any());
         verify(mealSlotRepository, never()).saveAll(any());

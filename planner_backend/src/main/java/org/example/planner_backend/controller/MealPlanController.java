@@ -27,11 +27,11 @@ public class MealPlanController {
 
     private final MealPlanService mealPlanService;
 
-    @GetMapping("/window")
-    public ResponseEntity<MealPlanWindowResponseDto> getWindow(
+    @GetMapping("/current-and-next")
+    public ResponseEntity<MealPlanWindowResponseDto> getCurrentAndNext(
             @AuthenticationPrincipal String email
     ) {
-        return ResponseEntity.ok(mealPlanService.getWindow(email));
+        return ResponseEntity.ok(mealPlanService.getCurrentAndNext(email));
     }
 
     @PatchMapping("/{id}")

@@ -53,7 +53,7 @@ class MealPlanControllerTest {
     private JwtService jwtService;
 
     private MealSlotResponseDto sampleSlot() {
-        return new MealSlotResponseDto(SLOT_ID, WEEK_START, MealType.BREAKFAST, null, null, null);
+        return new MealSlotResponseDto(SLOT_ID, WEEK_START, MealType.BREAKFAST, null, null, null, null);
     }
 
     private MealPlanResponseDto samplePlan() {
@@ -64,13 +64,13 @@ class MealPlanControllerTest {
         return new MealPlanWindowResponseDto(samplePlan(), samplePlan());
     }
 
-    // ---------- GET /api/v1/meal-plans/window ----------
+    // ---------- GET /api/v1/meal-plans/current-and-next ----------
 
     @Test
     void test_shouldReturn200WithWindow() throws Exception {
-        when(mealPlanService.getWindow(any())).thenReturn(sampleWindow());
+        when(mealPlanService.getCurrentAndNext(any())).thenReturn(sampleWindow());
 
-        mockMvc.perform(get("/api/v1/meal-plans/window"))
+        mockMvc.perform(get("/api/v1/meal-plans/current-and-next"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.currentWeek.id").value(PLAN_ID.toString()))
                 .andExpect(jsonPath("$.currentWeek.status").value("DRAFT"))
@@ -79,10 +79,10 @@ class MealPlanControllerTest {
 
     @Test
     void test_shouldReturn404WhenUserHasNoFamily() throws Exception {
-        when(mealPlanService.getWindow(any()))
+        when(mealPlanService.getCurrentAndNext(any()))
                 .thenThrow(new ResourceNotFoundException("User has no family"));
 
-        mockMvc.perform(get("/api/v1/meal-plans/window"))
+        mockMvc.perform(get("/api/v1/meal-plans/current-and-next"))
                 .andExpect(status().isNotFound());
     }
 
@@ -144,7 +144,7 @@ class MealPlanControllerTest {
     @Test
     void test_shouldReturn200WhenAssignRecipeToSlot() throws Exception {
         MealSlotResponseDto assigned = new MealSlotResponseDto(
-                SLOT_ID, WEEK_START, MealType.BREAKFAST, RECIPE_ID, "Pasta", 4);
+                SLOT_ID, WEEK_START, MealType.BREAKFAST, RECIPE_ID, "Pasta", 30, 4);
         when(mealPlanService.updateSlot(any(), eq(SLOT_ID), any(MealSlotUpdateRequestDto.class)))
                 .thenReturn(assigned);
 
