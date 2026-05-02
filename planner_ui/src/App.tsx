@@ -17,6 +17,7 @@ import {RecipeEditPage} from '@/pages/recipes/RecipeEditPage';
 import {ProfilePage} from '@/pages/ProfilePage';
 import {FamilyPage} from '@/pages/family/FamilyPage';
 import {JoinPage} from '@/pages/family/JoinPage';
+import {PlannerPage} from '@/pages/planner/PlannerPage';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -52,7 +53,7 @@ function App() {
                                     <Route path=":id" element={<RecipeDetailPage/>}/>
                                     <Route path=":id/edit" element={<RecipeEditPage/>}/>
                                 </Route>
-                                <Route path="/planner" element={<div>Planner</div>}/>
+                                <Route path="/planner" element={<PlannerPage/>}/>
                                 <Route path="/shopping" element={<div>Shopping</div>}/>
                                 <Route path="/basics" element={<div>Always Buy</div>}/>
                                 <Route path="/profile" element={<ProfilePage/>}/>
