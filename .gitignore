@@ -17,6 +17,4 @@ Thumbs.db
 .env.local
 
 # Personal notes
-NOTES.md
-IMPLEMENTATION.md
-DESCRIPTION.md
+notes/
