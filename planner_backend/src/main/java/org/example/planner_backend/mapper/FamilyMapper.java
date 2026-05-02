@@ -10,8 +10,5 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface FamilyMapper {
 
-    @Mapping(target = "userId", source = "id")
-    FamilyMemberDto toMember(AppUser user);
-
     List<FamilyMemberDto> toMembers(List<AppUser> users);
 }

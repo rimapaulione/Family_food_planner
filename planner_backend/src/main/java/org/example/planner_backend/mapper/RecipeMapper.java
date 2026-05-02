@@ -13,9 +13,4 @@ public interface RecipeMapper {
     @Mapping(source = "leftoverRecipe.id", target = "leftoverRecipeId")
     RecipeResponseDto toResponse(Recipe recipe);
 
-    @Mapping(source = "ingredient.id", target = "ingredientId")
-    @Mapping(source = "ingredient.nameLt", target = "ingredientName")
-    @Mapping(source = "ingredient.unit", target = "unit")
-    RecipeResponseDto.RecipeIngredientDto toRecipeIngredientDto(RecipeIngredient
-                                                                        recipeIngredient);
 }
