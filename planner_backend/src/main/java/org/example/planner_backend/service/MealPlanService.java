@@ -14,7 +14,6 @@ import org.example.planner_backend.mapper.MealPlanMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.MealPlan;
-import org.example.planner_backend.model.entity.MealServings;
 import org.example.planner_backend.model.entity.MealSlot;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.enums.MealType;
@@ -109,33 +108,18 @@ public class MealPlanService {
                 .endDate(startOfWeek.plusDays(6))
                 .status(PlanStatus.DRAFT)
                 .build());
-        List<MealSlot> slots = mealSlotRepository.saveAll(generateMealSlots(family, plan));
+        List<MealSlot> slots = mealSlotRepository.saveAll(generateMealSlots(plan));
         plan.setSlots(slots);
         return plan;
     }
 
-    private List<MealSlot> generateMealSlots(final Family family, final MealPlan mealPlan) {
+    private List<MealSlot> generateMealSlots(final MealPlan mealPlan) {
         List<MealSlot> slots = new ArrayList<>();
-
         for (int offset = 0; offset < 7; offset++) {
             LocalDate date = mealPlan.getStartDate().plusDays(offset);
-
-            boolean isWeekend = date.getDayOfWeek() == DayOfWeek.SATURDAY
-                    || date.getDayOfWeek() == DayOfWeek.SUNDAY;
-
-            MealServings active = isWeekend
-                    ? family.getDefaultWeekendServings()
-                    : family.getDefaultWeekdayServings();
-
-            if (active.breakfast() != null) {
-                slots.add(buildSlot(mealPlan, date, MealType.BREAKFAST));
-            }
-            if (active.lunch() != null) {
-                slots.add(buildSlot(mealPlan, date, MealType.LUNCH));
-            }
-            if (active.dinner() != null) {
-                slots.add(buildSlot(mealPlan, date, MealType.DINNER));
-            }
+            slots.add(buildSlot(mealPlan, date, MealType.BREAKFAST));
+            slots.add(buildSlot(mealPlan, date, MealType.LUNCH));
+            slots.add(buildSlot(mealPlan, date, MealType.DINNER));
         }
         return slots;
     }

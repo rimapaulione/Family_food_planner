@@ -1,4 +1,5 @@
 import {CalendarDays} from 'lucide-react';
+import {useFamily} from '@/hooks/useFamily';
 import {useMealPlanCurrentAndNext} from '@/hooks/useMealPlan';
 import {Spinner} from '@/components/ui/Spinner';
 import {ErrorMessage} from '@/components/ui/ErrorMessage';
@@ -7,8 +8,9 @@ import {MealPlanGrid} from '@/components/planner/MealPlanGrid';
 
 export function PlannerPage() {
     const {data, isLoading, isError, error} = useMealPlanCurrentAndNext();
+    const {data: family} = useFamily();
 
-    if (isLoading) return <Spinner/>;
+    if (isLoading || !family) return <Spinner/>;
     if (isError) return <ErrorMessage error={error} fallback="Failed to load meal plan."/>;
     if (!data) return null;
 
@@ -22,6 +24,7 @@ export function PlannerPage() {
                 </h2>
                 <MealPlanGrid
                     plan={data.currentWeek}
+                    family={family}
                     onSlotClick={(id) => console.log('Clicked slot', id)}
                 />
             </section>
@@ -32,6 +35,7 @@ export function PlannerPage() {
                 </h2>
                 <MealPlanGrid
                     plan={data.nextWeek}
+                    family={family}
                     onSlotClick={(id) => console.log('Clicked slot', id)}
                 />
             </section>

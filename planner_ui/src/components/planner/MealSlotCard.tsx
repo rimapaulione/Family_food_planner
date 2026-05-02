@@ -6,9 +6,10 @@ interface MealSlotCardProps {
     slot: MealSlot;
     onClick?: () => void;
     disabled?: boolean;
+    muted?: boolean;
 }
 
-export function MealSlotCard({slot, onClick, disabled}: MealSlotCardProps) {
+export function MealSlotCard({slot, onClick, disabled, muted}: MealSlotCardProps) {
     const isAssigned = slot.recipeId !== null;
 
     const handleClick = () => {
@@ -16,12 +17,16 @@ export function MealSlotCard({slot, onClick, disabled}: MealSlotCardProps) {
         onClick?.();
     };
 
+    const containerClass = `w-full text-left disabled:cursor-not-allowed disabled:opacity-50 ${
+        muted ? 'opacity-40' : ''
+    }`;
+
     return (
         <button
             type="button"
             onClick={handleClick}
             disabled={disabled}
-            className="w-full text-left disabled:cursor-not-allowed disabled:opacity-50"
+            className={containerClass}
         >
             <Card variant={isAssigned ? 'solid' : 'dashed'} padding="sm">
                 {isAssigned ? (

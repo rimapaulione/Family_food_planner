@@ -1,5 +1,6 @@
 import {Fragment} from 'react';
 import {MealSlotCard} from './MealSlotCard';
+import type {Family} from '@/types/family';
 import type {MealPlan, MealType} from '@/types/mealPlan';
 import {MEAL_TYPE} from '@/types/mealPlan';
 
@@ -13,11 +14,12 @@ const MEAL_LABELS: Record<MealType, string> = {
 
 interface MealPlanGridProps {
     plan: MealPlan;
+    family: Family;
     onSlotClick?: (slotId: string) => void;
     disabled?: boolean;
 }
 
-export function MealPlanGrid({plan, onSlotClick, disabled}: MealPlanGridProps) {
+export function MealPlanGrid({plan, family, onSlotClick, disabled}: MealPlanGridProps) {
     const days = getWeekDates(plan.startDate);
 
     return (
@@ -38,15 +40,16 @@ export function MealPlanGrid({plan, onSlotClick, disabled}: MealPlanGridProps) {
                         const slot = plan.slots.find(
                             (s) => s.date === date && s.mealType === mealType,
                         );
+                        if (!slot) return <div key={`${mealType}-${date}`}/>;
+                        const isMuted = slot.recipeId === null && !isMealActive(date, mealType, family);
                         return (
                             <div key={`${mealType}-${date}`}>
-                                {slot ? (
-                                    <MealSlotCard
-                                        slot={slot}
-                                        onClick={() => onSlotClick?.(slot.id)}
-                                        disabled={disabled}
-                                    />
-                                ) : null}
+                                <MealSlotCard
+                                    slot={slot}
+                                    onClick={() => onSlotClick?.(slot.id)}
+                                    disabled={disabled}
+                                    muted={isMuted}
+                                />
                             </div>
                         );
                     })}
@@ -54,6 +57,16 @@ export function MealPlanGrid({plan, onSlotClick, disabled}: MealPlanGridProps) {
             ))}
         </div>
     );
+}
+
+function isMealActive(date: string, mealType: MealType, family: Family): boolean {
+    const dow = new Date(date + 'T00:00:00Z').getUTCDay();
+    const isWeekend = dow === 0 || dow === 6;
+    const servings = isWeekend ? family.defaultWeekendServings : family.defaultWeekdayServings;
+    if (mealType === MEAL_TYPE.BREAKFAST) return servings.breakfast !== null;
+    if (mealType === MEAL_TYPE.LUNCH) return servings.lunch !== null;
+    if (mealType === MEAL_TYPE.DINNER) return servings.dinner !== null;
+    return false;
 }
 
 function getWeekDates(startDate: string): string[] {

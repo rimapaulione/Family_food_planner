@@ -123,6 +123,33 @@ class MealPlanServiceTest {
         verify(mealSlotRepository, never()).saveAll(any());
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void getCurrentAndNext_shouldGenerate21SlotsPerWeek() {
+        ArgumentCaptor<List<MealSlot>> captor = ArgumentCaptor.forClass(List.class);
+        when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
+        when(mealPlanRepository.findByFamilyIdAndStartDate(any(), any())).thenReturn(Optional.empty());
+        when(mealPlanRepository.save(any(MealPlan.class))).thenAnswer(i -> {
+            MealPlan p = i.getArgument(0);
+            p.setId(UUID.randomUUID());
+            return p;
+        });
+        when(mealSlotRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
+
+        mealPlanService.getCurrentAndNext(EMAIL);
+
+        verify(mealSlotRepository, times(2)).saveAll(captor.capture());
+        List<MealSlot> firstWeekSlots = captor.getAllValues().get(0);
+        // 7 days × 3 meal types = 21 slots, regardless of family settings
+        assertThat(firstWeekSlots).hasSize(21);
+        assertThat(firstWeekSlots.stream().filter(s -> s.getMealType() == MealType.BREAKFAST).count())
+                .isEqualTo(7);
+        assertThat(firstWeekSlots.stream().filter(s -> s.getMealType() == MealType.LUNCH).count())
+                .isEqualTo(7);
+        assertThat(firstWeekSlots.stream().filter(s -> s.getMealType() == MealType.DINNER).count())
+                .isEqualTo(7);
+    }
+
 
     // ---------- updateSlot ----------
 
