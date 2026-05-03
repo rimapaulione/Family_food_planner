@@ -55,7 +55,6 @@ function App() {
                                 </Route>
                                 <Route path="/planner" element={<PlannerPage/>}/>
                                 <Route path="/shopping" element={<div>Shopping</div>}/>
-                                <Route path="/basics" element={<div>Always Buy</div>}/>
                                 <Route path="/profile" element={<ProfilePage/>}/>
                                 <Route path="/family" element={<FamilyPage/>}/>
                                 <Route path="*" element={<Navigate to="/" replace/>}/>

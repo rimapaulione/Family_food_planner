@@ -11,6 +11,5 @@ export const navItems: NavItem[] = [
     {to: '/recipes', icon: UtensilsCrossed, label: 'Recipes'},
     {to: '/planner', icon: CalendarDays, label: 'Planner'},
     {to: '/shopping', icon: ShoppingCart, label: 'Shopping'},
-    {to: '/basics', icon: ShoppingBasket, label: 'Always Buy'},
     {to: '/family', icon: Users, label: 'Family'},
 ];

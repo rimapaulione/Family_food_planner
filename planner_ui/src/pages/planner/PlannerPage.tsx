@@ -5,7 +5,7 @@ import {useMealPlanCurrentAndNext, useUpdateMealSlot} from '@/hooks/useMealPlan'
 import {Spinner} from '@/components/ui/Spinner';
 import {ErrorMessage} from '@/components/ui/ErrorMessage';
 import {SectionHeader} from '@/components/ui/SectionHeader';
-import {MealPlanGrid} from '@/components/planner/MealPlanGrid';
+import {PlannerWeekSection} from '@/components/planner/PlannerWeekSection';
 import {MealSlotEditModal} from '@/components/planner/MealSlotEditModal';
 
 export function PlannerPage() {
@@ -37,29 +37,18 @@ export function PlannerPage() {
         <div className="mx-auto max-w-6xl space-y-8">
             <SectionHeader icon={CalendarDays} title="Meal Plan" level="h1"/>
 
-            <section className="space-y-3">
-                <h2 className="text-lg font-semibold">
-                    Week {data.currentWeek.startDate} – {data.currentWeek.endDate}
-                </h2>
-                <MealPlanGrid
-                    plan={data.currentWeek}
-                    family={family}
-                    onSlotClick={setEditingSlotId}
-                    onSlotRemove={handleRemove}
-                />
-            </section>
-
-            <section className="space-y-3">
-                <h2 className="text-lg font-semibold">
-                    Week {data.nextWeek.startDate} – {data.nextWeek.endDate}
-                </h2>
-                <MealPlanGrid
-                    plan={data.nextWeek}
-                    family={family}
-                    onSlotClick={setEditingSlotId}
-                    onSlotRemove={handleRemove}
-                />
-            </section>
+            <PlannerWeekSection
+                plan={data.currentWeek}
+                family={family}
+                onSlotClick={setEditingSlotId}
+                onSlotRemove={handleRemove}
+            />
+            <PlannerWeekSection
+                plan={data.nextWeek}
+                family={family}
+                onSlotClick={setEditingSlotId}
+                onSlotRemove={handleRemove}
+            />
 
             {editingSlot && (
                 <MealSlotEditModal
