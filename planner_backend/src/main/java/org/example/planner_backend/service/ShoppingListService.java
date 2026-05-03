@@ -1,8 +1,11 @@
 package org.example.planner_backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.planner_backend.dto.shopping.MarkBoughtRequestDto;
 import org.example.planner_backend.dto.shopping.ShoppingItemDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
+import org.example.planner_backend.exception.BadRequestException;
+import org.example.planner_backend.exception.UnauthorizedException;
 import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.model.entity.MealPlan;
@@ -11,6 +14,7 @@ import org.example.planner_backend.model.entity.MealSlot;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.RecipeIngredient;
 import org.example.planner_backend.model.entity.ShoppingListPlanHistory;
+import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.MealPlanRepository;
 import org.example.planner_backend.repository.ShoppingListPlanHistoryRepository;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,7 @@ public class ShoppingListService {
 
     private final MealPlanRepository mealPlanRepository;
     private final ShoppingListPlanHistoryRepository planHistoryRepository;
+    private final IngredientRepository ingredientRepository;
     private final FamilyResolver familyResolver;
 
     @Transactional(readOnly = true)
@@ -75,6 +80,44 @@ public class ShoppingListService {
         }
 
         return new ShoppingListResponseDto(weekStart, weekEnd, items);
+    }
+
+    @Transactional
+    public void markBought(final String email, final MarkBoughtRequestDto request) {
+        validateWeekStart(request.weekStart());
+        Family family = familyResolver.getFamilyByEmail(email);
+        Ingredient ingredient = ingredientRepository
+                .findByIdAndFamilyId(request.ingredientId(), family.getId())
+                .orElseThrow(() -> new UnauthorizedException("Ingredient not in your family"));
+
+        planHistoryRepository
+                .findByFamilyIdAndWeekStartAndIngredientId(family.getId(), request.weekStart(), request.ingredientId())
+                .ifPresentOrElse(
+                        existing -> existing.setQuantity(request.quantity()),
+                        () -> planHistoryRepository.save(ShoppingListPlanHistory.builder()
+                                .family(family)
+                                .weekStart(request.weekStart())
+                                .ingredient(ingredient)
+                                .quantity(request.quantity())
+                                .build())
+                );
+    }
+
+    @Transactional
+    public void markUnbought(final String email, final MarkBoughtRequestDto request) {
+        validateWeekStart(request.weekStart());
+        Family family = familyResolver.getFamilyByEmail(email);
+        planHistoryRepository
+                .findByFamilyIdAndWeekStartAndIngredientId(family.getId(), request.weekStart(), request.ingredientId())
+                .ifPresent(planHistoryRepository::delete);
+    }
+
+    private void validateWeekStart(final LocalDate weekStart) {
+        LocalDate currentMonday = LocalDate.now().with(DayOfWeek.MONDAY);
+        LocalDate nextMonday = currentMonday.plusWeeks(1);
+        if (!weekStart.equals(currentMonday) && !weekStart.equals(nextMonday)) {
+            throw new BadRequestException("weekStart must be current or next week's Monday");
+        }
     }
 
     private Map<UUID, AggregatedItem> aggregatePlanItems(final MealPlan plan, final Family family) {
