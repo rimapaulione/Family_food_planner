@@ -1,5 +1,5 @@
 import type {KeyboardEvent} from 'react';
-import {Plus, Clock, User, X} from 'lucide-react';
+import {Plus, Clock, Pencil, User, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {Card} from '@/components/ui/Card';
 import {LONG_COOKING_MINUTES} from '@/constants/mealPlan';
@@ -36,7 +36,7 @@ export function MealSlotCard({slot, effectiveServings, onClick, onRemove, disabl
         }
     };
 
-    const wrapperClass = `group relative w-full text-left ${
+    const wrapperClass = `group relative block w-full text-left no-underline ${
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
     } ${muted ? 'opacity-40' : ''}`;
 
@@ -65,23 +65,16 @@ export function MealSlotCard({slot, effectiveServings, onClick, onRemove, disabl
         : '';
 
     return (
-        <div
-            role="button"
-            tabIndex={disabled ? -1 : 0}
-            onClick={handleClick}
-            onKeyDown={handleKeyDown}
+        <Link
+            to={`/recipes/${slot.recipeId}`}
+            state={{from: '/planner'}}
             className={wrapperClass}
         >
             <Card padding="sm" className={`min-h-[3.5rem] ${longCookClass}`}>
                 <div className="flex h-full flex-col justify-between gap-1">
-                    <Link
-                        to={`/recipes/${slot.recipeId}`}
-                        state={{from: '/planner'}}
-                        onClick={(e) => e.stopPropagation()}
-                        className="block truncate text-sm font-medium text-foreground hover:underline"
-                    >
+                    <span className="block truncate text-sm font-medium text-foreground">
                         {slot.recipeName}
-                    </Link>
+                    </span>
                     <div className={`flex items-center gap-2 text-xs ${
                         isLongCook ? 'text-orange-700 dark:text-orange-400' : 'text-muted-foreground'
                     }`}>
@@ -100,19 +93,38 @@ export function MealSlotCard({slot, effectiveServings, onClick, onRemove, disabl
                     </div>
                 </div>
             </Card>
-            {onRemove && !disabled && (
-                <button
-                    type="button"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onRemove();
-                    }}
-                    className="absolute -right-1.5 -top-1.5 block rounded-full bg-destructive p-0.5 text-destructive-foreground shadow md:hidden md:group-hover:block"
-                    aria-label="Remove recipe"
-                >
-                    <X className="h-3 w-3"/>
-                </button>
+            {(onClick || onRemove) && !disabled && (
+                <div className="absolute -right-2 -top-2 flex gap-1 md:hidden md:group-hover:flex">
+                    {onClick && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onClick();
+                            }}
+                            className="rounded-full bg-secondary p-1.5 text-secondary-foreground shadow"
+                            aria-label="Edit slot"
+                        >
+                            <Pencil className="h-4 w-4"/>
+                        </button>
+                    )}
+                    {onRemove && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onRemove();
+                            }}
+                            className="rounded-full bg-destructive p-1.5 text-destructive-foreground shadow"
+                            aria-label="Remove recipe"
+                        >
+                            <X className="h-4 w-4"/>
+                        </button>
+                    )}
+                </div>
             )}
-        </div>
+        </Link>
     );
 }

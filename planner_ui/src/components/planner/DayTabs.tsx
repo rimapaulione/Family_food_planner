@@ -1,3 +1,4 @@
+import {TabBar} from '@/components/ui/TabBar';
 import {TabButton} from '@/components/ui/TabButton';
 import {formatDayOfMonth, formatWeekdayShort} from '@/utils/mealPlanHelpers';
 
@@ -9,7 +10,7 @@ interface DayTabsProps {
 
 export function DayTabs({dates, activeIndex, onSelect}: DayTabsProps) {
     return (
-        <div className="flex gap-3 overflow-x-auto border-b border-border">
+        <TabBar className="overflow-x-auto">
             {dates.map((date, idx) => (
                 <TabButton
                     key={date}
@@ -18,6 +19,6 @@ export function DayTabs({dates, activeIndex, onSelect}: DayTabsProps) {
                     onClick={() => onSelect(idx)}
                 />
             ))}
-        </div>
+        </TabBar>
     );
 }

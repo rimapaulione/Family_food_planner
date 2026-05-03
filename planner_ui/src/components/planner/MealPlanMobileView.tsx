@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {Lock, Unlock} from 'lucide-react';
 import {Button} from '@/components/ui/Button';
+import {TabBar} from '@/components/ui/TabBar';
 import {TabButton} from '@/components/ui/TabButton';
 import {DayTabs} from './DayTabs';
 import {MealRow} from './MealRow';
@@ -29,7 +30,7 @@ export function MealPlanMobileView({
     family,
     onSlotClick,
     onSlotRemove,
-}: MealPlanMobileViewProps) {
+}: MealPlanMobileViewProps) {{
     const isAdmin = useAuthStore((s) => s.role === ROLE.ADMIN);
     const updatePlanMutation = useUpdateMealPlan();
 
@@ -62,7 +63,7 @@ export function MealPlanMobileView({
 
     return (
         <div className="space-y-3">
-            <div className="flex gap-3 border-b border-border">
+            <TabBar>
                 <TabButton
                     label="This week"
                     isActive={isCurrentWeekActive}
@@ -73,7 +74,7 @@ export function MealPlanMobileView({
                     isActive={!isCurrentWeekActive}
                     onClick={() => setActiveDayIso(nextDays[0])}
                 />
-            </div>
+            </TabBar>
 
             <div className="flex items-center justify-between gap-2">
                 <div className="text-sm text-muted-foreground">

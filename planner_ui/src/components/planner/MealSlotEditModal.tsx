@@ -81,6 +81,18 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
         onClose();
     };
 
+    const handleSaveServings = async () => {
+        const isValid = await trigger();
+        if (!isValid) return;
+        const {servings} = getValues();
+        const servingsValue = servings === '' ? null : Number(servings);
+        await updateMutation.mutateAsync({
+            slotId: slot.id,
+            request: {recipeId: slot.recipeId, servings: servingsValue},
+        });
+        onClose();
+    };
+
     const handleClear = async () => {
         await updateMutation.mutateAsync({
             slotId: slot.id,
@@ -135,6 +147,16 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
                             {...register('servings')}
                             className="w-20 rounded-md border border-input bg-background px-2 py-1 text-base outline-none focus:ring-2 focus:ring-ring md:text-sm"
                         />
+                        {slot.recipeId !== null && (
+                            <button
+                                type="button"
+                                onClick={handleSaveServings}
+                                disabled={updateMutation.isPending}
+                                className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                            >
+                                Save
+                            </button>
+                        )}
                     </div>
                     {errors.servings && (
                         <p className="text-xs text-destructive">{errors.servings.message}</p>
