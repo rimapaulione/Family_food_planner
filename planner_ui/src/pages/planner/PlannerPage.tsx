@@ -6,6 +6,7 @@ import {Spinner} from '@/components/ui/Spinner';
 import {ErrorMessage} from '@/components/ui/ErrorMessage';
 import {SectionHeader} from '@/components/ui/SectionHeader';
 import {PlannerWeekSection} from '@/components/planner/PlannerWeekSection';
+import {MealPlanMobileView} from '@/components/planner/MealPlanMobileView';
 import {MealSlotEditModal} from '@/components/planner/MealSlotEditModal';
 
 export function PlannerPage() {
@@ -37,18 +38,29 @@ export function PlannerPage() {
         <div className="mx-auto max-w-6xl space-y-8">
             <SectionHeader icon={CalendarDays} title="Meal Plan" level="h1"/>
 
-            <PlannerWeekSection
-                plan={data.currentWeek}
-                family={family}
-                onSlotClick={setEditingSlotId}
-                onSlotRemove={handleRemove}
-            />
-            <PlannerWeekSection
-                plan={data.nextWeek}
-                family={family}
-                onSlotClick={setEditingSlotId}
-                onSlotRemove={handleRemove}
-            />
+            <div className="hidden space-y-8 md:block">
+                <PlannerWeekSection
+                    plan={data.currentWeek}
+                    family={family}
+                    onSlotClick={setEditingSlotId}
+                    onSlotRemove={handleRemove}
+                />
+                <PlannerWeekSection
+                    plan={data.nextWeek}
+                    family={family}
+                    onSlotClick={setEditingSlotId}
+                    onSlotRemove={handleRemove}
+                />
+            </div>
+            <div className="md:hidden">
+                <MealPlanMobileView
+                    currentWeek={data.currentWeek}
+                    nextWeek={data.nextWeek}
+                    family={family}
+                    onSlotClick={setEditingSlotId}
+                    onSlotRemove={handleRemove}
+                />
+            </div>
 
             {editingSlot && (
                 <MealSlotEditModal

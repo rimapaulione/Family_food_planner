@@ -12,6 +12,7 @@ public record MealSlotResponseDto(
         UUID recipeId,
         String recipeName,
         Integer cookingTimeMinutes,
+        Integer recipeDefaultServing,
         Integer servings
 ) {
 }

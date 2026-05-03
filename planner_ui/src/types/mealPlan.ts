@@ -20,6 +20,7 @@ export interface MealSlot {
     recipeId: string | null;
     recipeName: string | null;
     cookingTimeMinutes: number | null;
+    recipeDefaultServing: number | null;
     servings: number | null;
 }
 

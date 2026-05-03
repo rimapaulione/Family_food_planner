@@ -1,9 +1,9 @@
 import {Fragment} from 'react';
 import {Clock} from 'lucide-react';
 import {MealSlotCard} from './MealSlotCard';
+import {LONG_DAILY_COOK_MINUTES, MEAL_LABELS, MEAL_ORDER} from '@/constants/mealPlan';
 import type {Family} from '@/types/family';
-import type {MealPlan, MealType} from '@/types/mealPlan';
-import {MEAL_TYPE} from '@/types/mealPlan';
+import type {MealPlan} from '@/types/mealPlan';
 import {
     effectiveServings,
     formatDayOfMonth,
@@ -13,16 +13,6 @@ import {
     isWeekday,
     totalCookingTimeForDay,
 } from '@/utils/mealPlanHelpers';
-
-const LONG_DAILY_COOK_MINUTES = 60;
-
-const MEAL_ORDER: MealType[] = [MEAL_TYPE.BREAKFAST, MEAL_TYPE.LUNCH, MEAL_TYPE.DINNER];
-
-const MEAL_LABELS: Record<MealType, string> = {
-    BREAKFAST: 'Breakfast',
-    LUNCH: 'Lunch',
-    DINNER: 'Dinner',
-};
 
 interface MealPlanGridProps {
     plan: MealPlan;

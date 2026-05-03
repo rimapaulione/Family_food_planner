@@ -53,7 +53,7 @@ class MealPlanControllerTest {
     private JwtService jwtService;
 
     private MealSlotResponseDto sampleSlot() {
-        return new MealSlotResponseDto(SLOT_ID, WEEK_START, MealType.BREAKFAST, null, null, null, null);
+        return new MealSlotResponseDto(SLOT_ID, WEEK_START, MealType.BREAKFAST, null, null, null, null, null);
     }
 
     private MealPlanResponseDto samplePlan() {
@@ -144,7 +144,7 @@ class MealPlanControllerTest {
     @Test
     void test_shouldReturn200WhenAssignRecipeToSlot() throws Exception {
         MealSlotResponseDto assigned = new MealSlotResponseDto(
-                SLOT_ID, WEEK_START, MealType.BREAKFAST, RECIPE_ID, "Pasta", 30, 4);
+                SLOT_ID, WEEK_START, MealType.BREAKFAST, RECIPE_ID, "Pasta", 30, 4, 4);
         when(mealPlanService.updateSlot(any(), eq(SLOT_ID), any(MealSlotUpdateRequestDto.class)))
                 .thenReturn(assigned);
 

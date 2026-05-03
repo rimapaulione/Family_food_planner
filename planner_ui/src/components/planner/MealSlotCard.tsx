@@ -2,10 +2,9 @@ import type {KeyboardEvent} from 'react';
 import {Plus, Clock, User, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {Card} from '@/components/ui/Card';
+import {LONG_COOKING_MINUTES} from '@/constants/mealPlan';
 import type {MealSlot} from '@/types/mealPlan';
 import {isWeekday} from '@/utils/mealPlanHelpers';
-
-const LONG_COOKING_MINUTES = 45;
 
 interface MealSlotCardProps {
     slot: MealSlot;
@@ -108,7 +107,7 @@ export function MealSlotCard({slot, effectiveServings, onClick, onRemove, disabl
                         e.stopPropagation();
                         onRemove();
                     }}
-                    className="absolute -right-1.5 -top-1.5 hidden rounded-full bg-destructive p-0.5 text-destructive-foreground shadow group-hover:block"
+                    className="absolute -right-1.5 -top-1.5 block rounded-full bg-destructive p-0.5 text-destructive-foreground shadow md:hidden md:group-hover:block"
                     aria-label="Remove recipe"
                 >
                     <X className="h-3 w-3"/>

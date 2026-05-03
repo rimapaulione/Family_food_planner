@@ -1,18 +1,16 @@
 import {useEffect, useMemo, useState} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
 import {AlertTriangle, Clock, Search, Star, Trash2, User, X} from 'lucide-react';
 import {useCategories} from '@/hooks/useCategories';
+import {useFamily} from '@/hooks/useFamily';
 import {useRecipes} from '@/hooks/useRecipes';
 import {useUpdateMealSlot} from '@/hooks/useMealPlan';
 import {Spinner} from '@/components/ui/Spinner';
-import type {MealSlot, MealType} from '@/types/mealPlan';
-
-const MEAL_LABELS: Record<MealType, string> = {
-    BREAKFAST: 'Breakfast',
-    LUNCH: 'Lunch',
-    DINNER: 'Dinner',
-};
-
-const LONG_COOKING_MINUTES = 45;
+import {LONG_COOKING_MINUTES, MEAL_LABELS} from '@/constants/mealPlan';
+import {mealSlotServingsSchema, type MealSlotServingsFormData} from '@/schemas/mealSlot';
+import type {MealSlot} from '@/types/mealPlan';
+import {effectiveServings} from '@/utils/mealPlanHelpers';
 
 function formatSlotDate(iso: string): string {
     return new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
@@ -40,7 +38,18 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
 
     const {data: recipes, isLoading} = useRecipes();
     const {data: categories} = useCategories();
+    const {data: family} = useFamily();
     const updateMutation = useUpdateMealSlot();
+
+    const initialServings = family != null ? effectiveServings(slot, family) : slot.servings;
+
+    const {register, trigger, getValues, formState: {errors}} = useForm<MealSlotServingsFormData>({
+        resolver: zodResolver(mealSlotServingsSchema),
+        mode: 'onChange',
+        defaultValues: {
+            servings: initialServings != null ? String(initialServings) : '',
+        },
+    });
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -61,9 +70,13 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
     }, [recipes, categoryId, search]);
 
     const handlePick = async (recipeId: string) => {
+        const isValid = await trigger();
+        if (!isValid) return;
+        const {servings} = getValues();
+        const servingsValue = servings === '' ? null : Number(servings);
         await updateMutation.mutateAsync({
             slotId: slot.id,
-            request: {recipeId, servings: slot.servings},
+            request: {recipeId, servings: servingsValue},
         });
         onClose();
     };
@@ -109,6 +122,23 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
                             className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-3 text-base md:text-sm outline-none focus:ring-2 focus:ring-ring"
                         />
                     </div>
+
+                    <div className="flex items-center gap-2">
+                        <label htmlFor="servings" className="text-sm text-muted-foreground">
+                            Servings:
+                        </label>
+                        <input
+                            id="servings"
+                            type="number"
+                            min={1}
+                            max={50}
+                            {...register('servings')}
+                            className="w-20 rounded-md border border-input bg-background px-2 py-1 text-base outline-none focus:ring-2 focus:ring-ring md:text-sm"
+                        />
+                    </div>
+                    {errors.servings && (
+                        <p className="text-xs text-destructive">{errors.servings.message}</p>
+                    )}
 
                     {categories && categories.length > 0 && (
                         <div className="flex flex-wrap gap-1">

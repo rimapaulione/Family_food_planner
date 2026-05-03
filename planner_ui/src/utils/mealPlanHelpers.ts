@@ -47,7 +47,10 @@ export function isWeekday(iso: string): boolean {
 export function effectiveServings(slot: MealSlot, family: Family): number | null {
     if (slot.servings !== null) return slot.servings;
     const s = isWeekday(slot.date) ? family.defaultWeekdayServings : family.defaultWeekendServings;
-    if (slot.mealType === MEAL_TYPE.BREAKFAST) return s.breakfast;
-    if (slot.mealType === MEAL_TYPE.LUNCH) return s.lunch;
-    return s.dinner;
+    let fromFamily: number | null = null;
+    if (slot.mealType === MEAL_TYPE.BREAKFAST) fromFamily = s.breakfast;
+    else if (slot.mealType === MEAL_TYPE.LUNCH) fromFamily = s.lunch;
+    else fromFamily = s.dinner;
+    if (fromFamily !== null) return fromFamily;
+    return slot.recipeDefaultServing;
 }

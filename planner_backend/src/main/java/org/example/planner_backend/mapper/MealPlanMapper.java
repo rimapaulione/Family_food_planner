@@ -15,6 +15,7 @@ public interface MealPlanMapper {
     @Mapping(target = "recipeId", source = "recipe.id")
     @Mapping(target = "recipeName", source = "recipe.name")
     @Mapping(target = "cookingTimeMinutes", source = "recipe.cookingTimeMinutes")
+    @Mapping(target = "recipeDefaultServing", source = "recipe.defaultServing")
     MealSlotResponseDto toSlotDto(MealSlot slot);
 
     List<MealSlotResponseDto> toSlotDtos(List<MealSlot> slots);
