@@ -46,7 +46,7 @@ public class ShoppingListService {
         Family family = familyResolver.getFamilyByEmail(email);
         LocalDate weekEnd = weekStart.plusDays(6);
 
-        Optional<MealPlan> plan = mealPlanRepository.findWithIngredientsByFamilyIdAndStartDate(family.getId(), weekStart);
+        Optional<MealPlan> plan = mealPlanRepository.findByFamilyIdAndStartDate(family.getId(), weekStart);
 
         List<ShoppingListPlanHistory> historyRows = planHistoryRepository.findByFamilyIdAndWeekStart(family.getId(), weekStart);
 
@@ -62,8 +62,20 @@ public class ShoppingListService {
         List<ShoppingItemDto> items = new ArrayList<>();
         for (AggregatedItem agg : aggregated.values()) {
             BigDecimal bought = boughtQty.get(agg.ingredientId());
-            boolean isBought = bought != null && bought.compareTo(agg.quantity()) == 0;
-            items.add(new ShoppingItemDto(agg.ingredientId(), agg.name(), agg.unit(), agg.quantity(), isBought));
+            if (bought != null && bought.compareTo(agg.quantity()) < 0) {
+                items.add(new ShoppingItemDto(
+                        agg.ingredientId(), agg.name(), agg.unit(),
+                        bought, bought, true));
+                items.add(new ShoppingItemDto(
+                        agg.ingredientId(), agg.name(), agg.unit(),
+                        agg.quantity().subtract(bought), agg.quantity(), false));
+            } else {
+                boolean isBought = bought != null;
+                BigDecimal displayQty = isBought ? bought : agg.quantity();
+                items.add(new ShoppingItemDto(
+                        agg.ingredientId(), agg.name(), agg.unit(),
+                        displayQty, agg.quantity(), isBought));
+            }
         }
 
         for (ShoppingListPlanHistory row : historyRows) {
@@ -74,6 +86,7 @@ public class ShoppingListService {
                         ingredientId,
                         ing.getNameLt(),
                         ing.getUnit().name(),
+                        row.getQuantity(),
                         row.getQuantity(),
                         true));
             }

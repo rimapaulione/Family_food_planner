@@ -8,6 +8,7 @@ public record ShoppingItemDto(
         String name,
         String unit,
         BigDecimal quantity,
+        BigDecimal targetQuantity,
         boolean isBought
 ) {
 }

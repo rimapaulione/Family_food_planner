@@ -11,6 +11,20 @@ export function isMealActive(date: string, mealType: MealType, family: Family): 
     return false;
 }
 
+export function mondayOfThisWeek(): string {
+    const d = new Date();
+    const dow = d.getUTCDay();
+    const offset = dow === 0 ? -6 : 1 - dow;
+    d.setUTCDate(d.getUTCDate() + offset);
+    return d.toISOString().slice(0, 10);
+}
+
+export function addWeeks(isoDate: string, n: number): string {
+    const d = new Date(isoDate + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + 7 * n);
+    return d.toISOString().slice(0, 10);
+}
+
 export function getWeekDates(startDate: string): string[] {
     const dates: string[] = [];
     const start = new Date(startDate + 'T00:00:00Z');

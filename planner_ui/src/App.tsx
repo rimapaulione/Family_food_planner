@@ -18,6 +18,7 @@ import {ProfilePage} from '@/pages/ProfilePage';
 import {FamilyPage} from '@/pages/family/FamilyPage';
 import {JoinPage} from '@/pages/family/JoinPage';
 import {PlannerPage} from '@/pages/planner/PlannerPage';
+import {ShoppingListPage} from '@/pages/shopping/ShoppingListPage';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -54,7 +55,7 @@ function App() {
                                     <Route path=":id/edit" element={<RecipeEditPage/>}/>
                                 </Route>
                                 <Route path="/planner" element={<PlannerPage/>}/>
-                                <Route path="/shopping" element={<div>Shopping</div>}/>
+                                <Route path="/shopping" element={<ShoppingListPage/>}/>
                                 <Route path="/profile" element={<ProfilePage/>}/>
                                 <Route path="/family" element={<FamilyPage/>}/>
                                 <Route path="*" element={<Navigate to="/" replace/>}/>

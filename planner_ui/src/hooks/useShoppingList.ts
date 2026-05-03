@@ -1,0 +1,66 @@
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {toast} from 'sonner';
+import api from '@/api/axios';
+import {useAuthStore} from '@/stores/useAuthStore';
+import type {MarkBoughtRequest, ShoppingItem, ShoppingList} from '@/types/shoppingList';
+import {getErrorMessage} from '@/utils/getErrorMessage';
+
+const queryKey = (weekStart: string) => ['shopping-list', weekStart] as const;
+
+export function useShoppingList(weekStart: string) {
+    const familyId = useAuthStore((s) => s.familyId);
+    return useQuery({
+        queryKey: queryKey(weekStart),
+        queryFn: async () => {
+            const {data} = await api.get<ShoppingList>('/shopping-lists/family', {
+                params: {weekStart},
+            });
+            return data;
+        },
+        enabled: familyId !== null,
+        staleTime: 0,
+    });
+}
+
+export function useToggleBought(weekStart: string) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (item: ShoppingItem) => {
+            const body: MarkBoughtRequest = {
+                weekStart,
+                ingredientId: item.ingredientId,
+                quantity: item.targetQuantity,
+            };
+            if (item.isBought) {
+                await api.delete('/shopping-lists/checks', {data: body});
+            } else {
+                await api.post('/shopping-lists/checks', body);
+            }
+        },
+        onMutate: async (item) => {
+            await queryClient.cancelQueries({queryKey: queryKey(weekStart)});
+            const previous = queryClient.getQueryData<ShoppingList>(queryKey(weekStart));
+            queryClient.setQueryData<ShoppingList>(queryKey(weekStart), (old) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    items: old.items.map((i) =>
+                        i.ingredientId === item.ingredientId && i.isBought === item.isBought
+                            ? {...i, isBought: !i.isBought}
+                            : i,
+                    ),
+                };
+            });
+            return {previous};
+        },
+        onError: (err, _item, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(queryKey(weekStart), context.previous);
+            }
+            toast.error(getErrorMessage(err, 'Failed to update item'));
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({queryKey: queryKey(weekStart)});
+        },
+    });
+}

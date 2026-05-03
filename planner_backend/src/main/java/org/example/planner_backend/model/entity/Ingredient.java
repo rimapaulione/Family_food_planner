@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.planner_backend.model.enums.Unit;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -31,6 +32,7 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode(of = "id")
 @Builder
+@BatchSize(size = 50)
 @Table(name = "ingredient")
 public class Ingredient {
     @Id

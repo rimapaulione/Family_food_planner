@@ -30,7 +30,7 @@ export function MealPlanMobileView({
     family,
     onSlotClick,
     onSlotRemove,
-}: MealPlanMobileViewProps) {{
+}: MealPlanMobileViewProps) {
     const isAdmin = useAuthStore((s) => s.role === ROLE.ADMIN);
     const updatePlanMutation = useUpdateMealPlan();
 
