@@ -1,8 +1,20 @@
 import {Fragment} from 'react';
+import {Clock} from 'lucide-react';
 import {MealSlotCard} from './MealSlotCard';
 import type {Family} from '@/types/family';
 import type {MealPlan, MealType} from '@/types/mealPlan';
 import {MEAL_TYPE} from '@/types/mealPlan';
+import {
+    effectiveServings,
+    formatDayOfMonth,
+    formatWeekdayShort,
+    getWeekDates,
+    isMealActive,
+    isWeekday,
+    totalCookingTimeForDay,
+} from '@/utils/mealPlanHelpers';
+
+const LONG_DAILY_COOK_MINUTES = 60;
 
 const MEAL_ORDER: MealType[] = [MEAL_TYPE.BREAKFAST, MEAL_TYPE.LUNCH, MEAL_TYPE.DINNER];
 
@@ -16,20 +28,46 @@ interface MealPlanGridProps {
     plan: MealPlan;
     family: Family;
     onSlotClick?: (slotId: string) => void;
+    onSlotRemove?: (slotId: string) => void;
     disabled?: boolean;
 }
 
-export function MealPlanGrid({plan, family, onSlotClick, disabled}: MealPlanGridProps) {
+export function MealPlanGrid({plan, family, onSlotClick, onSlotRemove, disabled}: MealPlanGridProps) {
     const days = getWeekDates(plan.startDate);
 
     return (
         <div className="grid gap-2 grid-cols-[80px_repeat(7,minmax(0,1fr))]">
             <div/>
-            {days.map((date) => (
-                <div key={date} className="text-center text-xs font-semibold text-muted-foreground">
-                    {formatDayHeader(date)}
-                </div>
-            ))}
+            {days.map((date) => {
+                const total = totalCookingTimeForDay(date, plan);
+                const isWknd = !isWeekday(date);
+                const totalIsLong = isWeekday(date) && total > LONG_DAILY_COOK_MINUTES;
+                return (
+                    <div
+                        key={date}
+                        className={`rounded text-center ${
+                            isWknd ? 'bg-blue-50 dark:bg-blue-950/30' : ''
+                        }`}
+                    >
+                        <div className="text-xs font-semibold text-foreground">
+                            {formatWeekdayShort(date)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                            {formatDayOfMonth(date)}
+                        </div>
+                        {total > 0 && (
+                            <div
+                                className={`mt-0.5 inline-flex items-center gap-0.5 text-xs ${
+                                    totalIsLong ? 'font-medium text-orange-500' : 'text-muted-foreground'
+                                }`}
+                            >
+                                <Clock className="h-3 w-3"/>
+                                {total}m
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
 
             {MEAL_ORDER.map((mealType) => (
                 <Fragment key={mealType}>
@@ -46,7 +84,9 @@ export function MealPlanGrid({plan, family, onSlotClick, disabled}: MealPlanGrid
                             <div key={`${mealType}-${date}`}>
                                 <MealSlotCard
                                     slot={slot}
+                                    effectiveServings={effectiveServings(slot, family)}
                                     onClick={() => onSlotClick?.(slot.id)}
+                                    onRemove={onSlotRemove ? () => onSlotRemove(slot.id) : undefined}
                                     disabled={disabled}
                                     muted={isMuted}
                                 />
@@ -57,32 +97,4 @@ export function MealPlanGrid({plan, family, onSlotClick, disabled}: MealPlanGrid
             ))}
         </div>
     );
-}
-
-function isMealActive(date: string, mealType: MealType, family: Family): boolean {
-    const dow = new Date(date + 'T00:00:00Z').getUTCDay();
-    const isWeekend = dow === 0 || dow === 6;
-    const servings = isWeekend ? family.defaultWeekendServings : family.defaultWeekdayServings;
-    if (mealType === MEAL_TYPE.BREAKFAST) return servings.breakfast !== null;
-    if (mealType === MEAL_TYPE.LUNCH) return servings.lunch !== null;
-    if (mealType === MEAL_TYPE.DINNER) return servings.dinner !== null;
-    return false;
-}
-
-function getWeekDates(startDate: string): string[] {
-    const dates: string[] = [];
-    const start = new Date(startDate + 'T00:00:00Z');
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(start);
-        d.setUTCDate(start.getUTCDate() + i);
-        dates.push(d.toISOString().slice(0, 10));
-    }
-    return dates;
-}
-
-function formatDayHeader(iso: string): string {
-    const d = new Date(iso + 'T00:00:00Z');
-    const weekday = d.toLocaleDateString('en-US', {weekday: 'short', timeZone: 'UTC'});
-    const day = d.getUTCDate();
-    return `${weekday} ${day}`;
 }

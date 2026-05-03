@@ -25,7 +25,7 @@ export function useRecipesById(id: string) {
                 ...data,
                 ingredients: data.ingredients.map((ing) => ({
                     ...ing,
-                    unit: ing.unit.toLowerCase(),
+                    unit: (ing.unit ?? '').toLowerCase(),
                 })),
             };
         },

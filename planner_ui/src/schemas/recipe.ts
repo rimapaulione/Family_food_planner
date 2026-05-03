@@ -20,13 +20,29 @@ export const recipeSchema = z.object({
         .optional(),
     ingredients: z.array(
         z.object({
-            ingredientId: z.string().min(1, 'Select an ingredient'),
-            quantity: z.number()
-                .min(0.01, 'Min quantity 0.01')
-                .max(99999, 'Quantity too large'),
+            ingredientId: z.string(),
+            quantity: z.number(),
             unit: z.string(),
         }),
-    ).optional(),
+    ).superRefine((rows, ctx) => {
+        rows.forEach((row, i) => {
+            if (!row.ingredientId) return;
+            if (row.quantity < 0.01) {
+                ctx.addIssue({
+                    code: 'custom',
+                    path: [i, 'quantity'],
+                    message: 'Min quantity 0.01',
+                });
+            }
+            if (row.quantity > 99999) {
+                ctx.addIssue({
+                    code: 'custom',
+                    path: [i, 'quantity'],
+                    message: 'Quantity too large',
+                });
+            }
+        });
+    }).optional(),
 });
 
 export type RecipeFormData = z.infer<typeof recipeSchema>;
