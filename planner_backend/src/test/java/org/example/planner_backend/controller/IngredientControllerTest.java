@@ -1,6 +1,5 @@
 package org.example.planner_backend.controller;
 
-import org.example.planner_backend.dto.ingredient.IngredientCheckNameResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientDetailResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientRequestDto;
 import org.example.planner_backend.dto.ingredient.IngredientResponseDto;
@@ -94,53 +93,6 @@ class IngredientControllerTest {
                 .andExpect(jsonPath("$[0].nameLt").value(INGREDIENT_NAME))
                 .andExpect(jsonPath("$[0].unit").value("ML"))
                 .andExpect(jsonPath("$[0].recipeCount").value(2));
-    }
-
-    // ---------- GET /api/v1/ingredients/check ----------
-
-    @Test
-    void test_shouldReturn200WithExactMatchWhenNameExists() throws Exception {
-        IngredientCheckNameResponseDto response = new IngredientCheckNameResponseDto(
-                true, INGREDIENT_NAME, List.of());
-        when(ingredientService.checkName(any(), eq(INGREDIENT_NAME))).thenReturn(response);
-
-        mockMvc.perform(get("/api/v1/ingredients/check").param("name", INGREDIENT_NAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exactMatch").value(true))
-                .andExpect(jsonPath("$.existingName").value(INGREDIENT_NAME))
-                .andExpect(jsonPath("$.similarNames").isEmpty());
-    }
-
-    @Test
-    void test_shouldReturn200WithSimilarNamesWhenNoExactMatch() throws Exception {
-        IngredientCheckNameResponseDto response = new IngredientCheckNameResponseDto(
-                false, null, List.of("Pienas", "Pienelis"));
-        when(ingredientService.checkName(any(), eq("Pie"))).thenReturn(response);
-
-        mockMvc.perform(get("/api/v1/ingredients/check").param("name", "Pie"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exactMatch").value(false))
-                .andExpect(jsonPath("$.similarNames[0]").value("Pienas"))
-                .andExpect(jsonPath("$.similarNames[1]").value("Pienelis"));
-    }
-
-    @Test
-    void test_shouldReturn400WhenNameMissing() throws Exception {
-        mockMvc.perform(get("/api/v1/ingredients/check"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void test_shouldReturn400WhenNameBlank() throws Exception {
-        mockMvc.perform(get("/api/v1/ingredients/check").param("name", ""))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void test_shouldReturn400WhenCheckNameTooLong() throws Exception {
-        String tooLong = "a".repeat(101);
-        mockMvc.perform(get("/api/v1/ingredients/check").param("name", tooLong))
-                .andExpect(status().isBadRequest());
     }
 
     // ---------- POST /api/v1/ingredients ----------

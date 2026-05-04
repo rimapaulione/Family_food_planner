@@ -1,6 +1,5 @@
 package org.example.planner_backend.service;
 
-import org.example.planner_backend.dto.ingredient.IngredientCheckNameResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientDetailResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientRequestDto;
 import org.example.planner_backend.dto.ingredient.IngredientResponseDto;
@@ -130,58 +129,6 @@ class IngredientServiceTest {
 
         assertThat(result).containsExactly(detail);
         verify(ingredientRepository).findAllWithRecipeCount(FAMILY_ID, "milk");
-    }
-
-    // ---------- checkName ----------
-
-    @Test
-    void test_shouldReturnEmptyWhenNameTooShort() {
-        mockFamilyId();
-        IngredientCheckNameResponseDto result = ingredientService.checkName(EMAIL, "a");
-
-        assertThat(result.exactMatch()).isFalse();
-        assertThat(result.existingName()).isNull();
-        assertThat(result.similarNames()).isEmpty();
-        verify(ingredientRepository, never()).findByFamilyIdAndNameLtIgnoreCaseStartingWith(any(), anyString());
-    }
-
-    @Test
-    void test_shouldReturnExactMatchWhenNameExistsIgnoringCase() {
-        mockFamilyId();
-        when(ingredientRepository.findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "pien"))
-                .thenReturn(List.of(milk));
-
-        IngredientCheckNameResponseDto result = ingredientService.checkName(EMAIL, "pienas");
-
-        assertThat(result.exactMatch()).isTrue();
-        assertThat(result.existingName()).isEqualTo(INGREDIENT_NAME);
-        assertThat(result.similarNames()).isEmpty();
-    }
-
-    @Test
-    void test_shouldReturnSimilarNamesWhenNoExactMatch() {
-        mockFamilyId();
-        Ingredient pienelis = Ingredient.builder().nameLt("Pienelis").unit(Unit.ML).family(family).build();
-        Ingredient pienukas = Ingredient.builder().nameLt("Pienukas").unit(Unit.ML).family(family).build();
-        when(ingredientRepository.findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "Pien"))
-                .thenReturn(List.of(pienelis, pienukas));
-
-        IngredientCheckNameResponseDto result = ingredientService.checkName(EMAIL, "Piena");
-
-        assertThat(result.exactMatch()).isFalse();
-        assertThat(result.existingName()).isNull();
-        assertThat(result.similarNames()).containsExactly("Pienelis", "Pienukas");
-    }
-
-    @Test
-    void test_shouldUseFullNameAsPrefixWhenNameShorterThanFour() {
-        mockFamilyId();
-        when(ingredientRepository.findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "Pi"))
-                .thenReturn(List.of());
-
-        ingredientService.checkName(EMAIL, "Pi");
-
-        verify(ingredientRepository).findByFamilyIdAndNameLtIgnoreCaseStartingWith(FAMILY_ID, "Pi");
     }
 
     // ---------- create ----------

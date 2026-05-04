@@ -15,8 +15,6 @@ public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
 
     List<Ingredient> findByFamilyIdAndNameLtContainingIgnoreCase(UUID familyId, String nameLt);
 
-    List<Ingredient> findByFamilyIdAndNameLtIgnoreCaseStartingWith(UUID familyId, String prefix);
-
     Optional<Ingredient> findByIdAndFamilyId(UUID id, UUID familyId);
 
     boolean existsByFamilyIdAndNameLtIgnoreCase(UUID familyId, String nameLt);

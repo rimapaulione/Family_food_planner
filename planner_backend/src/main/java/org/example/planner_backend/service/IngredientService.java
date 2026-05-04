@@ -1,7 +1,6 @@
 package org.example.planner_backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.planner_backend.dto.ingredient.IngredientCheckNameResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientDetailResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientRequestDto;
 import org.example.planner_backend.dto.ingredient.IngredientResponseDto;
@@ -29,7 +28,7 @@ public class IngredientService {
     @Transactional(readOnly = true)
     public List<IngredientResponseDto> getAll(final String email, final String search) {
         UUID familyId = familyResolver.getFamilyIdByEmail(email);
-        return findIngredients(familyId, search).stream()
+        return this.findIngredients(familyId, search).stream()
                 .map(ingredientMapper::toResponse)
                 .toList();
     }
@@ -39,35 +38,6 @@ public class IngredientService {
         UUID familyId = familyResolver.getFamilyIdByEmail(email);
         String trimmedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
         return ingredientRepository.findAllWithRecipeCount(familyId, trimmedSearch);
-    }
-
-    @Transactional(readOnly = true)
-    public IngredientCheckNameResponseDto checkName(final String email, final String name) {
-        UUID familyId = familyResolver.getFamilyIdByEmail(email);
-        String trimmed = name.trim();
-        if (trimmed.length() < 2) {
-            return new IngredientCheckNameResponseDto(false, null, List.of());
-        }
-        String prefix = trimmed.length() >= 4 ? trimmed.substring(0, 4) : trimmed;
-
-        List<Ingredient> matches = ingredientRepository
-                .findByFamilyIdAndNameLtIgnoreCaseStartingWith(familyId, prefix);
-
-        String existingName = matches.stream()
-                .map(Ingredient::getNameLt)
-                .filter(nameLt -> nameLt.equalsIgnoreCase(trimmed))
-                .findFirst()
-                .orElse(null);
-        boolean exactMatch = existingName != null;
-
-        List<String> similar = exactMatch ? List.of() :
-                matches.stream()
-                        .map(Ingredient::getNameLt)
-                        .filter(n -> !n.equalsIgnoreCase(trimmed))
-                        .limit(5)
-                        .toList();
-
-        return new IngredientCheckNameResponseDto(exactMatch, existingName, similar);
     }
 
     @Transactional

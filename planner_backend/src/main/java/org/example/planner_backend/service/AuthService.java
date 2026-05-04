@@ -43,7 +43,7 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getEmail());
 
-        return toAuthResponse(user, token);
+        return this.toAuthResponse(user, token);
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +60,7 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getEmail());
 
-        return toAuthResponse(user, token);
+        return this.toAuthResponse(user, token);
     }
 
 

@@ -56,10 +56,11 @@ public class ShoppingListService {
         }
 
         Map<UUID, AggregatedItem> aggregated = plan
-                .map(p -> aggregatePlanItems(p, family))
+                .map(p -> this.aggregatePlanItems(p, family))
                 .orElseGet(LinkedHashMap::new);
 
         List<ShoppingItemDto> items = new ArrayList<>();
+
         for (AggregatedItem agg : aggregated.values()) {
             BigDecimal bought = boughtQty.get(agg.ingredientId());
             if (bought != null && bought.compareTo(agg.quantity()) < 0) {
@@ -97,7 +98,7 @@ public class ShoppingListService {
 
     @Transactional
     public void markBought(final String email, final MarkBoughtRequestDto request) {
-        validateWeekStart(request.weekStart());
+        this.validateWeekStart(request.weekStart());
         Family family = familyResolver.getFamilyByEmail(email);
         Ingredient ingredient = ingredientRepository
                 .findByIdAndFamilyId(request.ingredientId(), family.getId())
@@ -118,7 +119,7 @@ public class ShoppingListService {
 
     @Transactional
     public void markUnbought(final String email, final MarkBoughtRequestDto request) {
-        validateWeekStart(request.weekStart());
+        this.validateWeekStart(request.weekStart());
         Family family = familyResolver.getFamilyByEmail(email);
         planHistoryRepository
                 .findByFamilyIdAndWeekStartAndIngredientId(family.getId(), request.weekStart(), request.ingredientId())
@@ -138,7 +139,7 @@ public class ShoppingListService {
         for (MealSlot slot : plan.getSlots()) {
             Recipe recipe = slot.getRecipe();
             if (recipe == null) continue;
-            Integer needed = effectiveServings(slot, family);
+            Integer needed = this.effectiveServings(slot, family);
             if (needed == null) continue;
             int batches = Math.max(1, (int) Math.ceil((double) needed / recipe.getDefaultServing()));
             BigDecimal multiplier = BigDecimal.valueOf(batches);
@@ -157,7 +158,7 @@ public class ShoppingListService {
 
     private Integer effectiveServings(final MealSlot slot, final Family family) {
         if (slot.getServings() != null) return slot.getServings();
-        boolean weekend = isWeekend(slot.getDate());
+        boolean weekend = this.isWeekend(slot.getDate());
         MealServings defaults = weekend ? family.getDefaultWeekendServings() : family.getDefaultWeekdayServings();
         Integer fromFamily = switch (slot.getMealType()) {
             case BREAKFAST -> defaults.breakfast();

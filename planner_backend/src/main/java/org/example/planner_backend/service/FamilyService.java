@@ -53,9 +53,8 @@ public class FamilyService {
 
         creator.setFamily(family);
         creator.setRole(Role.ADMIN);
-        appUserRepository.save(creator);
 
-        copySeedIngredients(family);
+        this.copySeedIngredients(family);
 
         return this.buildFamilyResponse(family);
     }
@@ -95,8 +94,7 @@ public class FamilyService {
             throw new ConflictException("You cannot change your own role");
         }
 
-        long adminCount = appUserRepository.countByFamilyIdAndRole(
-                admin.getFamily().getId(), Role.ADMIN);
+        long adminCount = appUserRepository.countByFamilyIdAndRole(admin.getFamily().getId(), Role.ADMIN);
         if (member.getRole() == Role.ADMIN
                 && request.role() == Role.USER
                 && adminCount <= 1) {

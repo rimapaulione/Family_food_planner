@@ -1,10 +1,8 @@
 package org.example.planner_backend.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.example.planner_backend.dto.ingredient.IngredientCheckNameResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientDetailResponseDto;
 import org.example.planner_backend.dto.ingredient.IngredientRequestDto;
 import org.example.planner_backend.dto.ingredient.IngredientResponseDto;
@@ -48,13 +46,6 @@ public class IngredientController {
             @Size(min = 1, max = 50)
             @RequestParam(required = false) String search) {
         return ResponseEntity.ok(ingredientService.getAllWithRecipesCount(email, search));
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<IngredientCheckNameResponseDto> checkName(
-            @AuthenticationPrincipal String email,
-            @RequestParam @NotBlank @Size(min = 1, max = 100) String name) {
-        return ResponseEntity.ok(ingredientService.checkName(email, name));
     }
 
     @PostMapping()

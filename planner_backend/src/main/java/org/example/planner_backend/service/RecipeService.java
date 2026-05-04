@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.planner_backend.dto.recipe.RecipeListResponseDto;
 import org.example.planner_backend.dto.recipe.RecipeRequestDto;
 import org.example.planner_backend.dto.recipe.RecipeResponseDto;
+import org.example.planner_backend.exception.ConflictException;
 import org.example.planner_backend.exception.ResourceNotFoundException;
 import org.example.planner_backend.mapper.CategoryMapper;
 import org.example.planner_backend.mapper.RecipeMapper;
@@ -23,6 +24,7 @@ import org.example.planner_backend.util.TextUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -85,9 +87,9 @@ public class RecipeService {
                 .family(family)
                 .build();
 
-        setTags(recipe, request.tagIds());
-        setLeftoverRecipe(recipe, family.getId(), request.leftoverRecipeId());
-        setIngredients(recipe, family.getId(), request.ingredients());
+        this.setTags(recipe, request.tagIds());
+        this.setLeftoverRecipe(recipe, family.getId(), request.leftoverRecipeId());
+        this.setIngredients(recipe, family.getId(), request.ingredients());
 
         return recipeMapper.toResponse(recipeRepository.save(recipe));
     }
@@ -108,9 +110,9 @@ public class RecipeService {
         recipe.setIsFavorite(request.isFavorite() != null ? request.isFavorite() : false);
         recipe.setNotes(request.notes());
 
-        setTags(recipe, request.tagIds());
-        setLeftoverRecipe(recipe, familyId, request.leftoverRecipeId());
-        setIngredients(recipe, familyId, request.ingredients());
+        this.setTags(recipe, request.tagIds());
+        this.setLeftoverRecipe(recipe, familyId, request.leftoverRecipeId());
+        this.setIngredients(recipe, familyId, request.ingredients());
 
         return recipeMapper.toResponse(recipeRepository.save(recipe));
     }
@@ -147,6 +149,14 @@ public class RecipeService {
 
     private void setIngredients(final Recipe recipe, final UUID familyId,
                                 final List<RecipeRequestDto.RecipeIngredientRequestDto> ingredients) {
+        if (ingredients != null) {
+            Set<UUID> seenIds = new HashSet<>();
+            for (RecipeRequestDto.RecipeIngredientRequestDto ri : ingredients) {
+                if (!seenIds.add(ri.ingredientId())) {
+                    throw new ConflictException("Same ingredient added more than once");
+                }
+            }
+        }
         recipe.getIngredients().clear();
         recipeRepository.flush();
         if (ingredients != null && !ingredients.isEmpty()) {

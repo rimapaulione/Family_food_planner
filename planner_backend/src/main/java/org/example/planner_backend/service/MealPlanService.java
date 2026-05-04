@@ -49,8 +49,8 @@ public class MealPlanService {
         LocalDate startOfCurrentWeek = LocalDate.now().with(DayOfWeek.MONDAY);
         LocalDate startOfNextWeek = startOfCurrentWeek.plusWeeks(1);
 
-        MealPlan currentWeekPlan = getOrCreatePlan(family, startOfCurrentWeek);
-        MealPlan nextWeekPlan = getOrCreatePlan(family, startOfNextWeek);
+        MealPlan currentWeekPlan = this.getOrCreatePlan(family, startOfCurrentWeek);
+        MealPlan nextWeekPlan = this.getOrCreatePlan(family, startOfNextWeek);
 
         return new MealPlanWindowResponseDto(
                 mealPlanMapper.toPlanDto(currentWeekPlan),
@@ -98,7 +98,7 @@ public class MealPlanService {
 
     private MealPlan getOrCreatePlan(final Family family, final LocalDate startOfWeek) {
         return mealPlanRepository.findByFamilyIdAndStartDate(family.getId(), startOfWeek)
-                .orElseGet(() -> createPlan(family, startOfWeek));
+                .orElseGet(() -> this.createPlan(family, startOfWeek));
     }
 
     private MealPlan createPlan(final Family family, final LocalDate startOfWeek) {
@@ -108,7 +108,7 @@ public class MealPlanService {
                 .endDate(startOfWeek.plusDays(6))
                 .status(PlanStatus.DRAFT)
                 .build());
-        List<MealSlot> slots = mealSlotRepository.saveAll(generateMealSlots(plan));
+        List<MealSlot> slots = mealSlotRepository.saveAll(this.generateMealSlots(plan));
         plan.setSlots(slots);
         return plan;
     }
@@ -117,9 +117,9 @@ public class MealPlanService {
         List<MealSlot> slots = new ArrayList<>();
         for (int offset = 0; offset < 7; offset++) {
             LocalDate date = mealPlan.getStartDate().plusDays(offset);
-            slots.add(buildSlot(mealPlan, date, MealType.BREAKFAST));
-            slots.add(buildSlot(mealPlan, date, MealType.LUNCH));
-            slots.add(buildSlot(mealPlan, date, MealType.DINNER));
+            slots.add(this.buildSlot(mealPlan, date, MealType.BREAKFAST));
+            slots.add(this.buildSlot(mealPlan, date, MealType.LUNCH));
+            slots.add(this.buildSlot(mealPlan, date, MealType.DINNER));
         }
         return slots;
     }

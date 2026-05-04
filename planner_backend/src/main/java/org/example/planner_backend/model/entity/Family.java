@@ -59,7 +59,7 @@ public class Family {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "default_weekday_servings", nullable = false, columnDefinition = "jsonb")
     @Builder.Default
-    private MealServings defaultWeekdayServings = new MealServings(3, null, 4);
+    private MealServings defaultWeekdayServings = new MealServings(4, 4, 4);
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "default_weekend_servings", nullable = false, columnDefinition = "jsonb")
