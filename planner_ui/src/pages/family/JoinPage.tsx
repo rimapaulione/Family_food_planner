@@ -107,4 +107,4 @@ export function JoinPage() {
             </Button>
         </CenteredCard>
     );
-}I
+}

@@ -19,6 +19,9 @@ export function useShoppingList(weekStart: string) {
         },
         enabled: familyId !== null,
         staleTime: 0,
+        refetchInterval: 5_000,
+        refetchIntervalInBackground: false,
+        refetchOnWindowFocus: true,
     });
 }
 
