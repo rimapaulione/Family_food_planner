@@ -47,8 +47,8 @@ public class RecipeService {
     public List<RecipeListResponseDto> getAllWithIngredients(final String email, final String search) {
         UUID familyId = familyResolver.getFamilyIdByEmail(email);
         List<Recipe> recipes = (search != null && !search.isBlank())
-                ? recipeRepository.findAllWithTagsAndIngredientsByFamilyIdAndSearch(familyId, search.trim())
-                : recipeRepository.findAllWithTagsAndIngredientsByFamilyId(familyId);
+                ? recipeRepository.findByFamilyIdAndNameContainingIgnoreCase(familyId, search.trim())
+                : recipeRepository.findByFamilyId(familyId);
 
         return recipes.stream().map(r -> new RecipeListResponseDto(
                 r.getId(),

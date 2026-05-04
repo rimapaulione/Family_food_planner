@@ -149,7 +149,7 @@ class RecipeServiceTest {
     void test_shouldReturnAllRecipesWhenSearchIsBlank() {
         mockFamilyId();
         CategoryResponseDto categoryResponse = aCategoryResponse();
-        when(recipeRepository.findAllWithTagsAndIngredientsByFamilyId(FAMILY_ID)).thenReturn(List.of(recipe));
+        when(recipeRepository.findByFamilyId(FAMILY_ID)).thenReturn(List.of(recipe));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
 
         List<RecipeListResponseDto> result = recipeService.getAllWithIngredients(EMAIL, "  ");
@@ -161,21 +161,21 @@ class RecipeServiceTest {
         assertThat(dto.category()).isEqualTo(categoryResponse);
         assertThat(dto.defaultServing()).isEqualTo((short) 4);
         assertThat(dto.cookingTimeMinutes()).isEqualTo((short) 30);
-        verify(recipeRepository).findAllWithTagsAndIngredientsByFamilyId(FAMILY_ID);
+        verify(recipeRepository).findByFamilyId(FAMILY_ID);
     }
 
     @Test
     void test_shouldReturnFilteredRecipesWhenSearchProvided() {
         mockFamilyId();
         CategoryResponseDto categoryResponse = aCategoryResponse();
-        when(recipeRepository.findAllWithTagsAndIngredientsByFamilyIdAndSearch(FAMILY_ID, "blyn"))
+        when(recipeRepository.findByFamilyIdAndNameContainingIgnoreCase(FAMILY_ID, "blyn"))
                 .thenReturn(List.of(recipe));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
 
         List<RecipeListResponseDto> result = recipeService.getAllWithIngredients(EMAIL, "  blyn  ");
 
         assertThat(result).hasSize(1);
-        verify(recipeRepository).findAllWithTagsAndIngredientsByFamilyIdAndSearch(FAMILY_ID, "blyn");
+        verify(recipeRepository).findByFamilyIdAndNameContainingIgnoreCase(FAMILY_ID, "blyn");
     }
 
     // ---------- getById ----------
