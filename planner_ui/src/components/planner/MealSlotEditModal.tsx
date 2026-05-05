@@ -62,12 +62,18 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
     const filteredRecipes = useMemo(() => {
         if (!recipes) return [];
         const lowerSearch = search.toLowerCase().trim();
-        return recipes.filter((r) => {
-            if (categoryId !== null && r.category.id !== categoryId) return false;
-            if (lowerSearch && !r.name.toLowerCase().includes(lowerSearch)) return false;
-            return true;
-        });
-    }, [recipes, categoryId, search]);
+        return recipes
+            .filter((r) => {
+                if (categoryId !== null && r.category.id !== categoryId) return false;
+                if (lowerSearch && !r.name.toLowerCase().includes(lowerSearch)) return false;
+                return true;
+            })
+            .sort((a, b) => {
+                const aPlanned = plannedRecipeIds.has(a.id) ? 1 : 0;
+                const bPlanned = plannedRecipeIds.has(b.id) ? 1 : 0;
+                return aPlanned - bPlanned;
+            });
+    }, [recipes, categoryId, search, plannedRecipeIds]);
 
     const handlePick = async (recipeId: string) => {
         const isValid = await trigger();
@@ -193,7 +199,7 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
                     )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4 pb-4">
+                <div className="no-scrollbar h-80 overflow-y-auto px-4 pb-4">
                     {isLoading ? (
                         <Spinner/>
                     ) : filteredRecipes.length === 0 ? (
