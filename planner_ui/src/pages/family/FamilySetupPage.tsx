@@ -35,6 +35,8 @@ export function FamilySetupPage() {
                     defaultWeekdayServings: family.defaultWeekdayServings,
                     defaultWeekendServings: family.defaultWeekendServings,
                     noRepeatRecipeDays: family.noRepeatRecipeDays,
+                    maxWeekdayCookingMinutes: family.maxWeekdayCookingMinutes,
+                    maxWeekendCookingMinutes: family.maxWeekendCookingMinutes,
                 }}
                 onSubmit={handleSubmit}
                 submitLabel="Get Started"

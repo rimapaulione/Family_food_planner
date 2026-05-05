@@ -171,6 +171,8 @@ class FamilyServiceTest {
                 new MealServings(5, 5, 5),
                 new MealServings(6, 6, 6),
                 21,
+                50,
+                90,
                 true
         );
         when(familyResolver.getAdminUser(EMAIL)).thenReturn(user);
@@ -184,13 +186,15 @@ class FamilyServiceTest {
         assertThat(family.getDefaultWeekdayServings()).isEqualTo(new MealServings(5, 5, 5));
         assertThat(family.getDefaultWeekendServings()).isEqualTo(new MealServings(6, 6, 6));
         assertThat(family.getNoRepeatRecipeDays()).isEqualTo(21);
+        assertThat(family.getMaxWeekdayCookingMinutes()).isEqualTo(50);
+        assertThat(family.getMaxWeekendCookingMinutes()).isEqualTo(90);
         assertThat(family.isSetupCompleted()).isTrue();
     }
 
     @Test
     void updateSettings_shouldThrowNotFoundWhenUserHasNoFamily() {
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
-                "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), 14, true
+                "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), 14, null, null, true
         );
         when(familyResolver.getAdminUser(EMAIL))
                 .thenThrow(new ResourceNotFoundException("User has no family"));
@@ -203,7 +207,7 @@ class FamilyServiceTest {
     @Test
     void updateSettings_shouldThrowUnauthorizedWhenUserIsNotAdmin() {
         FamilySettingsRequestDto request = new FamilySettingsRequestDto(
-                "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), 14, true
+                "X", DayOfWeek.MONDAY, new MealServings(3, null, 4), new MealServings(4, 4, 4), 14, null, null, true
         );
         when(familyResolver.getAdminUser(EMAIL))
                 .thenThrow(new UnauthorizedException("Admin role required"));

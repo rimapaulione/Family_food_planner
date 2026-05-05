@@ -74,6 +74,8 @@ public class FamilyService {
         family.setDefaultWeekdayServings(request.defaultWeekdayServings());
         family.setDefaultWeekendServings(request.defaultWeekendServings());
         family.setNoRepeatRecipeDays(request.noRepeatRecipeDays());
+        family.setMaxWeekdayCookingMinutes(request.maxWeekdayCookingMinutes());
+        family.setMaxWeekendCookingMinutes(request.maxWeekendCookingMinutes());
         family.setSetupCompleted(request.isSetupCompleted());
 
         return this.buildFamilyResponse(family);
@@ -117,6 +119,8 @@ public class FamilyService {
                 family.getDefaultWeekdayServings(),
                 family.getDefaultWeekendServings(),
                 family.getNoRepeatRecipeDays(),
+                family.getMaxWeekdayCookingMinutes(),
+                family.getMaxWeekendCookingMinutes(),
                 family.isSetupCompleted(),
                 familyMapper.toMembers(members)
         );

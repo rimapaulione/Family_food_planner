@@ -15,6 +15,8 @@ public record FamilyResponseDto(
         MealServings defaultWeekdayServings,
         MealServings defaultWeekendServings,
         Integer noRepeatRecipeDays,
+        Integer maxWeekdayCookingMinutes,
+        Integer maxWeekendCookingMinutes,
         boolean isSetupCompleted,
         List<FamilyMemberDto> members
 ) {

@@ -16,12 +16,16 @@ export const familyCreateSchema = z.object({
     name: z.string().min(2, 'Min 2 characters').max(100, 'Max 100 characters'),
 });
 
+const cookingMinutesValue = z.number().int().min(1, 'Min 1').max(600, 'Max 600').nullable();
+
 export const familyFormSchema = z.object({
     name: z.string().min(2, 'Min 2 characters').max(100, 'Max 100 characters'),
     shoppingDay: z.enum(dayOfWeekValues),
     defaultWeekdayServings: mealServingsSchema,
     defaultWeekendServings: mealServingsSchema,
     noRepeatRecipeDays: z.number().int().min(0, 'Min 0').max(90, 'Max 90'),
+    maxWeekdayCookingMinutes: cookingMinutesValue,
+    maxWeekendCookingMinutes: cookingMinutesValue,
 });
 
 export const familyUpdateSchema = familyFormSchema.extend({

@@ -70,6 +70,12 @@ public class Family {
     @Builder.Default
     private Integer noRepeatRecipeDays = 14;
 
+    @Column(name = "max_weekday_cooking_minutes")
+    private Integer maxWeekdayCookingMinutes;
+
+    @Column(name = "max_weekend_cooking_minutes")
+    private Integer maxWeekendCookingMinutes;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

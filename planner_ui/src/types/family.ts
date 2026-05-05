@@ -30,6 +30,8 @@ export interface Family {
     defaultWeekdayServings: MealServings;
     defaultWeekendServings: MealServings;
     noRepeatRecipeDays: number;
+    maxWeekdayCookingMinutes: number | null;
+    maxWeekendCookingMinutes: number | null;
     isSetupCompleted: boolean;
     members: FamilyMember[];
 }
@@ -44,5 +46,7 @@ export interface FamilyUpdateRequest {
     defaultWeekdayServings: MealServings;
     defaultWeekendServings: MealServings;
     noRepeatRecipeDays: number;
+    maxWeekdayCookingMinutes: number | null;
+    maxWeekendCookingMinutes: number | null;
     isSetupCompleted: boolean;
 }

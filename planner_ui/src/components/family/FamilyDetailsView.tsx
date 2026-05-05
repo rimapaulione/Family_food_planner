@@ -61,6 +61,12 @@ export function FamilyDetailsView({family, canEdit, onEdit}: FamilyDetailsViewPr
                 <p className="text-muted-foreground">
                     Don't repeat recipes within: {family.noRepeatRecipeDays} days
                 </p>
+                <p className="text-muted-foreground">
+                    Weekday cook time: {family.maxWeekdayCookingMinutes != null ? `≤ ${family.maxWeekdayCookingMinutes} min` : 'No limit'}
+                </p>
+                <p className="text-muted-foreground">
+                    Weekend cook time: {family.maxWeekendCookingMinutes != null ? `≤ ${family.maxWeekendCookingMinutes} min` : 'No limit'}
+                </p>
             </div>
         </Card>
     );

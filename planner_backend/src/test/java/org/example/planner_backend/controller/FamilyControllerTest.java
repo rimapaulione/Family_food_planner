@@ -57,6 +57,8 @@ class FamilyControllerTest {
                 new MealServings(3, null, 4),
                 new MealServings(4, 4, 4),
                 14,
+                null,
+                null,
                 false,
                 List.of(new FamilyMemberDto(USER_ID, "Test User", EMAIL, null, Role.ADMIN))
         );

@@ -32,6 +32,8 @@ export function FamilySettingsSection({family, canEdit}: FamilySettingsSectionPr
                         defaultWeekdayServings: family.defaultWeekdayServings,
                         defaultWeekendServings: family.defaultWeekendServings,
                         noRepeatRecipeDays: family.noRepeatRecipeDays,
+                        maxWeekdayCookingMinutes: family.maxWeekdayCookingMinutes,
+                        maxWeekendCookingMinutes: family.maxWeekendCookingMinutes,
                     }}
                     onSubmit={handleSave}
                     onCancel={() => setEditing(false)}

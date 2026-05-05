@@ -85,6 +85,39 @@ export function FamilyForm({
                 />
             </FormField>
 
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <FormField
+                    label="Weekday cook time (min)"
+                    error={errors.maxWeekdayCookingMinutes?.message}
+                >
+                    <input
+                        type="number"
+                        min={1}
+                        max={600}
+                        placeholder="No limit"
+                        {...register('maxWeekdayCookingMinutes', {
+                            setValueAs: (v) => (v === '' || v === null ? null : Number(v)),
+                        })}
+                        className={inputClass(!!errors.maxWeekdayCookingMinutes)}
+                    />
+                </FormField>
+                <FormField
+                    label="Weekend cook time (min)"
+                    error={errors.maxWeekendCookingMinutes?.message}
+                >
+                    <input
+                        type="number"
+                        min={1}
+                        max={600}
+                        placeholder="No limit"
+                        {...register('maxWeekendCookingMinutes', {
+                            setValueAs: (v) => (v === '' || v === null ? null : Number(v)),
+                        })}
+                        className={inputClass(!!errors.maxWeekendCookingMinutes)}
+                    />
+                </FormField>
+            </div>
+
             <div className="flex gap-3 pt-2">
                 <Button
                     variant="primary"
