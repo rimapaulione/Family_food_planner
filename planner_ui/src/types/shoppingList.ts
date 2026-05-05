@@ -22,7 +22,7 @@ export interface ShoppingList {
     manualItems: ManualShoppingItem[];
 }
 
-export interface MarkBoughtRequest {
+export interface MarkBoughtPlanRequest {
     weekStart: string;
     ingredientId: string;
     quantity: number;

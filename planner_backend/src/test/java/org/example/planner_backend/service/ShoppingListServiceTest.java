@@ -1,6 +1,6 @@
 package org.example.planner_backend.service;
 
-import org.example.planner_backend.dto.shopping.MarkBoughtRequestDto;
+import org.example.planner_backend.dto.shopping.MarkBoughtPlanRequestDto;
 import org.example.planner_backend.dto.shopping.ShoppingItemPlanDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
 import org.example.planner_backend.exception.BadRequestException;
@@ -180,7 +180,7 @@ class ShoppingListServiceTest {
 
     @Test
     void markBought_throwsBadRequestWhenWeekStartIsNotCurrentOrNextMonday() {
-        MarkBoughtRequestDto request = new MarkBoughtRequestDto(
+        MarkBoughtPlanRequestDto request = new MarkBoughtPlanRequestDto(
                 LocalDate.of(2020, 1, 1), INGREDIENT_ID, new BigDecimal("100"));
 
         assertThatThrownBy(() -> shoppingListService.markBought(EMAIL, request))
@@ -190,7 +190,7 @@ class ShoppingListServiceTest {
 
     @Test
     void markBought_throwsUnauthorizedWhenIngredientNotInFamily() {
-        MarkBoughtRequestDto request = new MarkBoughtRequestDto(
+        MarkBoughtPlanRequestDto request = new MarkBoughtPlanRequestDto(
                 CURRENT_MONDAY, INGREDIENT_ID, new BigDecimal("100"));
 
         when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);
@@ -205,7 +205,7 @@ class ShoppingListServiceTest {
 
     @Test
     void markUnbought_isNoOpWhenNoExistingRow() {
-        MarkBoughtRequestDto request = new MarkBoughtRequestDto(
+        MarkBoughtPlanRequestDto request = new MarkBoughtPlanRequestDto(
                 CURRENT_MONDAY, INGREDIENT_ID, new BigDecimal("100"));
 
         when(familyResolver.getFamilyByEmail(EMAIL)).thenReturn(family);

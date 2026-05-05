@@ -1,7 +1,7 @@
 package org.example.planner_backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.planner_backend.dto.shopping.MarkBoughtRequestDto;
+import org.example.planner_backend.dto.shopping.MarkBoughtPlanRequestDto;
 import org.example.planner_backend.dto.shopping.ShoppingItemManualDto;
 import org.example.planner_backend.dto.shopping.ShoppingItemPlanDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
@@ -112,7 +112,7 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public void markBought(final String email, final MarkBoughtRequestDto request) {
+    public void markBought(final String email, final MarkBoughtPlanRequestDto request) {
         this.validateWeekStart(request.weekStart());
         Family family = familyResolver.getFamilyByEmail(email);
         Ingredient ingredient = ingredientRepository
@@ -133,7 +133,7 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public void markUnbought(final String email, final MarkBoughtRequestDto request) {
+    public void markUnbought(final String email, final MarkBoughtPlanRequestDto request) {
         this.validateWeekStart(request.weekStart());
         Family family = familyResolver.getFamilyByEmail(email);
         planHistoryRepository

@@ -2,7 +2,7 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {toast} from 'sonner';
 import api from '@/api/axios';
 import {useAuthStore} from '@/stores/useAuthStore';
-import type {MarkBoughtRequest, ShoppingItem, ShoppingList} from '@/types/shoppingList';
+import type {MarkBoughtPlanRequest, ShoppingItem, ShoppingList} from '@/types/shoppingList';
 import {getErrorMessage} from '@/utils/getErrorMessage';
 
 const queryKey = (weekStart: string) => ['shopping-list', weekStart] as const;
@@ -29,7 +29,7 @@ export function useToggleBought(weekStart: string) {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (item: ShoppingItem) => {
-            const body: MarkBoughtRequest = {
+            const body: MarkBoughtPlanRequest = {
                 weekStart,
                 ingredientId: item.ingredientId,
                 quantity: item.targetQuantity,

@@ -3,7 +3,7 @@ package org.example.planner_backend.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.example.planner_backend.dto.shopping.MarkBoughtRequestDto;
+import org.example.planner_backend.dto.shopping.MarkBoughtPlanRequestDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
 import org.example.planner_backend.service.ShoppingListService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,7 +37,7 @@ public class ShoppingListController {
     @PostMapping("/checks")
     public ResponseEntity<Void> markBought(
             @AuthenticationPrincipal String email,
-            @Valid @RequestBody MarkBoughtRequestDto request
+            @Valid @RequestBody MarkBoughtPlanRequestDto request
     ) {
         shoppingListService.markBought(email, request);
         return ResponseEntity.noContent().build();
@@ -46,7 +46,7 @@ public class ShoppingListController {
     @DeleteMapping("/checks")
     public ResponseEntity<Void> markUnbought(
             @AuthenticationPrincipal String email,
-            @Valid @RequestBody MarkBoughtRequestDto request
+            @Valid @RequestBody MarkBoughtPlanRequestDto request
     ) {
         shoppingListService.markUnbought(email, request);
         return ResponseEntity.noContent().build();
