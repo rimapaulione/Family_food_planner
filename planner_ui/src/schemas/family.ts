@@ -21,6 +21,7 @@ export const familyFormSchema = z.object({
     shoppingDay: z.enum(dayOfWeekValues),
     defaultWeekdayServings: mealServingsSchema,
     defaultWeekendServings: mealServingsSchema,
+    noRepeatRecipeDays: z.number().int().min(0, 'Min 0').max(90, 'Max 90'),
 });
 
 export const familyUpdateSchema = familyFormSchema.extend({

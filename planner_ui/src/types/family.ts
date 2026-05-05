@@ -29,6 +29,7 @@ export interface Family {
     shoppingDay: DayOfWeek;
     defaultWeekdayServings: MealServings;
     defaultWeekendServings: MealServings;
+    noRepeatRecipeDays: number;
     isSetupCompleted: boolean;
     members: FamilyMember[];
 }
@@ -42,5 +43,6 @@ export interface FamilyUpdateRequest {
     shoppingDay: DayOfWeek;
     defaultWeekdayServings: MealServings;
     defaultWeekendServings: MealServings;
+    noRepeatRecipeDays: number;
     isSetupCompleted: boolean;
 }

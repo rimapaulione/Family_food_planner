@@ -1,6 +1,7 @@
 package org.example.planner_backend.dto.family;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,9 @@ public record FamilySettingsRequestDto(
 
         @NotNull @Valid
         MealServings defaultWeekendServings,
+
+        @NotNull @Min(0)
+        Integer noRepeatRecipeDays,
 
         boolean isSetupCompleted
 ) {

@@ -73,6 +73,7 @@ public class FamilyService {
         family.setShoppingDay(request.shoppingDay());
         family.setDefaultWeekdayServings(request.defaultWeekdayServings());
         family.setDefaultWeekendServings(request.defaultWeekendServings());
+        family.setNoRepeatRecipeDays(request.noRepeatRecipeDays());
         family.setSetupCompleted(request.isSetupCompleted());
 
         return this.buildFamilyResponse(family);
@@ -115,6 +116,7 @@ public class FamilyService {
                 family.getShoppingDay(),
                 family.getDefaultWeekdayServings(),
                 family.getDefaultWeekendServings(),
+                family.getNoRepeatRecipeDays(),
                 family.isSetupCompleted(),
                 familyMapper.toMembers(members)
         );

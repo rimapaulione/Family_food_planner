@@ -34,6 +34,7 @@ export function FamilySetupPage() {
                     shoppingDay: family.shoppingDay,
                     defaultWeekdayServings: family.defaultWeekdayServings,
                     defaultWeekendServings: family.defaultWeekendServings,
+                    noRepeatRecipeDays: family.noRepeatRecipeDays,
                 }}
                 onSubmit={handleSubmit}
                 submitLabel="Get Started"

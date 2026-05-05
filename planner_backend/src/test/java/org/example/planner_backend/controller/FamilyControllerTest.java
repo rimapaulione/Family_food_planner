@@ -56,6 +56,7 @@ class FamilyControllerTest {
                 DayOfWeek.SUNDAY,
                 new MealServings(3, null, 4),
                 new MealServings(4, 4, 4),
+                14,
                 false,
                 List.of(new FamilyMemberDto(USER_ID, "Test User", EMAIL, null, Role.ADMIN))
         );
@@ -144,6 +145,7 @@ class FamilyControllerTest {
                   "shoppingDay": "MONDAY",
                   "defaultWeekdayServings": {"breakfast": 3, "lunch": null, "dinner": 4},
                   "defaultWeekendServings": {"breakfast": 4, "lunch": 4, "dinner": 4},
+                  "noRepeatRecipeDays": 14,
                   "isSetupCompleted": true
                 }
                 """;

@@ -14,6 +14,7 @@ public record FamilyResponseDto(
         DayOfWeek shoppingDay,
         MealServings defaultWeekdayServings,
         MealServings defaultWeekendServings,
+        Integer noRepeatRecipeDays,
         boolean isSetupCompleted,
         List<FamilyMemberDto> members
 ) {

@@ -58,6 +58,9 @@ export function FamilyDetailsView({family, canEdit, onEdit}: FamilyDetailsViewPr
                 </p>
                 <MealRow label="Weekday" meals={family.defaultWeekdayServings}/>
                 <MealRow label="Weekend" meals={family.defaultWeekendServings}/>
+                <p className="text-muted-foreground">
+                    Don't repeat recipes within: {family.noRepeatRecipeDays} days
+                </p>
             </div>
         </Card>
     );

@@ -66,6 +66,10 @@ public class Family {
     @Builder.Default
     private MealServings defaultWeekendServings = new MealServings(4, 4, 4);
 
+    @Column(name = "no_repeat_recipe_days", nullable = false)
+    @Builder.Default
+    private Integer noRepeatRecipeDays = 14;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

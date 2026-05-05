@@ -72,6 +72,19 @@ export function FamilyForm({
                 )}
             />
 
+            <FormField
+                label="Don't repeat recipes within (days)"
+                error={errors.noRepeatRecipeDays?.message}
+            >
+                <input
+                    type="number"
+                    min={0}
+                    max={90}
+                    {...register('noRepeatRecipeDays', {valueAsNumber: true})}
+                    className={inputClass(!!errors.noRepeatRecipeDays)}
+                />
+            </FormField>
+
             <div className="flex gap-3 pt-2">
                 <Button
                     variant="primary"
