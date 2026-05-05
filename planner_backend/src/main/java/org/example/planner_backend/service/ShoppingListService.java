@@ -1,12 +1,15 @@
 package org.example.planner_backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.planner_backend.dto.shopping.CreateManualItemRequestDto;
 import org.example.planner_backend.dto.shopping.MarkBoughtPlanRequestDto;
 import org.example.planner_backend.dto.shopping.ShoppingItemManualDto;
 import org.example.planner_backend.dto.shopping.ShoppingItemPlanDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
+import org.example.planner_backend.dto.shopping.UpdateManualItemBoughtRequestDto;
 import org.example.planner_backend.exception.BadRequestException;
 import org.example.planner_backend.exception.UnauthorizedException;
+import org.example.planner_backend.mapper.ShoppingListManualHistoryMapper;
 import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.model.entity.MealPlan;
@@ -16,6 +19,7 @@ import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.RecipeIngredient;
 import org.example.planner_backend.model.entity.ShoppingListManualHistory;
 import org.example.planner_backend.model.entity.ShoppingListPlanHistory;
+import org.example.planner_backend.model.enums.Unit;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.MealPlanRepository;
 import org.example.planner_backend.repository.ShoppingListManualHistoryRepository;
@@ -42,6 +46,7 @@ public class ShoppingListService {
     private final MealPlanRepository mealPlanRepository;
     private final ShoppingListPlanHistoryRepository planHistoryRepository;
     private final ShoppingListManualHistoryRepository manualHistoryRepository;
+    private final ShoppingListManualHistoryMapper manualHistoryMapper;
     private final IngredientRepository ingredientRepository;
     private final FamilyResolver familyResolver;
 
@@ -100,12 +105,7 @@ public class ShoppingListService {
         List<ShoppingItemManualDto> manualItems = manualHistoryRepository
                 .findByFamilyIdAndWeekStart(family.getId(), weekStart)
                 .stream()
-                .map(row -> new ShoppingItemManualDto(
-                        row.getId(),
-                        row.getName(),
-                        row.getUnit().name(),
-                        row.getQuantity(),
-                        row.isBought()))
+                .map(manualHistoryMapper::toDto)
                 .toList();
 
         return new ShoppingListResponseDto(weekStart, weekEnd, items, manualItems);
@@ -139,6 +139,32 @@ public class ShoppingListService {
         planHistoryRepository
                 .findByFamilyIdAndWeekStartAndIngredientId(family.getId(), request.weekStart(), request.ingredientId())
                 .ifPresent(planHistoryRepository::delete);
+    }
+
+    @Transactional
+    public ShoppingItemManualDto createManualItem(final String email, final CreateManualItemRequestDto request) {
+        this.validateWeekStart(request.weekStart());
+        Family family = familyResolver.getFamilyByEmail(email);
+
+        ShoppingListManualHistory saved = manualHistoryRepository.save(
+                ShoppingListManualHistory.builder()
+                        .family(family)
+                        .weekStart(request.weekStart())
+                        .name(request.name())
+                        .unit(request.unit() != null ? request.unit() : Unit.VNT)
+                        .quantity(request.quantity() != null ? request.quantity() : BigDecimal.ONE)
+                        .build());
+
+        return manualHistoryMapper.toDto(saved);
+    }
+
+    @Transactional
+    public void updateManualItemBought(final String email, final UUID itemId, final UpdateManualItemBoughtRequestDto request) {
+        Family family = familyResolver.getFamilyByEmail(email);
+        ShoppingListManualHistory item = manualHistoryRepository
+                .findByIdAndFamilyId(itemId, family.getId())
+                .orElseThrow(() -> new UnauthorizedException("Item not in your family"));
+        item.setBought(request.isBought());
     }
 
     private void validateWeekStart(final LocalDate weekStart) {

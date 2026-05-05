@@ -1,11 +1,11 @@
-import {useShoppingList, useToggleBought} from '@/hooks/useShoppingList';
+import {useShoppingList, useToggleBought, useToggleManualBought} from '@/hooks/useShoppingList';
 import {Spinner} from '@/components/ui/Spinner';
 import {ErrorMessage} from '@/components/ui/ErrorMessage';
-import {NotFound} from '@/components/ui/NotFound';
 import {ProgressBar} from '@/components/ui/ProgressBar';
 import {ShoppingItemRow} from './ShoppingItemRow';
 import {ManualItemRow} from './ManualItemRow';
 import {CollapsibleCard} from './CollapsibleCard';
+import {AddManualItemForm} from './AddManualItemForm';
 
 interface ShoppingListViewProps {
     weekStart: string;
@@ -14,12 +14,11 @@ interface ShoppingListViewProps {
 export function ShoppingListView({weekStart}: ShoppingListViewProps) {
     const {data, isLoading, isError, error} = useShoppingList(weekStart);
     const toggleMutation = useToggleBought(weekStart);
+    const toggleManualMutation = useToggleManualBought(weekStart);
 
     if (isLoading) return <Spinner/>;
     if (isError) return <ErrorMessage error={error} fallback="Failed to load shopping list."/>;
-    if (!data || (data.items.length === 0 && data.manualItems.length === 0)) {
-        return <NotFound message="No items. Plan some meals to generate a shopping list."/>;
-    }
+    if (!data) return null;
 
     const recipeItems = data.items.filter((i) => !i.isBought);
     const boughtRecipeItems = data.items.filter((i) => i.isBought);
@@ -46,11 +45,14 @@ export function ShoppingListView({weekStart}: ShoppingListViewProps) {
             )}
 
             <CollapsibleCard title="Extra items" count={manualItems.length} defaultOpen>
-                {manualItems.length === 0 ? (
-                    <p className="px-2 py-1.5 text-sm text-muted-foreground">No extra items.</p>
-                ) : (
-                    manualItems.map((item) => <ManualItemRow key={item.id} item={item}/>)
-                )}
+                {manualItems.map((item) => (
+                    <ManualItemRow
+                        key={item.id}
+                        item={item}
+                        onToggle={() => toggleManualMutation.mutate(item)}
+                    />
+                ))}
+                <AddManualItemForm weekStart={weekStart}/>
             </CollapsibleCard>
 
             {bought > 0 && (
@@ -63,7 +65,11 @@ export function ShoppingListView({weekStart}: ShoppingListViewProps) {
                         />
                     ))}
                     {boughtManualItems.map((item) => (
-                        <ManualItemRow key={item.id} item={item}/>
+                        <ManualItemRow
+                            key={item.id}
+                            item={item}
+                            onToggle={() => toggleManualMutation.mutate(item)}
+                        />
                     ))}
                 </CollapsibleCard>
             )}

@@ -27,3 +27,10 @@ export interface MarkBoughtPlanRequest {
     ingredientId: string;
     quantity: number;
 }
+
+export interface CreateManualItemRequest {
+    weekStart: string;
+    name: string;
+    unit?: string;
+    quantity?: number;
+}

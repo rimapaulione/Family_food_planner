@@ -15,6 +15,7 @@ import org.example.planner_backend.model.entity.RecipeIngredient;
 import org.example.planner_backend.model.entity.ShoppingListPlanHistory;
 import org.example.planner_backend.model.enums.MealType;
 import org.example.planner_backend.model.enums.Unit;
+import org.example.planner_backend.mapper.ShoppingListManualHistoryMapper;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.MealPlanRepository;
 import org.example.planner_backend.repository.ShoppingListManualHistoryRepository;
@@ -54,6 +55,8 @@ class ShoppingListServiceTest {
     private ShoppingListPlanHistoryRepository planHistoryRepository;
     @Mock
     private ShoppingListManualHistoryRepository manualHistoryRepository;
+    @Mock
+    private ShoppingListManualHistoryMapper manualHistoryMapper;
     @Mock
     private IngredientRepository ingredientRepository;
     @Mock
