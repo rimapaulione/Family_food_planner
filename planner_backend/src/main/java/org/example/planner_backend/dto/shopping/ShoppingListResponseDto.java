@@ -6,6 +6,7 @@ import java.util.List;
 public record ShoppingListResponseDto(
         LocalDate weekStart,
         LocalDate weekEnd,
-        List<ShoppingItemDto> items
+        List<ShoppingItemPlanDto> items,
+        List<ShoppingItemManualDto> manualItems
 ) {
 }

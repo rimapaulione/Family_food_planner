@@ -2,7 +2,8 @@ package org.example.planner_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.planner_backend.dto.shopping.MarkBoughtRequestDto;
-import org.example.planner_backend.dto.shopping.ShoppingItemDto;
+import org.example.planner_backend.dto.shopping.ShoppingItemManualDto;
+import org.example.planner_backend.dto.shopping.ShoppingItemPlanDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
 import org.example.planner_backend.exception.BadRequestException;
 import org.example.planner_backend.exception.UnauthorizedException;
@@ -13,9 +14,11 @@ import org.example.planner_backend.model.entity.MealServings;
 import org.example.planner_backend.model.entity.MealSlot;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.RecipeIngredient;
+import org.example.planner_backend.model.entity.ShoppingListManualHistory;
 import org.example.planner_backend.model.entity.ShoppingListPlanHistory;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.MealPlanRepository;
+import org.example.planner_backend.repository.ShoppingListManualHistoryRepository;
 import org.example.planner_backend.repository.ShoppingListPlanHistoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class ShoppingListService {
 
     private final MealPlanRepository mealPlanRepository;
     private final ShoppingListPlanHistoryRepository planHistoryRepository;
+    private final ShoppingListManualHistoryRepository manualHistoryRepository;
     private final IngredientRepository ingredientRepository;
     private final FamilyResolver familyResolver;
 
@@ -59,21 +63,21 @@ public class ShoppingListService {
                 .map(p -> this.aggregatePlanItems(p, family))
                 .orElseGet(LinkedHashMap::new);
 
-        List<ShoppingItemDto> items = new ArrayList<>();
+        List<ShoppingItemPlanDto> items = new ArrayList<>();
 
         for (AggregatedItem agg : aggregated.values()) {
             BigDecimal bought = boughtQty.get(agg.ingredientId());
             if (bought != null && bought.compareTo(agg.quantity()) < 0) {
-                items.add(new ShoppingItemDto(
+                items.add(new ShoppingItemPlanDto(
                         agg.ingredientId(), agg.name(), agg.unit(),
                         bought, bought, true));
-                items.add(new ShoppingItemDto(
+                items.add(new ShoppingItemPlanDto(
                         agg.ingredientId(), agg.name(), agg.unit(),
                         agg.quantity().subtract(bought), agg.quantity(), false));
             } else {
                 boolean isBought = bought != null;
                 BigDecimal displayQty = isBought ? bought : agg.quantity();
-                items.add(new ShoppingItemDto(
+                items.add(new ShoppingItemPlanDto(
                         agg.ingredientId(), agg.name(), agg.unit(),
                         displayQty, agg.quantity(), isBought));
             }
@@ -83,7 +87,7 @@ public class ShoppingListService {
             UUID ingredientId = row.getIngredient().getId();
             if (!aggregated.containsKey(ingredientId)) {
                 Ingredient ing = row.getIngredient();
-                items.add(new ShoppingItemDto(
+                items.add(new ShoppingItemPlanDto(
                         ingredientId,
                         ing.getNameLt(),
                         ing.getUnit().name(),
@@ -93,7 +97,18 @@ public class ShoppingListService {
             }
         }
 
-        return new ShoppingListResponseDto(weekStart, weekEnd, items);
+        List<ShoppingItemManualDto> manualItems = manualHistoryRepository
+                .findByFamilyIdAndWeekStart(family.getId(), weekStart)
+                .stream()
+                .map(row -> new ShoppingItemManualDto(
+                        row.getId(),
+                        row.getName(),
+                        row.getUnit().name(),
+                        row.getQuantity(),
+                        row.isBought()))
+                .toList();
+
+        return new ShoppingListResponseDto(weekStart, weekEnd, items, manualItems);
     }
 
     @Transactional

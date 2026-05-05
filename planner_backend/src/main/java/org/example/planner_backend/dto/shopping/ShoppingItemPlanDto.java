@@ -3,7 +3,7 @@ package org.example.planner_backend.dto.shopping;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record ShoppingItemDto(
+public record ShoppingItemPlanDto(
         UUID ingredientId,
         String name,
         String unit,

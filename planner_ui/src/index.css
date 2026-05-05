@@ -9,6 +9,8 @@
     --card-foreground: 240 10% 3.9%;
     --primary: 24 70% 50%;
     --primary-foreground: 0 0% 98%;
+    --success: 142 71% 38%;
+    --success-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
@@ -30,6 +32,8 @@
     --card-foreground: 0 0% 98%;
     --primary: 24 70% 55%;
     --primary-foreground: 240 10% 3.9%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 98%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
@@ -48,6 +52,8 @@
     --color-foreground: hsl(var(--foreground));
     --color-primary: hsl(var(--primary));
     --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-success: hsl(var(--success));
+    --color-success-foreground: hsl(var(--success-foreground));
     --color-secondary: hsl(var(--secondary));
     --color-secondary-foreground: hsl(var(--secondary-foreground));
     --color-muted: hsl(var(--muted));
@@ -68,6 +74,10 @@
 
 * {
     border-color: hsl(var(--border));
+}
+
+html, body {
+    overflow-x: hidden;
 }
 
 body {
@@ -106,4 +116,13 @@ input[type="number"] {
 .themed-scrollbar::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
     border-radius: 3px;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }

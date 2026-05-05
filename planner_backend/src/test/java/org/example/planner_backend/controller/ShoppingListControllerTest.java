@@ -1,6 +1,7 @@
 package org.example.planner_backend.controller;
 
-import org.example.planner_backend.dto.shopping.ShoppingItemDto;
+import org.example.planner_backend.dto.shopping.ShoppingItemManualDto;
+import org.example.planner_backend.dto.shopping.ShoppingItemPlanDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
 import org.example.planner_backend.service.JwtService;
 import org.example.planner_backend.service.ShoppingListService;
@@ -44,10 +45,10 @@ class ShoppingListControllerTest {
     private JwtService jwtService;
 
     private ShoppingListResponseDto sampleResponse() {
-        ShoppingItemDto item = new ShoppingItemDto(
+        ShoppingItemPlanDto item = new ShoppingItemPlanDto(
                 INGREDIENT_ID, "Pasta", "G",
                 new BigDecimal("500"), new BigDecimal("500"), false);
-        return new ShoppingListResponseDto(WEEK_START, WEEK_END, List.of(item));
+        return new ShoppingListResponseDto(WEEK_START, WEEK_END, List.of(item), List.<ShoppingItemManualDto>of());
     }
 
     // ---------- GET /api/v1/shopping-lists/family ----------

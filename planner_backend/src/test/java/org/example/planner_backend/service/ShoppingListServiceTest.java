@@ -1,7 +1,7 @@
 package org.example.planner_backend.service;
 
 import org.example.planner_backend.dto.shopping.MarkBoughtRequestDto;
-import org.example.planner_backend.dto.shopping.ShoppingItemDto;
+import org.example.planner_backend.dto.shopping.ShoppingItemPlanDto;
 import org.example.planner_backend.dto.shopping.ShoppingListResponseDto;
 import org.example.planner_backend.exception.BadRequestException;
 import org.example.planner_backend.exception.UnauthorizedException;
@@ -17,6 +17,7 @@ import org.example.planner_backend.model.enums.MealType;
 import org.example.planner_backend.model.enums.Unit;
 import org.example.planner_backend.repository.IngredientRepository;
 import org.example.planner_backend.repository.MealPlanRepository;
+import org.example.planner_backend.repository.ShoppingListManualHistoryRepository;
 import org.example.planner_backend.repository.ShoppingListPlanHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,8 @@ class ShoppingListServiceTest {
     private MealPlanRepository mealPlanRepository;
     @Mock
     private ShoppingListPlanHistoryRepository planHistoryRepository;
+    @Mock
+    private ShoppingListManualHistoryRepository manualHistoryRepository;
     @Mock
     private IngredientRepository ingredientRepository;
     @Mock
@@ -115,7 +118,7 @@ class ShoppingListServiceTest {
         ShoppingListResponseDto response = shoppingListService.getForFamily(EMAIL, CURRENT_MONDAY);
 
         assertThat(response.items()).hasSize(1);
-        ShoppingItemDto item = response.items().get(0);
+        ShoppingItemPlanDto item = response.items().get(0);
         assertThat(item.name()).isEqualTo("Pasta");
         assertThat(item.quantity()).isEqualByComparingTo("500");
         assertThat(item.targetQuantity()).isEqualByComparingTo("500");
@@ -143,10 +146,10 @@ class ShoppingListServiceTest {
         ShoppingListResponseDto response = shoppingListService.getForFamily(EMAIL, CURRENT_MONDAY);
 
         assertThat(response.items()).hasSize(2);
-        ShoppingItemDto bought = response.items().get(0);
+        ShoppingItemPlanDto bought = response.items().get(0);
         assertThat(bought.quantity()).isEqualByComparingTo("150");
         assertThat(bought.isBought()).isTrue();
-        ShoppingItemDto need = response.items().get(1);
+        ShoppingItemPlanDto need = response.items().get(1);
         assertThat(need.quantity()).isEqualByComparingTo("50");
         assertThat(need.targetQuantity()).isEqualByComparingTo("200");
         assertThat(need.isBought()).isFalse();

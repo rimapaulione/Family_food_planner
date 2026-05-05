@@ -4,6 +4,7 @@ import type {ReactNode} from 'react';
 
 const variants = {
     primary: 'bg-primary font-medium text-primary-foreground hover:opacity-90',
+    success: 'bg-success font-medium text-success-foreground hover:opacity-90',
     outline: 'border border-border hover:bg-accent',
     destructive: 'border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground',
 } as const;

@@ -79,11 +79,10 @@ export function MealPlanMobileView({
             <div className="flex items-center justify-between gap-2">
                 <div className="text-sm text-muted-foreground">
                     {activePlan.startDate} – {activePlan.endDate}
-                    {locked && <span className="ml-2">(locked)</span>}
                 </div>
                 {isAdmin && (
                     <Button
-                        variant={locked ? 'outline' : 'primary'}
+                        variant={locked ? 'outline' : 'success'}
                         icon={locked ? Unlock : Lock}
                         onClick={toggleLock}
                         disabled={updatePlanMutation.isPending}

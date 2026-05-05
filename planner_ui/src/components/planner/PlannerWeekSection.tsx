@@ -28,17 +28,17 @@ export function PlannerWeekSection({plan, family, onSlotClick, onSlotRemove}: Pl
     return (
         <section className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-                <h2 className="text-lg font-semibold">
+                <h2 className="flex items-center gap-2 text-lg font-semibold">
                     Week {plan.startDate} – {plan.endDate}
                     {locked && (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
-                            (locked)
+                        <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-normal text-success">
+                            Confirmed
                         </span>
                     )}
                 </h2>
                 {isAdmin && (
                     <Button
-                        variant={locked ? 'outline' : 'primary'}
+                        variant={locked ? 'outline' : 'success'}
                         icon={locked ? Unlock : Lock}
                         onClick={toggleLock}
                         disabled={updatePlanMutation.isPending}

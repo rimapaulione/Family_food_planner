@@ -48,7 +48,7 @@ export function IngredientSearch({
     const filtered = normalizedQuery
         ? sorted.filter((i) => normalize(i.nameLt).includes(normalizedQuery))
         : sorted;
-    const visible = filtered.slice(0, 20);
+    const visible = filtered;
 
     const exactMatch = ingredients.find(
         (i) => normalize(i.nameLt) === normalizedQuery,
@@ -131,7 +131,7 @@ export function IngredientSearch({
             {open && (
                 <div
                     ref={listRef}
-                    className="themed-scrollbar absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-border bg-background shadow-lg"
+                    className="no-scrollbar absolute z-20 mt-1 max-h-48 w-[calc(100vw-2.5rem)] sm:w-full overflow-y-auto overflow-x-hidden rounded-md border border-border bg-background shadow-lg"
                 >
                     {visible.map((ing, idx) => (
                         <button
@@ -147,8 +147,8 @@ export function IngredientSearch({
                                       : ''
                             }`}
                         >
-                            <span>{ing.nameLt}</span>
-                            <span className="text-xs text-muted-foreground">{ing.unit}</span>
+                            <span className="truncate">{ing.nameLt}</span>
+                            <span className="ml-2 shrink-0 text-xs text-muted-foreground">{ing.unit}</span>
                         </button>
                     ))}
                     {filtered.length === 0 && !showCreate && (

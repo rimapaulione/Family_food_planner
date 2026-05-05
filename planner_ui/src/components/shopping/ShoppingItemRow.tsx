@@ -16,7 +16,7 @@ export function ShoppingItemRow({item, onToggle}: ShoppingItemRowProps) {
                 type="checkbox"
                 checked={item.isBought}
                 onChange={onToggle}
-                className="h-4 w-4 cursor-pointer accent-primary"
+                className="h-4 w-4 cursor-pointer accent-success"
                 aria-label={`${item.name} bought`}
             />
             <span

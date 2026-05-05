@@ -7,10 +7,19 @@ export interface ShoppingItem {
     isBought: boolean;
 }
 
+export interface ManualShoppingItem {
+    id: string;
+    name: string;
+    unit: string;
+    quantity: number;
+    isBought: boolean;
+}
+
 export interface ShoppingList {
     weekStart: string;
     weekEnd: string;
     items: ShoppingItem[];
+    manualItems: ManualShoppingItem[];
 }
 
 export interface MarkBoughtRequest {
