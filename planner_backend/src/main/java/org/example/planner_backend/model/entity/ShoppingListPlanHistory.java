@@ -40,6 +40,8 @@ import java.util.UUID;
 )
 public class ShoppingListPlanHistory {
 
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -62,4 +64,6 @@ public class ShoppingListPlanHistory {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    private String test;
 }
