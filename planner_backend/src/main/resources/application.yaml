@@ -35,3 +35,7 @@ springdoc:
 jwt:
   secret: ${JWT_SECRET:change-in-production-make-at-least-32-chars-long}
   access-token-expiry-minutes: ${JWT_ACCESS_EXPIRY:60}
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  model: gpt-4o-mini
