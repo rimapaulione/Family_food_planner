@@ -4,7 +4,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {Save} from 'lucide-react';
 import {useCategories} from '@/hooks/useCategories';
 import {useIngredients, useCreateIngredient} from '@/hooks/useIngredients';
-import type {RecipeRequest, RecipeResponse} from '@/types/recipe';
+import type {AiRecipeGeneration, RecipeRequest, RecipeResponse} from '@/types/recipe';
 import {recipeSchema, type RecipeFormData} from '@/schemas/recipe';
 import {Button} from '@/components/ui/Button';
 import {RecipeBasicFields} from '@/components/recipes/RecipeBasicFields';
@@ -13,6 +13,7 @@ import {RecipeIngredientPicker} from '@/components/recipes/RecipeIngredientPicke
 
 interface RecipeFormProps {
     initialData?: RecipeResponse;
+    aiData?: AiRecipeGeneration | null;
     onSubmit: (data: RecipeRequest) => Promise<void>;
     onCancel: () => void;
     isPending: boolean;
@@ -22,6 +23,7 @@ interface RecipeFormProps {
 
 export function RecipeForm({
     initialData,
+    aiData,
     onSubmit,
     onCancel,
     isPending,
@@ -75,8 +77,52 @@ export function RecipeForm({
         }
     }, [categories, initialData, form]);
 
+    useEffect(() => {
+        if (!aiData) return;
+        form.reset({
+            name: aiData.name,
+            categoryId: aiData.categoryId,
+            defaultServing: aiData.defaultServing,
+            cookingTimeMinutes: aiData.cookingTimeMinutes,
+            tagIds: aiData.tagIds,
+            leftoverRecipeId: null,
+            isFavorite: false,
+            notes: aiData.notes ?? '',
+            ingredients: [
+                ...aiData.ingredients.map((i) => ({
+                    ingredientId: i.ingredientId,
+                    quantity: i.quantity,
+                    unit: i.unit,
+                })),
+                ...aiData.missingIngredients.map((i) => ({
+                    ingredientId: '',
+                    quantity: i.quantity,
+                    unit: i.unit,
+                    isNew: true,
+                    name: i.name,
+                })),
+            ],
+        });
+    }, [aiData, form]);
+
     const handleFormSubmit = form.handleSubmit(async (data) => {
         try {
+            const resolvedIngredients = await Promise.all(
+                (data.ingredients ?? []).map(async (row) => {
+                    if (row.isNew && row.name && row.quantity > 0) {
+                        const created = await createIngredientMutation.mutateAsync({
+                            nameLt: row.name,
+                            unit: row.unit,
+                        });
+                        return {ingredientId: created.id, quantity: row.quantity};
+                    }
+                    if (row.ingredientId && row.quantity > 0) {
+                        return {ingredientId: row.ingredientId, quantity: row.quantity};
+                    }
+                    return null;
+                }),
+            );
+
             await onSubmit({
                 name: data.name,
                 categoryId: data.categoryId,
@@ -86,9 +132,7 @@ export function RecipeForm({
                 leftoverRecipeId: data.leftoverRecipeId || null,
                 isFavorite: data.isFavorite,
                 notes: data.notes || undefined,
-                ingredients: data.ingredients
-                    ?.filter((r) => r.ingredientId && r.quantity > 0)
-                    .map((r) => ({ingredientId: r.ingredientId, quantity: r.quantity})),
+                ingredients: resolvedIngredients.filter((r): r is {ingredientId: string; quantity: number} => r !== null),
             });
         } catch (err: unknown) {
             const message =

@@ -24,14 +24,15 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-60}
-    restart: unless-stopped
+      CORS_ALLOWED_ORIGINS: "https://forkplan.app,https://www.forkplan.app"
+  restart: unless-stopped
 
   frontend:
     build: ./planner_ui
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "8081:80"
     restart: unless-stopped
 
 volumes:

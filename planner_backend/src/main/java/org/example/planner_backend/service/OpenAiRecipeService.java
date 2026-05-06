@@ -79,6 +79,7 @@ public class OpenAiRecipeService {
                 aiRecipe.categoryId(),
                 aiRecipe.defaultServing(),
                 aiRecipe.cookingTimeMinutes(),
+                aiRecipe.notes(),
                 aiRecipe.tagIds(),
                 matched,
                 missing
@@ -113,7 +114,10 @@ public class OpenAiRecipeService {
 
         sb.append("\nIf a recipe genuinely needs an ingredient not in the library, ");
         sb.append("use its Lithuanian name and an appropriate unit (VNT, G, or ML). ");
-        sb.append("Quantities must match the requested serving count.");
+        sb.append("Quantities must match the requested serving count.\n\n");
+
+        sb.append("Include short cooking instructions in 'notes' field (Lithuanian, ");
+        sb.append("2-4 short sentences, max 500 characters, just the essential steps).");
 
         return sb.toString();
     }
@@ -176,10 +180,11 @@ public class OpenAiRecipeService {
                     put("categoryId", Map.of("type", "integer"));
                     put("defaultServing", Map.of("type", "integer"));
                     put("cookingTimeMinutes", Map.of("type", "integer"));
+                    put("notes", Map.of("type", "string"));
                     put("tagIds", Map.of("type", "array", "items", Map.of("type", "integer")));
                     put("ingredients", Map.of("type", "array", "items", ingredientItem));
                 }},
-                "required", List.of("name", "categoryId", "defaultServing", "cookingTimeMinutes", "tagIds", "ingredients"),
+                "required", List.of("name", "categoryId", "defaultServing", "cookingTimeMinutes", "notes", "tagIds", "ingredients"),
                 "additionalProperties", false
         );
 
@@ -198,6 +203,7 @@ public class OpenAiRecipeService {
             Integer categoryId,
             Integer defaultServing,
             Integer cookingTimeMinutes,
+            String notes,
             List<Integer> tagIds,
             List<AiIngredient> ingredients
     ) {

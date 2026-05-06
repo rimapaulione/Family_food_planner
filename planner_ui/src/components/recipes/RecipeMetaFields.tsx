@@ -67,8 +67,8 @@ export function RecipeMetaFields({excludeRecipeId}: RecipeMetaFieldsProps) {
             <FormField label="Notes" error={errors.notes?.message}>
                 <textarea
                     {...register('notes')}
-                    rows={2}
-                    className={inputClass(!!errors.notes)}
+                    rows={4}
+                    className={`no-scrollbar ${inputClass(!!errors.notes)}`}
                     placeholder="Optional notes..."
                 />
             </FormField>

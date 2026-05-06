@@ -23,10 +23,13 @@ export const recipeSchema = z.object({
             ingredientId: z.string(),
             quantity: z.number(),
             unit: z.string(),
+            isNew: z.boolean().optional(),
+            name: z.string().optional(),
         }),
     ).superRefine((rows, ctx) => {
         rows.forEach((row, i) => {
-            if (!row.ingredientId) return;
+            const present = row.ingredientId || (row.isNew && row.name);
+            if (!present) return;
             if (row.quantity < 0.01) {
                 ctx.addIssue({
                     code: 'custom',

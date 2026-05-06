@@ -1,4 +1,4 @@
-import {Plus, Trash2} from 'lucide-react';
+import {PackagePlus, Plus, Trash2} from 'lucide-react';
 import {IngredientSearch} from '@/components/recipes/IngredientSearch';
 import type {Ingredient} from '@/types/ingredient';
 
@@ -6,6 +6,8 @@ export interface RecipeIngredientRow {
     ingredientId: string;
     quantity: number;
     unit: string;
+    isNew?: boolean;
+    name?: string;
 }
 
 interface RecipeIngredientPickerProps {
@@ -46,20 +48,36 @@ export function RecipeIngredientPicker({
 
             {rows.map((row, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                    <IngredientSearch
-                        ingredients={ingredients}
-                        selectedId={row.ingredientId}
-                        onSelect={(id, unit) => {
-                            updateRow(idx, {ingredientId: id, unit});
-                            focusQuantity(idx);
-                        }}
-                        onCreate={async (name, unit) => {
-                            const created = await onCreateIngredient(name, unit);
-                            updateRow(idx, {ingredientId: created.id, unit: created.unit});
-                            focusQuantity(idx);
-                        }}
-                        autoFocus={!row.ingredientId}
-                    />
+                    {row.isNew ? (
+                        <div className="flex flex-1 items-center gap-2">
+                            <PackagePlus
+                                className="h-4 w-4 shrink-0 text-primary"
+                                aria-label="New ingredient — will be added to your library on save"
+                            />
+                            <input
+                                type="text"
+                                value={row.name ?? ''}
+                                onChange={(e) => updateRow(idx, {name: e.target.value})}
+                                placeholder="New ingredient name"
+                                className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-base md:text-sm outline-none focus:ring-2 focus:ring-ring"
+                            />
+                        </div>
+                    ) : (
+                        <IngredientSearch
+                            ingredients={ingredients}
+                            selectedId={row.ingredientId}
+                            onSelect={(id, unit) => {
+                                updateRow(idx, {ingredientId: id, unit});
+                                focusQuantity(idx);
+                            }}
+                            onCreate={async (name, unit) => {
+                                const created = await onCreateIngredient(name, unit);
+                                updateRow(idx, {ingredientId: created.id, unit: created.unit});
+                                focusQuantity(idx);
+                            }}
+                            autoFocus={!row.ingredientId}
+                        />
+                    )}
                     <input
                         id={`qty-${idx}`}
                         type="number"

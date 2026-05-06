@@ -7,6 +7,7 @@ public record GenerateRecipeResponseDto(
         Integer categoryId,
         Integer defaultServing,
         Integer cookingTimeMinutes,
+        String notes,
         List<Integer> tagIds,
         List<MatchedIngredientDto> ingredients,
         List<MissingIngredientDto> missingIngredients

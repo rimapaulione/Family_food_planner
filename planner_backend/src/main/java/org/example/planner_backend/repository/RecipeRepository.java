@@ -13,10 +13,10 @@ import java.util.UUID;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
 
-    @EntityGraph(attributePaths = {"tags", "ingredients"})
+    @EntityGraph(attributePaths = {"tags"})
     List<Recipe> findByFamilyId(UUID familyId);
 
-    @EntityGraph(attributePaths = {"tags", "ingredients"})
+    @EntityGraph(attributePaths = {"tags"})
     List<Recipe> findByFamilyIdAndNameContainingIgnoreCase(UUID familyId, String search);
 
     Optional<Recipe> findByIdAndFamilyId(UUID id, UUID familyId);

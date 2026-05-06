@@ -58,3 +58,26 @@ export interface RecipeRequest {
   notes?: string;
   ingredients?: RecipeIngredientRequest[];
 }
+
+export interface AiMatchedIngredient {
+  ingredientId: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface AiMissingIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface AiRecipeGeneration {
+  name: string;
+  categoryId: number;
+  defaultServing: number;
+  cookingTimeMinutes: number;
+  notes: string;
+  tagIds: number[];
+  ingredients: AiMatchedIngredient[];
+  missingIngredients: AiMissingIngredient[];
+}
