@@ -1,4 +1,4 @@
-import {UtensilsCrossed, CalendarDays, ShoppingCart, ShoppingBasket, Users} from 'lucide-react';
+import {UtensilsCrossed, CalendarDays, ShoppingCart, Users} from 'lucide-react';
 import type {LucideIcon} from 'lucide-react';
 
 export interface NavItem {
