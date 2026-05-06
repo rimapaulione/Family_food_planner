@@ -1,12 +1,12 @@
 import {useState} from 'react';
-import {Lock, Unlock} from 'lucide-react';
+import {Lock, Unlock, Wand2} from 'lucide-react';
 import {Button} from '@/components/ui/Button';
 import {TabBar} from '@/components/ui/TabBar';
 import {TabButton} from '@/components/ui/TabButton';
 import {DayTabs} from './DayTabs';
 import {MealRow} from './MealRow';
 import {MEAL_ORDER} from '@/constants/mealPlan';
-import {useUpdateMealPlan} from '@/hooks/useMealPlan';
+import {useAutoFillPlan, useUpdateMealPlan} from '@/hooks/useMealPlan';
 import {useAuthStore} from '@/stores/useAuthStore';
 import {ROLE} from '@/types/auth';
 import type {Family} from '@/types/family';
@@ -33,6 +33,7 @@ export function MealPlanMobileView({
 }: MealPlanMobileViewProps) {
     const isAdmin = useAuthStore((s) => s.role === ROLE.ADMIN);
     const updatePlanMutation = useUpdateMealPlan();
+    const autoFillMutation = useAutoFillPlan();
 
     const currentDays = getWeekDates(currentWeek.startDate);
     const nextDays = getWeekDates(nextWeek.startDate);
@@ -81,14 +82,26 @@ export function MealPlanMobileView({
                     {activePlan.startDate} – {activePlan.endDate}
                 </div>
                 {isAdmin && (
-                    <Button
-                        variant={locked ? 'outline' : 'success'}
-                        icon={locked ? Unlock : Lock}
-                        onClick={toggleLock}
-                        disabled={updatePlanMutation.isPending}
-                    >
-                        {locked ? 'Unlock' : 'Lock'}
-                    </Button>
+                    <div className="flex gap-2">
+                        {!locked && (
+                            <Button
+                                variant="primary"
+                                icon={Wand2}
+                                onClick={() => autoFillMutation.mutate(activePlan.id)}
+                                disabled={autoFillMutation.isPending}
+                            >
+                                {autoFillMutation.isPending ? '...' : 'Plan'}
+                            </Button>
+                        )}
+                        <Button
+                            variant={locked ? 'outline' : 'success'}
+                            icon={locked ? Unlock : Lock}
+                            onClick={toggleLock}
+                            disabled={updatePlanMutation.isPending}
+                        >
+                            {locked ? 'Unlock' : 'Lock'}
+                        </Button>
+                    </div>
                 )}
             </div>
 

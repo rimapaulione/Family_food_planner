@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,5 +21,7 @@ public interface MealPlanRepository extends JpaRepository<MealPlan, UUID> {
     @SuppressWarnings("NullableProblems")
     Optional<MealPlan> findById(UUID id);
 
+    @EntityGraph(attributePaths = {"slots", "slots.recipe"})
+    List<MealPlan> findByFamilyIdAndStartDateGreaterThanEqual(UUID familyId, LocalDate startDate);
 }
 

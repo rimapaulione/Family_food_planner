@@ -68,6 +68,26 @@ export function useUpdateMealPlan() {
     });
 }
 
+export function useAutoFillPlan() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (planId: string) => {
+            const {data} = await api.post<MealPlan>(`/meal-plans/${planId}/auto-fill`);
+            return data;
+        },
+        onSuccess: (updatedPlan) => {
+            queryClient.setQueryData<MealPlanWindow>(WINDOW_KEY, (old) => {
+                if (!old) return old;
+                return {
+                    currentWeek: old.currentWeek.id === updatedPlan.id ? updatedPlan : old.currentWeek,
+                    nextWeek: old.nextWeek.id === updatedPlan.id ? updatedPlan : old.nextWeek,
+                };
+            });
+        },
+        onError: (err) => toast.error(getErrorMessage(err, 'Auto-fill failed')),
+    });
+}
+
 function replaceSlot(plan: MealPlan, updated: MealSlot): MealPlan {
     return {
         ...plan,

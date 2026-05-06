@@ -1,7 +1,7 @@
-import {Lock, Unlock} from 'lucide-react';
+import {Lock, Unlock, Wand2} from 'lucide-react';
 import {Button} from '@/components/ui/Button';
 import {MealPlanGrid} from './MealPlanGrid';
-import {useUpdateMealPlan} from '@/hooks/useMealPlan';
+import {useAutoFillPlan, useUpdateMealPlan} from '@/hooks/useMealPlan';
 import {useAuthStore} from '@/stores/useAuthStore';
 import {ROLE} from '@/types/auth';
 import type {Family} from '@/types/family';
@@ -18,6 +18,7 @@ interface PlannerWeekSectionProps {
 export function PlannerWeekSection({plan, family, onSlotClick, onSlotRemove}: PlannerWeekSectionProps) {
     const isAdmin = useAuthStore((s) => s.role === ROLE.ADMIN);
     const updatePlanMutation = useUpdateMealPlan();
+    const autoFillMutation = useAutoFillPlan();
     const locked = plan.status === PLAN_STATUS.LOCKED;
 
     const toggleLock = () => {
@@ -37,14 +38,26 @@ export function PlannerWeekSection({plan, family, onSlotClick, onSlotRemove}: Pl
                     )}
                 </h2>
                 {isAdmin && (
-                    <Button
-                        variant={locked ? 'outline' : 'success'}
-                        icon={locked ? Unlock : Lock}
-                        onClick={toggleLock}
-                        disabled={updatePlanMutation.isPending}
-                    >
-                        {locked ? 'Unlock plan' : 'Confirm & lock'}
-                    </Button>
+                    <div className="flex gap-2">
+                        {!locked && (
+                            <Button
+                                variant="primary"
+                                icon={Wand2}
+                                onClick={() => autoFillMutation.mutate(plan.id)}
+                                disabled={autoFillMutation.isPending}
+                            >
+                                {autoFillMutation.isPending ? 'Planning...' : 'Plan my week'}
+                            </Button>
+                        )}
+                        <Button
+                            variant={locked ? 'outline' : 'success'}
+                            icon={locked ? Unlock : Lock}
+                            onClick={toggleLock}
+                            disabled={updatePlanMutation.isPending}
+                        >
+                            {locked ? 'Unlock plan' : 'Confirm & lock'}
+                        </Button>
+                    </div>
                 )}
             </div>
             <MealPlanGrid
