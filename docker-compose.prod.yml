@@ -25,7 +25,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-60}
       CORS_ALLOWED_ORIGINS: "https://forkplan.app,https://www.forkplan.app"
-  restart: unless-stopped
+    restart: unless-stopped
 
   frontend:
     build: ./planner_ui
