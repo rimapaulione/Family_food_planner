@@ -1,4 +1,6 @@
 import {useState} from 'react';
+import {toast} from 'sonner';
+import {X} from 'lucide-react';
 import {normalize} from '@/utils/normalize';
 import {
     useCreateIngredient,
@@ -14,6 +16,7 @@ import {PageHeader} from '@/components/ui/PageHeader';
 import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {IngredientCard} from '@/components/ingredients/IngredientCard';
 import {IngredientForm} from '@/components/ingredients/IngredientForm';
+import {IngredientSearch} from '@/components/recipes/IngredientSearch';
 
 export function IngredientsTab() {
     const [search, setSearch] = useState('');
@@ -30,11 +33,6 @@ export function IngredientsTab() {
     const filtered = (ingredients ?? [])
         .filter((i) => !search || normalize(i.nameLt).includes(normalize(search)))
         .sort((a, b) => a.nameLt.localeCompare(b.nameLt, 'lt'));
-
-    const handleCreate = async (data: {nameLt: string; unit: string}) => {
-        await createMutation.mutateAsync(data);
-        setAddIngredient(false);
-    };
 
     const handleUpdate = async (id: string, data: {nameLt: string; unit: string}) => {
         await updateMutation.mutateAsync({id, data});
@@ -54,10 +52,28 @@ export function IngredientsTab() {
             />
 
             {addIngredient && (
-                <IngredientForm
-                    onSave={handleCreate}
-                    onCancel={() => setAddIngredient(false)}
-                />
+                <div className="flex items-center gap-2 rounded-md border border-dashed border-primary px-3 py-2">
+                    <IngredientSearch
+                        ingredients={ingredients ?? []}
+                        selectedId=""
+                        onSelect={() => {
+                            toast.info('Already in your library');
+                            setAddIngredient(false);
+                        }}
+                        onCreate={async (name, unit) => {
+                            await createMutation.mutateAsync({nameLt: name, unit});
+                            setAddIngredient(false);
+                        }}
+                        autoFocus
+                    />
+                    <button
+                        onClick={() => setAddIngredient(false)}
+                        aria-label="Cancel"
+                        className="rounded p-1 text-muted-foreground hover:bg-accent"
+                    >
+                        <X className="h-4 w-4"/>
+                    </button>
+                </div>
             )}
 
             {isLoading ? (
