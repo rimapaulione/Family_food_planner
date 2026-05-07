@@ -71,3 +71,18 @@ export function useUpdateMemberRole() {
         onError: (err) => toast.error(getErrorMessage(err, 'Failed to update member role')),
     });
 }
+
+export function useRemoveMember() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (memberId: string) => {
+            const {data} = await api.delete<Family>(`/families/members/${memberId}`);
+            return data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(['family', 'me'], data);
+            toast.success('Member removed');
+        },
+        onError: (err) => toast.error(getErrorMessage(err, 'Failed to remove member')),
+    });
+}

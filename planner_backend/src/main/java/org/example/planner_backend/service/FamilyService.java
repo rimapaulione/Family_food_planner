@@ -82,6 +82,33 @@ public class FamilyService {
     }
 
     @Transactional
+    public FamilyResponseDto removeMember(final String email, final UUID id) {
+        AppUser admin = familyResolver.getAdminUser(email);
+        AppUser member = appUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Member does not exist"));
+
+        if (member.getFamily() == null
+                || !member.getFamily().getId().equals(admin.getFamily().getId())) {
+            throw new UnauthorizedException("Member is not in your family");
+        }
+        if (admin.getId().equals(member.getId())) {
+            throw new ConflictException("You cannot remove yourself");
+        }
+        if (member.getRole() == Role.ADMIN) {
+            long adminCount = appUserRepository.countByFamilyIdAndRole(admin.getFamily().getId(), Role.ADMIN);
+            if (adminCount <= 1) {
+                throw new ConflictException("Family must have at least one admin");
+            }
+        }
+
+        Family family = admin.getFamily();
+        member.setFamily(null);
+        member.setRole(Role.USER);
+
+        return this.buildFamilyResponse(family);
+    }
+
+    @Transactional
     public FamilyResponseDto updateMemberRole(final String email,
                                               final UUID id,
                                               final FamilyMemberRoleRequestDto request) {

@@ -1,3 +1,4 @@
+import {Trash2} from 'lucide-react';
 import {Avatar} from '@/components/ui/Avatar';
 import {Card} from '@/components/ui/Card';
 import type {FamilyMember} from '@/types/family';
@@ -6,10 +7,19 @@ interface FamilyMemberCardProps {
     member: FamilyMember;
     isCurrentUser: boolean;
     canEditRole: boolean;
+    canRemove: boolean;
     onRoleClick?: () => void;
+    onRemoveClick?: () => void;
 }
 
-export function FamilyMemberCard({member, isCurrentUser, canEditRole, onRoleClick}: FamilyMemberCardProps) {
+export function FamilyMemberCard({
+    member,
+    isCurrentUser,
+    canEditRole,
+    canRemove,
+    onRoleClick,
+    onRemoveClick,
+}: FamilyMemberCardProps) {
     const initial = member.displayName.charAt(0).toUpperCase();
     const roleClass = member.role === 'ADMIN'
         ? 'bg-primary text-primary-foreground'
@@ -31,17 +41,29 @@ export function FamilyMemberCard({member, isCurrentUser, canEditRole, onRoleClic
                         <p className="truncate text-xs text-muted-foreground">{member.email}</p>
                     </div>
                 </div>
-                {canEditRole ? (
-                    <button
-                        type="button"
-                        onClick={onRoleClick}
-                        className={`${badgeClasses} cursor-pointer hover:opacity-80`}
-                    >
-                        {member.role}
-                    </button>
-                ) : (
-                    <span className={badgeClasses}>{member.role}</span>
-                )}
+                <div className="flex items-center gap-2">
+                    {canEditRole ? (
+                        <button
+                            type="button"
+                            onClick={onRoleClick}
+                            className={`${badgeClasses} cursor-pointer hover:opacity-80`}
+                        >
+                            {member.role}
+                        </button>
+                    ) : (
+                        <span className={badgeClasses}>{member.role}</span>
+                    )}
+                    {canRemove && (
+                        <button
+                            type="button"
+                            onClick={onRemoveClick}
+                            aria-label="Remove member"
+                            className="rounded p-1 text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                            <Trash2 className="h-4 w-4"/>
+                        </button>
+                    )}
+                </div>
             </div>
         </Card>
     );
