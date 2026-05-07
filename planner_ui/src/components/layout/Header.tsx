@@ -1,10 +1,8 @@
 import {useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
-import {ChefHat, LogOut, UserCircle, Menu} from 'lucide-react';
-import {NavLink} from '@/components/layout/NavLink';
-import {Button} from '@/components/ui/Button';
-import {MobileDrawer} from '@/components/layout/MobileDrawer';
-import {navItems} from '@/components/layout/navConfig';
+import {ChefHat, Menu} from 'lucide-react';
+import {Nav} from '@/components/layout/Nav';
+import {MobileNav} from '@/components/layout/MobileNav';
 import {useAuthStore} from '@/stores/useAuthStore';
 
 export function Header() {
@@ -12,7 +10,7 @@ export function Header() {
     const clearAuth = useAuthStore((s) => s.clearAuth);
     const displayName = useAuthStore((s) => s.displayName);
     const avatarUrl = useAuthStore((s) => s.avatarUrl);
-    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleLogout = () => {
         clearAuth();
@@ -30,17 +28,11 @@ export function Header() {
                     Food Planner
                 </Link>
 
-                <nav className="hidden lg:flex items-center gap-4">
-                    {navItems.map(({to, icon, label}) => (
-                        <NavLink key={to} to={to} icon={icon} label={label}/>
-                    ))}
-                    <NavLink to="/profile" icon={UserCircle} label={displayName ?? ''} avatarUrl={avatarUrl}/>
-                    <Button variant="outline" icon={LogOut} onClick={handleLogout}></Button>
-                </nav>
+                <Nav displayName={displayName} avatarUrl={avatarUrl} onLogout={handleLogout}/>
 
                 <button
                     type="button"
-                    onClick={() => setDrawerOpen(true)}
+                    onClick={() => setMobileOpen(true)}
                     aria-label="Open menu"
                     className="lg:hidden p-2 text-muted-foreground hover:text-foreground"
                 >
@@ -48,9 +40,9 @@ export function Header() {
                 </button>
             </div>
 
-            <MobileDrawer
-                open={drawerOpen}
-                onClose={() => setDrawerOpen(false)}
+            <MobileNav
+                open={mobileOpen}
+                onClose={() => setMobileOpen(false)}
                 displayName={displayName}
                 avatarUrl={avatarUrl}
                 onLogout={handleLogout}

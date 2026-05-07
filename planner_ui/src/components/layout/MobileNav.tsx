@@ -3,7 +3,7 @@ import {Link, useLocation} from 'react-router-dom';
 import {X, UserCircle, LogOut} from 'lucide-react';
 import {navItems} from '@/components/layout/navConfig';
 
-interface MobileDrawerProps {
+interface MobileNavProps {
     open: boolean;
     onClose: () => void;
     displayName: string | null;
@@ -11,7 +11,7 @@ interface MobileDrawerProps {
     onLogout: () => void;
 }
 
-export function MobileDrawer({open, onClose, displayName, avatarUrl, onLogout}: MobileDrawerProps) {
+export function MobileNav({open, onClose, displayName, avatarUrl, onLogout}: MobileNavProps) {
     const {pathname} = useLocation();
 
     useEffect(() => {
