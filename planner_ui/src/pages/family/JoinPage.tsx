@@ -7,7 +7,7 @@ import {Button} from '@/components/ui/Button';
 import {Spinner} from '@/components/ui/Spinner';
 
 export function JoinPage() {
-    const {token} = useParams<{token: string}>();
+    const {token} = useParams<{ token: string }>();
     const navigate = useNavigate();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const userEmail = useAuthStore((s) => s.email);
@@ -33,7 +33,6 @@ export function JoinPage() {
         );
     }
 
-    const subtitle = `You're invited to join ${invitation.familyName} as ${invitation.invitedEmail}`;
 
     if (!isAuthenticated) {
         const params = new URLSearchParams({
@@ -42,7 +41,8 @@ export function JoinPage() {
         }).toString();
 
         return (
-            <CenteredCard title="Family invitation" subtitle={subtitle}>
+            <CenteredCard title="Family invitation"
+                          subtitle={`You're invited to join ${invitation.familyName} as ${invitation.invitedEmail}`}>
                 <div className="flex flex-col gap-3">
                     <Button
                         variant="primary"
@@ -65,9 +65,7 @@ export function JoinPage() {
         );
     }
 
-    const emailMatches = userEmail?.toLowerCase() === invitation.invitedEmail.toLowerCase();
-
-    if (!emailMatches) {
+    if (!userEmail?.toLowerCase() === invitation.invitedEmail.toLowerCase()) {
         const handleLogout = () => {
             clearAuth();
             navigate(`/join/${token}`);
