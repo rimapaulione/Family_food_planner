@@ -25,6 +25,7 @@ export interface RecipeListResponse {
   tags: Tag[];
   isFavorite: boolean;
   ingredientCount: number;
+  hasLeftover: boolean;
 }
 
 export interface RecipeResponse {

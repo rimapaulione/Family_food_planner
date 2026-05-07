@@ -272,7 +272,8 @@ class RecipeControllerTest {
                 (short) 30,
                 Set.of(new TagResponseDto(1L, "Greiti")),
                 true,
-                5
+                5,
+                false
         );
     }
 

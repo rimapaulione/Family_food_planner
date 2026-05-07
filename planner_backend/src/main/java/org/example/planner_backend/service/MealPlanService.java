@@ -141,6 +141,13 @@ public class MealPlanService {
 
         String season = AutoFillConstants.currentSeason(today.getMonth());
 
+        Map<UUID, UUID> consumerByProducer = new HashMap<>();
+        for (Recipe r : recipes) {
+            if (r.getLeftoverRecipe() != null) {
+                consumerByProducer.put(r.getLeftoverRecipe().getId(), r.getId());
+            }
+        }
+
         Map<MealType, UUID> hintsForNextDay = new HashMap<>();
         Map<MealType, UUID> hintsForCurrentDay = new HashMap<>();
 
@@ -159,7 +166,7 @@ public class MealPlanService {
             }
 
             if (slot.getRecipe() != null) {
-                this.applyLeftoverHint(slot, hintsForNextDay);
+                this.applyLeftoverHint(slot, hintsForNextDay, consumerByProducer);
                 continue;
             }
 
@@ -179,17 +186,21 @@ public class MealPlanService {
             if (picked != null) {
                 slot.setRecipe(picked);
                 alreadyPlannedRecipes.add(picked.getId());
-                this.applyLeftoverHint(slot, hintsForNextDay);
+                this.applyLeftoverHint(slot, hintsForNextDay, consumerByProducer);
             }
         }
 
         return mealPlanMapper.toPlanDto(plan);
     }
 
-    private void applyLeftoverHint(final MealSlot slot, final Map<MealType, UUID> hints) {
+    private void applyLeftoverHint(final MealSlot slot,
+                                   final Map<MealType, UUID> hints,
+                                   final Map<UUID, UUID> consumerByProducer) {
         Recipe r = slot.getRecipe();
-        if (r != null && r.getLeftoverRecipe() != null) {
-            hints.put(slot.getMealType(), r.getLeftoverRecipe().getId());
+        if (r == null) return;
+        UUID consumer = consumerByProducer.get(r.getId());
+        if (consumer != null) {
+            hints.put(slot.getMealType(), consumer);
         }
     }
 

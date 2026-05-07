@@ -58,7 +58,8 @@ public class RecipeService {
                 r.getCookingTimeMinutes(),
                 r.getTags().stream().map(tagMapper::toResponse).collect(Collectors.toSet()),
                 r.getIsFavorite(),
-                r.getIngredients().size()
+                r.getIngredients().size(),
+                r.getLeftoverRecipe() != null
         )).toList();
     }
 

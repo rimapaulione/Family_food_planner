@@ -5,7 +5,7 @@ import {ConfirmDialog} from '@/components/ui/ConfirmDialog';
 import {IconStat} from '@/components/ui/IconStat';
 import {RecipeCategoryBadge} from '@/components/recipes/RecipeCategoryBadge';
 import {RecipeTagList} from '@/components/recipes/RecipeTagList';
-import {Users, Clock, Trash2} from 'lucide-react';
+import {Users, Clock, Link2, Trash2} from 'lucide-react';
 import {FavoriteStar} from '@/components/recipes/FavoriteStar';
 
 interface RecipeCardProps {
@@ -23,6 +23,14 @@ export function RecipeCard({recipe, onDelete}: RecipeCardProps) {
                     {recipe.name}
                 </Link>
                 <FavoriteStar isFavorite={recipe.isFavorite}/>
+                {recipe.hasLeftover && (
+                    <span className="group relative inline-flex">
+                        <Link2 className="h-3.5 w-3.5 text-muted-foreground"/>
+                        <span className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-xs text-card-foreground shadow-md opacity-0 transition-opacity group-hover:opacity-100">
+                            Uses leftovers from another recipe
+                        </span>
+                    </span>
+                )}
             </div>
 
             <div className="mt-1 flex items-center justify-between">

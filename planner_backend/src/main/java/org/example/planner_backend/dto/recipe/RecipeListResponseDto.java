@@ -14,6 +14,7 @@ public record RecipeListResponseDto(
         Short cookingTimeMinutes,
         Set<TagResponseDto> tags,
         Boolean isFavorite,
-        int ingredientCount
+        int ingredientCount,
+        boolean hasLeftover
 ) {
 }
