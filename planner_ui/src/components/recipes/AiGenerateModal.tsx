@@ -44,7 +44,7 @@ export function AiGenerateModal({onClose, onGenerated}: AiGenerateModalProps) {
                     <textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Pvz: Pomidorų sriuba su ryžiais šeimai iš 4"
+                        placeholder="e.g., Tomato soup with rice for a family of 4"
                         rows={4}
                         autoFocus
                         maxLength={500}

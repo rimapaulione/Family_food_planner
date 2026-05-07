@@ -1,4 +1,4 @@
-import {PackagePlus, Plus, Trash2} from 'lucide-react';
+import {Plus, Trash2} from 'lucide-react';
 import {IngredientSearch} from '@/components/recipes/IngredientSearch';
 import type {Ingredient} from '@/types/ingredient';
 
@@ -49,11 +49,7 @@ export function RecipeIngredientPicker({
             {rows.map((row, idx) => (
                 <div key={idx} className="flex items-center gap-2">
                     {row.isNew ? (
-                        <div className="flex flex-1 items-center gap-2">
-                            <PackagePlus
-                                className="h-4 w-4 shrink-0 text-primary"
-                                aria-label="New ingredient — will be added to your library on save"
-                            />
+                        <div className="relative flex-1">
                             <input
                                 type="text"
                                 value={row.name ?? ''}
