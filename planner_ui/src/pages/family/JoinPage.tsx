@@ -75,12 +75,9 @@ export function JoinPage() {
                 title="Different account"
                 subtitle={`You're signed in as ${userEmail}, but this invite is for ${invitation.invitedEmail}. Sign out and use the matching account.`}
                 footer={
-                    <button
-                        onClick={handleLogout}
-                        className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
-                    >
-                        <LogOut className="h-4 w-4"/> Sign out
-                    </button>
+                    <Button variant="ghost" icon={LogOut} onClick={handleLogout}>
+                        Sign out
+                    </Button>
                 }
             />
         );

@@ -7,6 +7,7 @@ const variants = {
     success: 'bg-success font-medium text-success-foreground hover:opacity-90',
     outline: 'border border-border hover:bg-accent',
     destructive: 'border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground',
+    ghost: 'text-muted-foreground hover:text-foreground',
 } as const;
 
 interface ButtonProps {

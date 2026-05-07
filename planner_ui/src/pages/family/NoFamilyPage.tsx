@@ -2,6 +2,7 @@ import {Navigate, useNavigate} from 'react-router-dom';
 import {LogOut} from 'lucide-react';
 import {useCreateFamily} from '@/hooks/useFamily';
 import {useAuthStore} from '@/stores/useAuthStore';
+import {Button} from '@/components/ui/Button';
 import {CenteredCard} from '@/components/ui/CenteredCard';
 import {CreateFamilyForm} from '@/components/family/CreateFamilyForm';
 import type {FamilyCreateFormData} from '@/schemas/family';
@@ -29,12 +30,9 @@ export function NoFamilyPage() {
             title="No Family"
             subtitle="Create a new family or wait for an invitation"
             footer={
-                <button
-                    onClick={handleLogout}
-                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
-                >
-                    <LogOut className="h-4 w-4"/> Logout
-                </button>
+                <Button variant="ghost" icon={LogOut} onClick={handleLogout}>
+                    Logout
+                </Button>
             }
         >
             <CreateFamilyForm onSubmit={handleSubmit} isPending={createMutation.isPending}/>

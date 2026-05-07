@@ -26,6 +26,7 @@ export function AddManualItemForm({weekStart}: AddManualItemFormProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Add item (e.g., Paper towels)"
+                maxLength={100}
                 className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-base md:text-sm outline-none focus:ring-2 focus:ring-ring"
             />
             <button
