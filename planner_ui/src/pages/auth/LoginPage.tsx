@@ -1,19 +1,14 @@
-import {useNavigate, useSearchParams} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {useLogin} from '@/hooks/useAuth';
+import {useAuthSearchParams} from '@/hooks/useAuthSearchParams';
 import {AuthCard} from '@/components/auth/AuthCard';
 import {LoginForm} from '@/components/auth/LoginForm';
 import type {LoginFormData} from '@/schemas/auth';
 
 export function LoginPage() {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const redirectTo = searchParams.get('redirectTo') ?? '/';
-    const prefilledEmail = searchParams.get('email') ?? undefined;
+    const {redirectTo, email, siblingHref} = useAuthSearchParams();
     const loginMutation = useLogin();
-
-    const registerHref = prefilledEmail || redirectTo !== '/'
-        ? `/register?${searchParams.toString()}`
-        : '/register';
 
     const handleSubmit = async (data: LoginFormData) => {
         await loginMutation.mutateAsync(data);
@@ -26,12 +21,12 @@ export function LoginPage() {
             subtitle="Sign in to your account"
             footerPrompt="No account?"
             footerLinkText="Register"
-            footerLinkTo={registerHref}
+            footerLinkTo={siblingHref('/register')}
         >
             <LoginForm
                 onSubmit={handleSubmit}
                 isPending={loginMutation.isPending}
-                prefilledEmail={prefilledEmail}
+                prefilledEmail={email}
             />
         </AuthCard>
     );

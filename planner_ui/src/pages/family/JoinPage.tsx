@@ -65,7 +65,7 @@ export function JoinPage() {
         );
     }
 
-    if (!userEmail?.toLowerCase() === invitation.invitedEmail.toLowerCase()) {
+    if (userEmail?.toLowerCase() !== invitation.invitedEmail.toLowerCase()) {
         const handleLogout = () => {
             clearAuth();
             navigate(`/join/${token}`);
@@ -93,7 +93,10 @@ export function JoinPage() {
     };
 
     return (
-        <CenteredCard title="Family invitation" subtitle={subtitle}>
+        <CenteredCard
+            title="Family invitation"
+            subtitle={`You're invited to join ${invitation.familyName} as ${invitation.invitedEmail}`}
+        >
             <Button
                 variant="primary"
                 icon={Check}
