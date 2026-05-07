@@ -23,6 +23,8 @@ public final class AutoFillConstants {
     public static final int SCORE_NO_SEASON = 3;
     public static final int SCORE_FAVORITE = 2;
     public static final int SCORE_LEFTOVER = 30;
+    public static final int SCORE_NEW_RECIPE = 5;
+    public static final int NEW_RECIPE_DAYS = 30;
 
     public static final int TOP_N_FOR_RANDOM = 3;
 

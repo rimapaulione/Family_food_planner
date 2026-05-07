@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -140,6 +142,7 @@ public class MealPlanService {
                 .collect(Collectors.toCollection(HashSet::new));
 
         String season = AutoFillConstants.currentSeason(today.getMonth());
+        Instant newRecipeCutoff = Instant.now().minus(AutoFillConstants.NEW_RECIPE_DAYS, ChronoUnit.DAYS);
 
         Map<UUID, UUID> consumerByProducer = new HashMap<>();
         for (Recipe r : recipes) {
@@ -181,7 +184,7 @@ public class MealPlanService {
 
             Recipe picked = this.pickForSlot(
                     recipes, slot.getMealType(), maxMinutes, alreadyPlannedRecipes,
-                    hintsForCurrentDay.get(slot.getMealType()), season);
+                    hintsForCurrentDay.get(slot.getMealType()), season, newRecipeCutoff);
 
             if (picked != null) {
                 slot.setRecipe(picked);
@@ -206,29 +209,30 @@ public class MealPlanService {
 
     private Recipe pickForSlot(final List<Recipe> recipes, final MealType mealType,
                                final Integer maxMinutes, final Set<UUID> alreadyPlanned,
-                               final UUID leftoverHint, final String season) {
+                               final UUID leftoverHint, final String season,
+                               final Instant newRecipeCutoff) {
 
         Set<String> allowedCats = AutoFillConstants.CATEGORY_FOR_MEAL.getOrDefault(mealType, Set.of());
 
-        List<Scored> candidates = this.scoreFiltered(recipes, allowedCats, maxMinutes, alreadyPlanned, leftoverHint, season)
+        List<Scored> candidates = this.scoreFiltered(recipes, allowedCats, maxMinutes, alreadyPlanned, leftoverHint, season, newRecipeCutoff)
                 .filter(s -> s.score() > AutoFillConstants.SCORE_REPEAT_PENALTY)
                 .sorted(Comparator.comparingInt(Scored::score).reversed())
                 .toList();
         if (!candidates.isEmpty()) return this.pickFromTopN(candidates);
 
-        candidates = this.scoreFiltered(recipes, allowedCats, null, alreadyPlanned, leftoverHint, season)
+        candidates = this.scoreFiltered(recipes, allowedCats, null, alreadyPlanned, leftoverHint, season, newRecipeCutoff)
                 .filter(s -> s.score() > AutoFillConstants.SCORE_REPEAT_PENALTY)
                 .sorted(Comparator.comparingInt(Scored::score).reversed())
                 .toList();
         if (!candidates.isEmpty()) return this.pickFromTopN(candidates);
 
-        candidates = this.scoreFiltered(recipes, null, null, alreadyPlanned, leftoverHint, season)
+        candidates = this.scoreFiltered(recipes, null, null, alreadyPlanned, leftoverHint, season, newRecipeCutoff)
                 .filter(s -> s.score() > AutoFillConstants.SCORE_REPEAT_PENALTY)
                 .sorted(Comparator.comparingInt(Scored::score).reversed())
                 .toList();
         if (!candidates.isEmpty()) return this.pickFromTopN(candidates);
 
-        candidates = this.scoreFiltered(recipes, null, null, alreadyPlanned, leftoverHint, season)
+        candidates = this.scoreFiltered(recipes, null, null, alreadyPlanned, leftoverHint, season, newRecipeCutoff)
                 .sorted(Comparator.comparingInt(Scored::score).reversed())
                 .toList();
         return candidates.isEmpty() ? null : this.pickFromTopN(candidates);
@@ -236,12 +240,13 @@ public class MealPlanService {
 
     private Stream<Scored> scoreFiltered(final List<Recipe> recipes, final Set<String> allowedCats,
                                          final Integer maxMinutes, final Set<UUID> alreadyPlanned,
-                                         final UUID leftoverHint, final String season) {
+                                         final UUID leftoverHint, final String season,
+                                         final Instant newRecipeCutoff) {
         return recipes.stream()
                 .filter(r -> allowedCats == null
                         || (r.getCategory() != null && allowedCats.contains(r.getCategory().getName())))
                 .filter(r -> maxMinutes == null || r.getCookingTimeMinutes() <= maxMinutes)
-                .map(r -> this.score(r, alreadyPlanned, leftoverHint, season));
+                .map(r -> this.score(r, alreadyPlanned, leftoverHint, season, newRecipeCutoff));
     }
 
     private Recipe pickFromTopN(final List<Scored> sorted) {
@@ -250,16 +255,23 @@ public class MealPlanService {
     }
 
     private Scored score(final Recipe r, final Set<UUID> alreadyPlanned,
-                         final UUID leftoverHint, final String season) {
+                         final UUID leftoverHint, final String season,
+                         final Instant newRecipeCutoff) {
         int s = 0;
-        if (alreadyPlanned.contains(r.getId())) s += AutoFillConstants.SCORE_REPEAT_PENALTY;
+        boolean isLeftoverConsumer = leftoverHint != null && leftoverHint.equals(r.getId());
+        if (alreadyPlanned.contains(r.getId()) && !isLeftoverConsumer) {
+            s += AutoFillConstants.SCORE_REPEAT_PENALTY;
+        }
         Set<String> tagNames = r.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
         if (tagNames.contains(AutoFillConstants.TAG_KID_FAVORITE)) s += AutoFillConstants.SCORE_KID_FAVORITE;
         boolean hasSeason = tagNames.stream().anyMatch(AutoFillConstants.SEASON_TAGS::contains);
         if (hasSeason && tagNames.contains(season)) s += AutoFillConstants.SCORE_SEASON_MATCH;
         else if (!hasSeason) s += AutoFillConstants.SCORE_NO_SEASON;
         if (Boolean.TRUE.equals(r.getIsFavorite())) s += AutoFillConstants.SCORE_FAVORITE;
-        if (leftoverHint != null && leftoverHint.equals(r.getId())) s += AutoFillConstants.SCORE_LEFTOVER;
+        if (isLeftoverConsumer) s += AutoFillConstants.SCORE_LEFTOVER;
+        if (r.getCreatedAt() != null && r.getCreatedAt().isAfter(newRecipeCutoff)) {
+            s += AutoFillConstants.SCORE_NEW_RECIPE;
+        }
         return new Scored(r, s);
     }
 
