@@ -187,7 +187,7 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
                                     key={cat.id}
                                     type="button"
                                     onClick={() => setCategoryId(cat.id)}
-                                    className={`rounded-full px-2.5 py-0.5 text-xs ${
+                                    className={`rounded-full px-2 py-0.5 text-[11px] sm:px-2.5 sm:text-xs ${
                                         categoryId === cat.id
                                             ? 'bg-primary text-primary-foreground'
                                             : 'bg-secondary text-secondary-foreground hover:bg-accent'

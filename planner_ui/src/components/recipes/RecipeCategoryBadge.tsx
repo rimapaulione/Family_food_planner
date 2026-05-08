@@ -7,7 +7,7 @@ interface RecipeCategoryBadgeProps {
 
 export function RecipeCategoryBadge({category}: RecipeCategoryBadgeProps) {
     return (
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+        <span className="rounded-full bg-secondary px-1.5 py-0 text-[10px] text-secondary-foreground sm:px-2 sm:text-[11px]">
             {CATEGORY_LABELS[category.name] || category.name}
         </span>
     );

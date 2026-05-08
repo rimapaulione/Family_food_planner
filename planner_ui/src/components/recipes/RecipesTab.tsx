@@ -9,7 +9,7 @@ import {PageHeader} from '@/components/ui/PageHeader';
 import {RecipeCard} from '@/components/recipes/RecipeCard';
 
 const pillClass = (active: boolean) =>
-    `rounded-full px-2.5 py-0.5 text-xs ${
+    `rounded-full px-2 py-0.5 text-[11px] sm:px-2.5 sm:text-xs ${
         active
             ? 'bg-primary text-primary-foreground'
             : 'bg-secondary text-secondary-foreground hover:bg-accent'
