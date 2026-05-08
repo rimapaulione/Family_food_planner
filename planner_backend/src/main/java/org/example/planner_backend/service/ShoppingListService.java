@@ -13,7 +13,6 @@ import org.example.planner_backend.mapper.ShoppingListManualHistoryMapper;
 import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.Ingredient;
 import org.example.planner_backend.model.entity.MealPlan;
-import org.example.planner_backend.model.entity.MealServings;
 import org.example.planner_backend.model.entity.MealSlot;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.RecipeIngredient;
@@ -37,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,47 +55,47 @@ public class ShoppingListService {
 
         Optional<MealPlan> plan = mealPlanRepository.findByFamilyIdAndStartDate(family.getId(), weekStart);
 
-        List<ShoppingListPlanHistory> historyRows = planHistoryRepository.findByFamilyIdAndWeekStart(family.getId(), weekStart);
+        List<ShoppingListPlanHistory> boughtPlanItems = planHistoryRepository.findByFamilyIdAndWeekStart(family.getId(), weekStart);
 
         Map<UUID, BigDecimal> boughtQty = new HashMap<>();
-        for (ShoppingListPlanHistory h : historyRows) {
-            boughtQty.put(h.getIngredient().getId(), h.getQuantity());
+        for (ShoppingListPlanHistory boughtPlanItem : boughtPlanItems) {
+            boughtQty.put(boughtPlanItem.getIngredient().getId(), boughtPlanItem.getQuantity());
         }
 
-        Map<UUID, AggregatedItem> aggregated = plan
+        Map<UUID, AggregatedItem> neededByIngredient = plan
                 .map(p -> this.aggregatePlanItems(p, family))
                 .orElseGet(LinkedHashMap::new);
 
         List<ShoppingItemPlanDto> items = new ArrayList<>();
 
-        for (AggregatedItem agg : aggregated.values()) {
-            BigDecimal bought = boughtQty.get(agg.ingredientId());
-            if (bought != null && bought.compareTo(agg.quantity()) < 0) {
+        for (AggregatedItem needed : neededByIngredient.values()) {
+            BigDecimal bought = boughtQty.get(needed.ingredientId());
+            if (bought != null && bought.compareTo(needed.quantity()) < 0) {
                 items.add(new ShoppingItemPlanDto(
-                        agg.ingredientId(), agg.name(), agg.unit(),
+                        needed.ingredientId(), needed.name(), needed.unit(),
                         bought, bought, true));
                 items.add(new ShoppingItemPlanDto(
-                        agg.ingredientId(), agg.name(), agg.unit(),
-                        agg.quantity().subtract(bought), agg.quantity(), false));
+                        needed.ingredientId(), needed.name(), needed.unit(),
+                        needed.quantity().subtract(bought), needed.quantity(), false));
             } else {
                 boolean isBought = bought != null;
-                BigDecimal displayQty = isBought ? bought : agg.quantity();
+                BigDecimal displayQty = isBought ? bought : needed.quantity();
                 items.add(new ShoppingItemPlanDto(
-                        agg.ingredientId(), agg.name(), agg.unit(),
-                        displayQty, agg.quantity(), isBought));
+                        needed.ingredientId(), needed.name(), needed.unit(),
+                        displayQty, needed.quantity(), isBought));
             }
         }
 
-        for (ShoppingListPlanHistory row : historyRows) {
-            UUID ingredientId = row.getIngredient().getId();
-            if (!aggregated.containsKey(ingredientId)) {
-                Ingredient ing = row.getIngredient();
+        for (ShoppingListPlanHistory purchase : boughtPlanItems) {
+            UUID ingredientId = purchase.getIngredient().getId();
+            if (!neededByIngredient.containsKey(ingredientId)) {
+                Ingredient ing = purchase.getIngredient();
                 items.add(new ShoppingItemPlanDto(
                         ingredientId,
                         ing.getNameLt(),
                         ing.getUnit().name(),
-                        row.getQuantity(),
-                        row.getQuantity(),
+                        purchase.getQuantity(),
+                        purchase.getQuantity(),
                         true));
             }
         }
@@ -180,7 +178,7 @@ public class ShoppingListService {
         for (MealSlot slot : plan.getSlots()) {
             Recipe recipe = slot.getRecipe();
             if (recipe == null) continue;
-            Integer needed = this.effectiveServings(slot, family);
+            Integer needed = ServingsResolver.resolveServings(slot, family);
             if (needed == null) continue;
             int batches = Math.max(1, (int) Math.ceil((double) needed / recipe.getDefaultServing()));
             BigDecimal multiplier = BigDecimal.valueOf(batches);
@@ -195,24 +193,6 @@ public class ShoppingListService {
             }
         }
         return agg;
-    }
-
-    private Integer effectiveServings(final MealSlot slot, final Family family) {
-        if (slot.getServings() != null) return slot.getServings();
-        boolean weekend = this.isWeekend(slot.getDate());
-        MealServings defaults = weekend ? family.getDefaultWeekendServings() : family.getDefaultWeekdayServings();
-        Integer fromFamily = switch (slot.getMealType()) {
-            case BREAKFAST -> defaults.breakfast();
-            case LUNCH -> defaults.lunch();
-            case DINNER -> defaults.dinner();
-        };
-        if (fromFamily != null) return fromFamily;
-        return slot.getRecipe() != null ? (int) slot.getRecipe().getDefaultServing() : null;
-    }
-
-    private boolean isWeekend(final LocalDate date) {
-        DayOfWeek dow = date.getDayOfWeek();
-        return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
     }
 
     private record AggregatedItem(UUID ingredientId, String name, String unit, BigDecimal quantity) {

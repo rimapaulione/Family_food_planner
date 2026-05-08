@@ -14,7 +14,6 @@ import org.example.planner_backend.mapper.MealPlanMapper;
 import org.example.planner_backend.model.entity.AppUser;
 import org.example.planner_backend.model.entity.Family;
 import org.example.planner_backend.model.entity.MealPlan;
-import org.example.planner_backend.model.entity.MealServings;
 import org.example.planner_backend.model.entity.MealSlot;
 import org.example.planner_backend.model.entity.Recipe;
 import org.example.planner_backend.model.entity.Tag;
@@ -175,10 +174,10 @@ public class MealPlanService {
 
             if (slot.getDate().isBefore(today)) continue;
 
-            Integer servings = this.effectiveServings(slot, family);
+            Integer servings = ServingsResolver.resolveServings(slot, family);
             if (servings == null) continue;
 
-            Integer dayCap = this.isWeekend(slot.getDate())
+            Integer dayCap = ServingsResolver.isWeekend(slot.getDate())
                     ? family.getMaxWeekendCookingMinutes()
                     : family.getMaxWeekdayCookingMinutes();
             Integer remainingBudget = dayCap != null ? Math.max(0, dayCap - cookingMinutesUsedToday) : null;
@@ -276,24 +275,6 @@ public class MealPlanService {
             s += AutoFillConstants.SCORE_NEW_RECIPE;
         }
         return new Scored(r, s);
-    }
-
-    private Integer effectiveServings(final MealSlot slot, final Family family) {
-        if (slot.getServings() != null) return slot.getServings();
-        boolean weekend = this.isWeekend(slot.getDate());
-        MealServings defaults = weekend ? family.getDefaultWeekendServings() : family.getDefaultWeekdayServings();
-        Integer fromFamily = switch (slot.getMealType()) {
-            case BREAKFAST -> defaults.breakfast();
-            case LUNCH -> defaults.lunch();
-            case DINNER -> defaults.dinner();
-        };
-        if (fromFamily != null) return fromFamily;
-        return slot.getRecipe() != null ? (int) slot.getRecipe().getDefaultServing() : null;
-    }
-
-    private boolean isWeekend(final LocalDate date) {
-        DayOfWeek dow = date.getDayOfWeek();
-        return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
     }
 
     private record Scored(Recipe recipe, int score) {
