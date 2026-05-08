@@ -47,14 +47,12 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class MealPlanService {
 
-
     private final MealPlanRepository mealPlanRepository;
     private final MealSlotRepository mealSlotRepository;
     private final RecipeRepository recipeRepository;
     private final MealPlanMapper mealPlanMapper;
     private final FamilyResolver familyResolver;
     private final Random random = new Random();
-
 
     @Transactional
     public MealPlanWindowResponseDto getCurrentAndNext(final String email) {
@@ -108,7 +106,6 @@ public class MealPlanService {
 
         return mealPlanMapper.toSlotDto(slot);
     }
-
 
     @Transactional
     public MealPlanResponseDto autoFillPlan(final String email, final UUID planId) {

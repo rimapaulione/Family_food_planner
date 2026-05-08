@@ -55,7 +55,6 @@ public class IngredientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ingredientService.create(email, newIngredient));
     }
 
-
     @PutMapping("{id}")
     public ResponseEntity<IngredientResponseDto> update(
             @AuthenticationPrincipal String email,
@@ -64,7 +63,6 @@ public class IngredientController {
     ) {
         return ResponseEntity.ok(ingredientService.update(email, id, request));
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
