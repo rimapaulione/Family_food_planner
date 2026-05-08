@@ -1,7 +1,7 @@
 import {Fragment} from 'react';
 import {Clock} from 'lucide-react';
 import {MealSlotCard} from './MealSlotCard';
-import {LONG_DAILY_COOK_MINUTES, MEAL_LABELS, MEAL_ORDER} from '@/constants/mealPlan';
+import {MEAL_LABELS, MEAL_ORDER} from '@/constants/mealPlan';
 import type {Family} from '@/types/family';
 import type {MealPlan} from '@/types/mealPlan';
 import {
@@ -31,7 +31,11 @@ export function MealPlanGrid({plan, family, onSlotClick, onSlotRemove, disabled}
             {days.map((date) => {
                 const total = totalCookingTimeForDay(date, plan);
                 const isWknd = !isWeekday(date);
-                const totalIsLong = isWeekday(date) && total > LONG_DAILY_COOK_MINUTES;
+                const dayCap = isWknd ? family.maxWeekendCookingMinutes : family.maxWeekdayCookingMinutes;
+                const totalIsLong = dayCap != null && total > dayCap;
+                const tooltip = totalIsLong
+                    ? `Total ${total} min exceeds your ${dayCap} min ${isWknd ? 'weekend' : 'weekday'} cap.`
+                    : undefined;
                 return (
                     <div
                         key={date}
@@ -47,6 +51,7 @@ export function MealPlanGrid({plan, family, onSlotClick, onSlotRemove, disabled}
                         </div>
                         {total > 0 && (
                             <div
+                                title={tooltip}
                                 className={`mt-0.5 inline-flex items-center gap-0.5 text-xs ${
                                     totalIsLong ? 'font-medium text-orange-500' : 'text-muted-foreground'
                                 }`}

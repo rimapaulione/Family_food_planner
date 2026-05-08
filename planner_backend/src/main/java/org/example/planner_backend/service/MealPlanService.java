@@ -155,6 +155,7 @@ public class MealPlanService {
         Map<MealType, UUID> hintsForCurrentDay = new HashMap<>();
 
         LocalDate currentDay = null;
+        int cookingMinutesUsedToday = 0;
 
         List<MealSlot> sortedSlots = plan.getSlots().stream()
                 .sorted(Comparator.comparing(MealSlot::getDate)
@@ -165,10 +166,12 @@ public class MealPlanService {
             if (!slot.getDate().equals(currentDay)) {
                 hintsForCurrentDay = new HashMap<>(hintsForNextDay);
                 hintsForNextDay.clear();
+                cookingMinutesUsedToday = 0;
                 currentDay = slot.getDate();
             }
 
             if (slot.getRecipe() != null) {
+                cookingMinutesUsedToday += slot.getRecipe().getCookingTimeMinutes();
                 this.applyLeftoverHint(slot, hintsForNextDay, consumerByProducer);
                 continue;
             }
@@ -178,16 +181,18 @@ public class MealPlanService {
             Integer servings = this.effectiveServings(slot, family);
             if (servings == null) continue;
 
-            Integer maxMinutes = this.isWeekend(slot.getDate())
+            Integer dayCap = this.isWeekend(slot.getDate())
                     ? family.getMaxWeekendCookingMinutes()
                     : family.getMaxWeekdayCookingMinutes();
+            Integer remainingBudget = dayCap != null ? Math.max(0, dayCap - cookingMinutesUsedToday) : null;
 
             Recipe picked = this.pickForSlot(
-                    recipes, slot.getMealType(), maxMinutes, alreadyPlannedRecipes,
+                    recipes, slot.getMealType(), remainingBudget, alreadyPlannedRecipes,
                     hintsForCurrentDay.get(slot.getMealType()), season, newRecipeCutoff);
 
             if (picked != null) {
                 slot.setRecipe(picked);
+                cookingMinutesUsedToday += picked.getCookingTimeMinutes();
                 alreadyPlannedRecipes.add(picked.getId());
                 this.applyLeftoverHint(slot, hintsForNextDay, consumerByProducer);
             }

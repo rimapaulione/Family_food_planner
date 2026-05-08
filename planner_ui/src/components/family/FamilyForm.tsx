@@ -87,7 +87,7 @@ export function FamilyForm({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <FormField
-                    label="Weekday cook time (min)"
+                    label="Total weekday cook time (min)"
                     error={errors.maxWeekdayCookingMinutes?.message}
                 >
                     <input
@@ -102,7 +102,7 @@ export function FamilyForm({
                     />
                 </FormField>
                 <FormField
-                    label="Weekend cook time (min)"
+                    label="Total weekend cook time (min)"
                     error={errors.maxWeekendCookingMinutes?.message}
                 >
                     <input
