@@ -140,15 +140,15 @@ public class MealPlanService {
         String season = AutoFillConstants.getCurrentSeason(today.getMonth());
         Instant newRecipeCutoff = Instant.now().minus(AutoFillConstants.NEW_RECIPE_DAYS, ChronoUnit.DAYS);
 
-        Map<UUID, UUID> consumerByProducer = new HashMap<>();
+        Map<UUID, UUID> chainedRecipeBy = new HashMap<>();
         for (Recipe r : recipes) {
             if (r.getLeftoverRecipe() != null) {
-                consumerByProducer.put(r.getLeftoverRecipe().getId(), r.getId());
+                chainedRecipeBy.put(r.getLeftoverRecipe().getId(), r.getId());
             }
         }
 
-        Map<MealType, UUID> hintsForNextDay = new HashMap<>();
-        Map<MealType, UUID> hintsForCurrentDay = new HashMap<>();
+        Map<MealType, UUID> pendingLeftoverHints = new HashMap<>();
+        Map<MealType, UUID> activeLeftoverHints = new HashMap<>();
 
         LocalDate currentDay = null;
         int cookingMinutesUsedToday = 0;
@@ -160,15 +160,15 @@ public class MealPlanService {
 
         for (MealSlot slot : sortedSlots) {
             if (!slot.getDate().equals(currentDay)) {
-                hintsForCurrentDay = new HashMap<>(hintsForNextDay);
-                hintsForNextDay.clear();
+                activeLeftoverHints = new HashMap<>(pendingLeftoverHints);
+                pendingLeftoverHints.clear();
                 cookingMinutesUsedToday = 0;
                 currentDay = slot.getDate();
             }
 
             if (slot.getRecipe() != null) {
                 cookingMinutesUsedToday += slot.getRecipe().getCookingTimeMinutes();
-                this.applyLeftoverHint(slot, hintsForNextDay, consumerByProducer);
+                this.applyLeftoverHint(slot, pendingLeftoverHints, chainedRecipeBy);
                 continue;
             }
 
@@ -177,20 +177,20 @@ public class MealPlanService {
             Integer servings = ServingsResolver.resolveServings(slot, family);
             if (servings == null) continue;
 
-            Integer dayCap = ServingsResolver.isWeekend(slot.getDate())
+            Integer dayTimeLimit = ServingsResolver.isWeekend(slot.getDate())
                     ? family.getMaxWeekendCookingMinutes()
                     : family.getMaxWeekdayCookingMinutes();
-            Integer remainingBudget = dayCap != null ? Math.max(0, dayCap - cookingMinutesUsedToday) : null;
+            Integer remainingBudget = dayTimeLimit != null ? Math.max(0, dayTimeLimit - cookingMinutesUsedToday) : null;
 
             Recipe picked = this.pickForSlot(
                     recipes, slot.getMealType(), remainingBudget, alreadyPlannedRecipes,
-                    hintsForCurrentDay.get(slot.getMealType()), season, newRecipeCutoff);
+                    activeLeftoverHints.get(slot.getMealType()), season, newRecipeCutoff);
 
             if (picked != null) {
                 slot.setRecipe(picked);
                 cookingMinutesUsedToday += picked.getCookingTimeMinutes();
                 alreadyPlannedRecipes.add(picked.getId());
-                this.applyLeftoverHint(slot, hintsForNextDay, consumerByProducer);
+                this.applyLeftoverHint(slot, pendingLeftoverHints, chainedRecipeBy);
             }
         }
 
