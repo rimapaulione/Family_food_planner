@@ -21,6 +21,7 @@ public final class AutoFillConstants {
     public static final int SCORE_KID_FAVORITE = 5;
     public static final int SCORE_SEASON_MATCH = 10;
     public static final int SCORE_NO_SEASON = 3;
+    public static final int SCORE_WRONG_SEASON = -10;
     public static final int SCORE_FAVORITE = 2;
     public static final int SCORE_LEFTOVER = 30;
     public static final int SCORE_NEW_RECIPE = 5;

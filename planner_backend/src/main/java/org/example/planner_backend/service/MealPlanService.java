@@ -265,8 +265,9 @@ public class MealPlanService {
         Set<String> tagNames = r.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
         if (tagNames.contains(AutoFillConstants.TAG_KID_FAVORITE)) s += AutoFillConstants.SCORE_KID_FAVORITE;
         boolean hasSeason = tagNames.stream().anyMatch(AutoFillConstants.SEASON_TAGS::contains);
-        if (hasSeason && tagNames.contains(season)) s += AutoFillConstants.SCORE_SEASON_MATCH;
-        else if (!hasSeason) s += AutoFillConstants.SCORE_NO_SEASON;
+        if (!hasSeason) s += AutoFillConstants.SCORE_NO_SEASON;
+        else if (tagNames.contains(season)) s += AutoFillConstants.SCORE_SEASON_MATCH;
+        else s += AutoFillConstants.SCORE_WRONG_SEASON;
         if (Boolean.TRUE.equals(r.getIsFavorite())) s += AutoFillConstants.SCORE_FAVORITE;
         if (isLeftoverConsumer) s += AutoFillConstants.SCORE_LEFTOVER;
         if (r.getCreatedAt() != null && r.getCreatedAt().isAfter(newRecipeCutoff)) {
