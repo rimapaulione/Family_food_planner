@@ -7,6 +7,7 @@ import {useFamily} from '@/hooks/useFamily';
 import {useRecipes} from '@/hooks/useRecipes';
 import {useUpdateMealSlot} from '@/hooks/useMealPlan';
 import {Spinner} from '@/components/ui/Spinner';
+import {CATEGORY_LABELS} from '@/constants/categories';
 import {LONG_COOKING_MINUTES, MEAL_LABELS} from '@/constants/mealPlan';
 import {mealSlotServingsSchema, type MealSlotServingsFormData} from '@/schemas/mealSlot';
 import type {MealSlot} from '@/types/mealPlan';
@@ -192,7 +193,7 @@ export function MealSlotEditModal({slot, plannedRecipeIds, onClose}: MealSlotEdi
                                             : 'bg-secondary text-secondary-foreground hover:bg-accent'
                                     }`}
                                 >
-                                    {cat.name}
+                                    {CATEGORY_LABELS[cat.name] ?? cat.name}
                                 </button>
                             ))}
                         </div>
