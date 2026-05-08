@@ -80,30 +80,23 @@ public class FamilyService {
 
         return this.buildFamilyResponse(family);
     }
-
     @Transactional
     public FamilyResponseDto removeMember(final String email, final UUID id) {
-        AppUser admin = familyResolver.getAdminUser(email);
-        AppUser member = appUserRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Member does not exist"));
-
-        if (member.getFamily() == null
-                || !member.getFamily().getId().equals(admin.getFamily().getId())) {
-            throw new UnauthorizedException("Member is not in your family");
-        }
-        if (admin.getId().equals(member.getId())) {
+        AdminAndMember pair = this.resolveAdminAndMember(email, id);
+        if (pair.admin().getId().equals(pair.member().getId())) {
             throw new ConflictException("You cannot remove yourself");
         }
-        if (member.getRole() == Role.ADMIN) {
-            long adminCount = appUserRepository.countByFamilyIdAndRole(admin.getFamily().getId(), Role.ADMIN);
+        if (pair.member().getRole() == Role.ADMIN) {
+            long adminCount = appUserRepository.countByFamilyIdAndRole(
+                    pair.admin().getFamily().getId(), Role.ADMIN);
             if (adminCount <= 1) {
                 throw new ConflictException("Family must have at least one admin");
             }
         }
 
-        Family family = admin.getFamily();
-        member.setFamily(null);
-        member.setRole(Role.USER);
+        Family family = pair.admin().getFamily();
+        pair.member().setFamily(null);
+        pair.member().setRole(Role.USER);
 
         return this.buildFamilyResponse(family);
     }
@@ -112,29 +105,37 @@ public class FamilyService {
     public FamilyResponseDto updateMemberRole(final String email,
                                               final UUID id,
                                               final FamilyMemberRoleRequestDto request) {
+        AdminAndMember pair = this.resolveAdminAndMember(email, id);
+        if (pair.admin().getId().equals(pair.member().getId())) {
+            throw new ConflictException("You cannot change your own role");
+        }
+
+        long adminCount = appUserRepository.countByFamilyIdAndRole(
+                pair.admin().getFamily().getId(), Role.ADMIN);
+        if (pair.member().getRole() == Role.ADMIN
+                && request.role() == Role.USER
+                && adminCount <= 1) {
+            throw new ConflictException("Family must have at least one admin");
+        }
+
+        pair.member().setRole(request.role());
+
+        return this.buildFamilyResponse(pair.admin().getFamily());
+    }
+
+    private record AdminAndMember(AppUser admin, AppUser member) {
+    }
+
+    private AdminAndMember resolveAdminAndMember(final String email, final UUID memberId) {
         AppUser admin = familyResolver.getAdminUser(email);
-        AppUser member = appUserRepository.findById(id)
+        AppUser member = appUserRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member does not exist"));
 
         if (member.getFamily() == null
                 || !member.getFamily().getId().equals(admin.getFamily().getId())) {
             throw new UnauthorizedException("Member is not in your family");
         }
-        if (admin.getId().equals(member.getId())) {
-            throw new ConflictException("You cannot change your own role");
-        }
-
-        long adminCount = appUserRepository.countByFamilyIdAndRole(admin.getFamily().getId(), Role.ADMIN);
-        if (member.getRole() == Role.ADMIN
-                && request.role() == Role.USER
-                && adminCount <= 1) {
-            throw new ConflictException("Family must have at least one admin");
-        }
-
-        member.setRole(request.role());
-
-        return this.buildFamilyResponse(admin.getFamily());
-
+        return new AdminAndMember(admin, member);
     }
 
     private FamilyResponseDto buildFamilyResponse(Family family) {
