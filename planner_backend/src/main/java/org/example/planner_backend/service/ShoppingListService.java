@@ -86,16 +86,16 @@ public class ShoppingListService {
             }
         }
 
-        for (ShoppingListPlanHistory purchase : boughtPlanItems) {
-            UUID ingredientId = purchase.getIngredient().getId();
+        for (ShoppingListPlanHistory boughtPlanItem : boughtPlanItems) {
+            UUID ingredientId = boughtPlanItem.getIngredient().getId();
             if (!neededByIngredient.containsKey(ingredientId)) {
-                Ingredient ing = purchase.getIngredient();
+                Ingredient ing = boughtPlanItem.getIngredient();
                 items.add(new ShoppingItemPlanDto(
                         ingredientId,
                         ing.getNameLt(),
                         ing.getUnit().name(),
-                        purchase.getQuantity(),
-                        purchase.getQuantity(),
+                        boughtPlanItem.getQuantity(),
+                        boughtPlanItem.getQuantity(),
                         true));
             }
         }
