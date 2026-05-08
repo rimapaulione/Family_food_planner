@@ -138,7 +138,7 @@ public class FamilyService {
         return new AdminAndMember(admin, member);
     }
 
-    private FamilyResponseDto buildFamilyResponse(Family family) {
+    private FamilyResponseDto buildFamilyResponse(final Family family) {
         List<AppUser> members = appUserRepository.findByFamilyId(family.getId());
         return new FamilyResponseDto(
                 family.getId(),
