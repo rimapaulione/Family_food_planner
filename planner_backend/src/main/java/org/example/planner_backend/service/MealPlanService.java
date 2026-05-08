@@ -137,7 +137,7 @@ public class MealPlanService {
                 .map(Recipe::getId)
                 .collect(Collectors.toCollection(HashSet::new));
 
-        String season = AutoFillConstants.currentSeason(today.getMonth());
+        String season = AutoFillConstants.getCurrentSeason(today.getMonth());
         Instant newRecipeCutoff = Instant.now().minus(AutoFillConstants.NEW_RECIPE_DAYS, ChronoUnit.DAYS);
 
         Map<UUID, UUID> consumerByProducer = new HashMap<>();

@@ -43,7 +43,6 @@ public class FamilyResolver {
     }
 
     public AppUser getUserByEmail(final String email) {
-
         return appUserRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
     }

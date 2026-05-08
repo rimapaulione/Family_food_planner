@@ -29,7 +29,7 @@ public final class AutoFillConstants {
 
     public static final int TOP_N_FOR_RANDOM = 3;
 
-    public static String currentSeason(final Month m) {
+    public static String getCurrentSeason(final Month m) {
         return switch (m) {
             case MARCH, APRIL, MAY -> "spring";
             case JUNE, JULY, AUGUST -> "summer";
