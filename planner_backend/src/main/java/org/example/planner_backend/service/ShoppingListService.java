@@ -169,12 +169,12 @@ public class ShoppingListService {
         LocalDate currentMonday = LocalDate.now().with(DayOfWeek.MONDAY);
         LocalDate nextMonday = currentMonday.plusWeeks(1);
         if (!weekStart.equals(currentMonday) && !weekStart.equals(nextMonday)) {
-            throw new BadRequestException("weekStart must be current or next week's Monday");
+            throw new BadRequestException("WeekStart must be current or next week's Monday");
         }
     }
 
     private Map<UUID, AggregatedItem> aggregatePlanItems(final MealPlan plan, final Family family) {
-        Map<UUID, AggregatedItem> agg = new LinkedHashMap<>();
+        Map<UUID, AggregatedItem> aggItems = new LinkedHashMap<>();
         for (MealSlot slot : plan.getSlots()) {
             Recipe recipe = slot.getRecipe();
             if (recipe == null) continue;
@@ -185,14 +185,14 @@ public class ShoppingListService {
             for (RecipeIngredient ri : recipe.getIngredients()) {
                 Ingredient ing = ri.getIngredient();
                 BigDecimal totalQty = ri.getQuantity().multiply(multiplier);
-                agg.merge(
+                aggItems.merge(
                         ing.getId(),
                         new AggregatedItem(ing.getId(), ing.getNameLt(), ing.getUnit().name(), totalQty),
                         AggregatedItem::merge
                 );
             }
         }
-        return agg;
+        return aggItems;
     }
 
     private record AggregatedItem(UUID ingredientId, String name, String unit, BigDecimal quantity) {
