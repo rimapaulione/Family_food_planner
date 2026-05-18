@@ -1,17 +1,20 @@
-name: test-actions
-on: workflow_dispatch
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH into EC2 and run test commands
+      - name: SSH into EC2 and deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.FOOD_PLANNER_DEPLOY }}
           script: |
-            echo "Hello from EC2!"
-            whoami
-            hostname
+            cd ~/family_food_shopping_planner
+            git pull origin main
+            docker compose up -d --build
