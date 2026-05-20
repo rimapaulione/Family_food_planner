@@ -5,7 +5,37 @@ on:
     branches: [ main ]
 
 jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Run backend tests
+        run: ./mvnw test
+        working-directory: planner_backend
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: planner_ui/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: planner_ui
+      - name: Build frontend
+        run: npm run build
+        working-directory: planner_ui
+
   deploy:
+    needs: [backend-test, frontend-build]
     runs-on: ubuntu-latest
     steps:
       - name: SSH into EC2 and deploy
