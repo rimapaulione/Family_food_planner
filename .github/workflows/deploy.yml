@@ -67,4 +67,4 @@ jobs:
           script: |
             cd Family_food_planner/
             git pull origin main
-            docker compose up -d --build
+            docker compose -f docker-compose.prod.yml up -d --build
