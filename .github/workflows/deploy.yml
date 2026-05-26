@@ -45,6 +45,6 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.FOOD_PLANNER_DEPLOY }}
           script: |
-            cd ~/family_food_shopping_planner
+            cd Family_food_planner/
             git pull origin main
             docker compose up -d --build
