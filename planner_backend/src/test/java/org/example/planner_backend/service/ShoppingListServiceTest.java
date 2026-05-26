@@ -188,7 +188,7 @@ class ShoppingListServiceTest {
 
         assertThatThrownBy(() -> shoppingListService.markBought(EMAIL, request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("weekStart");
+                .hasMessageContaining("WeekStart");
     }
 
     @Test
