@@ -1,6 +1,8 @@
 name: Deploy to EC2
 
 on:
+  pull_request:
+    branches: [ main ]
   push:
     branches: [ main ]
 
@@ -56,6 +58,7 @@ jobs:
 
   deploy:
     needs: [backend-test, frontend-build]
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: SSH into EC2 and deploy
