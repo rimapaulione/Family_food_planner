@@ -16,17 +16,15 @@ There are plenty of meal planners and shopping-list apps out there. Most pick on
 
 This app is different:
 
-- **Plan with YOUR recipes.** Your family's actual cooking, in your own words — not a generic catalog. Add, edit, delete freely.
+- **Plan with YOUR recipes.** 
 - **Your own ingredient library.** You manage it. Add new ingredients, edit names, delete what you don't use.
 - **Shared with the whole family.** Multiple accounts, one shared meal plan and shopping list. Everyone sees the same thing in real time.
 - **Meal plan and shopping list are linked.** The shopping list is generated from the plan — no double bookkeeping.
 - **AI helps you fill the library.** Type a sentence in Lithuanian, get a structured recipe ready to save.
 
----
-
 ## What it does today
 
-- **Custom family settings**
+- **Custom family settings.**
 - **One-click weekly planning.** 
 - **Two-week horizon.**
 - **Shopping list auto-generated from the plan.** 
@@ -52,14 +50,15 @@ This app is different:
 
 The app is live and usable, but not finished. Planned improvements:
 
-- **Email verification on signup** — currently anyone with an invite link can register that email.
-- **Drag and drop on the planner** — drag recipes from a sidebar onto meal slots.
-- **Generated photos for recipes** — AI generates an illustrative photo for each recipe.
-- **Re-plan the whole week** — overwrite mode for auto-fill (today it only fills empty slots).
+- **Email verification on signup** 
+- **Drag and drop on the planner**
+- **Generated photos for recipes**
+- **Re-plan the whole week**
+- **Always buy section** - for ingredients which we buy every time (bread, milk).
 - **Smarter shopping list** — don't double-count ingredients between leftover-linked recipes.
-- **Light / dark mode toggle** — the CSS already supports it; just needs the toggle UI.
-- **AI rate limiting** — per-user cap on recipe generation to control cost.
-- **Multi-language support** — a language picker for both UI and ingredient catalog. Today the UI is English while the seeded ingredient catalog is Lithuanian; the picker will let each family choose what they want.
+- **Light / dark mode toggle** 
+- **AI rate limiting** 
+- **Multi-language support** 
 
 ---
 
