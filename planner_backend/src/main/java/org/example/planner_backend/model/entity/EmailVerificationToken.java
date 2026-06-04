@@ -16,13 +16,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.planner_backend.model.enums.Unit;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
-@Table(name = "email_cerification_token")
+@Table(name = "email_verification_token")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -32,7 +32,7 @@ import java.time.Instant;
 public class EmailVerificationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Unit id;
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
