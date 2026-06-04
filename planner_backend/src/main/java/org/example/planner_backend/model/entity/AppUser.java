@@ -60,6 +60,9 @@ public class AppUser {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "family_id")
     private Family family;
